@@ -1,5 +1,11 @@
 # Rift Reference handoff
 
+## Published 0.10.0 and website version 12 (2026-09-06)
+
+Public release https://github.com/existntl/rift-reference/releases/tag/v0.10.0 includes the matching installer and signed latest.json. Public download signature/hash/size verified; the extracted 0.9.3 app discovered, downloaded and verified 0.10.0 without installing it. Upgrade from the old installation working directory and rollback preserve preferences, reviews and overlay.json/recovery. 98 overlay plus 768 application checks pass. Normal installation unchanged; live League integration remains unverified.
+
+Native release source published to main via GitHub connector at ea211099a755f57d013b59f33f6ea1e5f5648890; tree c8ed137d5eb5900d4d62898f1be85f55e777c214 exactly matches local release commit 54d8b63. CLI GitHub authentication is not configured; release upload used the signed-in in-app browser. Do not try repeated CLI login prompts. Site version 12 is public at https://rift-reference.reid-hill.chatgpt.site; source 760b400124e6aedc07b1e4e9f655a5cc6938c721 adds overlay tab, real schematic demo and setup/limitations FAQ. Website build and TypeScript passed; browser QA was not requested. Domain purchase remains paused.
+
 ## Removed shared layout toolbar (local 0.10.0)
 
 User requested removing the shared resize/layout menu and placing relevant functions in each gear. Removed toolbar and instruction banner. Build/stats gears now include reset only that panel, existing size/position/transparency controls, next preview screen, Use layout and Cancel layout. Ctrl+Enter/Esc/F6 work when all panels are hidden. Parent settings explains shortcuts, sample data and restoring closed panels through existing visibility switches. Fixed buff cards unchanged. 98 overlay plus 768 application checks passed; 1920x1080 editor and settings previews inspected. Local build only; public release unchanged.

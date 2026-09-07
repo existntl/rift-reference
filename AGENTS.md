@@ -1,5 +1,7 @@
 # Rift Ready working instructions
 
+- Current public release is 0.10.0, with matching installer and signed manifest; website version 12 describes overlays. Public signature/hash and the 0.9.3 updater download verified. 866 app/overlay checks and installer upgrade/rollback passed. No normal installation or live-game validation performed. GitHub source main matches the verified release tree. CLI GitHub credentials are absent: publish binaries through the signed-in in-app browser and source through the GitHub connector; never assume CLI authentication.
+
 - Layout editor has no shared toolbar/menu. Build/stats gears contain per-panel reset, transparency, next preview screen, and Use/Cancel layout. Ctrl+Enter accepts, Esc cancels, F6 cycles screens even when all panels are hidden. Restore closed panels in parent Game overlay settings, then reopen editor. Fixed buff cards remain without controls. Keep the parent settings shortcut/help text discoverable.
 
 - Buff UI supersedes the draggable buff panel: fixed top-center Baron/Elder cards, 200x106 each with 8px gap, no chrome/team labels/move/resize/close. Ignore legacy buff size/position; keep existing enable switch and opacity. Only active kill-derived windows appear in game (Baron 180s, Elder 150s); ordinary dragons excluded. Layout editor shows sample cards. These remain estimated objective windows, not individual holder tracking.

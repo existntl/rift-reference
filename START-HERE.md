@@ -1,8 +1,8 @@
 # Rift Ready — new session handoff
 
-Local update: native source 0.10.0 implements an opt-in borderless/windowed game overlay.
-See the newest handoff entry and docs/overlay.md. Public app is still 0.9.3; website version
-11 and paused domain decision are unchanged. Automatic Probuilds ingestion and real-game
+Published update: native source 0.10.0 implements an opt-in borderless/windowed game overlay.
+See the newest handoff entry and docs/overlay.md. Public app is 0.10.0; website version
+12 is published; domain purchase remains paused. Automatic Probuilds ingestion and real-game
 overlay smoke validation remain unfinished. Do not resume publication automatically.
 
 Prepared 2026-09-06. Read this first, then AGENTS.md and handoff.md in this checkout.
@@ -25,7 +25,7 @@ main app; phone/tablet support is an opt-in browser companion over a trusted loc
 Minimum advertised setup: Windows 10 or later, 64-bit Intel/AMD, .NET Framework 4.8 or
 later; local League client for detection. A second monitor is optional, not a minimum.
 
-- Published latest app: 0.9.3, https://github.com/existntl/rift-reference/releases/tag/v0.9.3
+- Published latest app: 0.10.0, https://github.com/existntl/rift-reference/releases/tag/v0.10.0
 - Public installer/update filenames remain RiftReference-Setup.exe and latest.json.
 - Installer: 21,521,920 bytes; SHA256
   7a4cb9e131a52f8000a0a6a101fc1487a26edeac0050a6716a6c9ac949915711.
