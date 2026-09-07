@@ -48,10 +48,10 @@ link is the selected rune/core combination. Missing or insufficient observations
 - Spells are an unordered observed pair. Situational recommendations, inferred playstyle
   labels and verified professional-player builds are not implemented.
 
-Runes / builds > Diamond+ choices opens a three-column visual dashboard. Champion and role
+Runes / builds opens the three-column visual dashboard directly. Champion and role
 selectors accompany the fixed Diamond+ / NA-EUW-KR / patch filters. Selecting a build updates
-the rune visualization, skill grid and item/spell sections together. Use selected build fills
-the existing editor; it does not immediately apply changes to League. Applying still uses
+the rune visualization, skill grid and item/spell sections together. Save and preview/apply
+controls live on this screen; the original manual editor is no longer in navigation. Applying uses
 explicit review and champion-select checks. Game overlay > Choose build opens the same
 selector and selects its first core item as the target; save overlay settings to persist it.
 Saved plans can also be loaded manually. Existing component-cost calculations apply;

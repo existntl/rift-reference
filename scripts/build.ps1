@@ -14,6 +14,9 @@ if (!(Test-Path -LiteralPath (Join-Path $projectRoot 'cache/data/loadout-icons/r
     throw 'Missing loadout icon cache. Run cache/runtime/python.exe scripts/cache-loadout-icons.py before building.'
 }
 New-Item -ItemType Directory -Path $appRoot -Force | Out-Null
+foreach ($tier in @('iron','bronze','silver','gold','platinum','emerald','diamond','master','grandmaster','challenger','unranked')) {
+    if (!(Test-Path -LiteralPath (Join-Path $projectRoot "cache/data/rank-badges/$tier.png"))) { throw 'Missing rank badges. Run cache/runtime/python.exe scripts/cache-rank-badges.py.' }
+}
 $brandIcon = Join-Path $appRoot 'rift-ready.ico'
 & (Join-Path $PSScriptRoot 'build-brand-icon.ps1') -OutputPath $brandIcon
 foreach ($folder in @('data','runtime')) { Copy-Item -LiteralPath (Join-Path $projectRoot "cache/$folder") -Destination $appRoot -Recurse -Force }
@@ -21,7 +24,7 @@ Copy-Item -LiteralPath (Join-Path $projectRoot 'helpers/transport.py'),(Join-Pat
 $mobileTemplate = [IO.File]::ReadAllText((Join-Path $projectRoot 'helpers/mobile.html'),[Text.Encoding]::UTF8)
 $mobileLogo = [Convert]::ToBase64String([IO.File]::ReadAllBytes([IO.Path]::ChangeExtension($brandIcon,'.png')))
 [IO.File]::WriteAllText((Join-Path $appRoot 'mobile.html'),$mobileTemplate.Replace('__RIFT_READY_LOGO__',$mobileLogo),[Text.Encoding]::UTF8)
-$sourceNames = @('Core','App','Matchup','AudioCues','Updates','ReleaseSecurity','Mobile','Theme','Brand','Pregame','BuildPlanner','LoadoutEditor','Recommendations','RecommendationDashboard','Postgame','Overlay','OverlayVisuals','PanelLayout','StatsPanel')
+$sourceNames = @('Core','App','HomeData','HomeDashboard','RankHistory','Matchup','AudioCues','Updates','ReleaseSecurity','Mobile','Theme','Brand','Pregame','BuildPlanner','LoadoutEditor','Recommendations','RecommendationDashboard','Postgame','Overlay','OverlayVisuals','PanelLayout','StatsPanel')
 if (Test-Path -LiteralPath (Join-Path $projectRoot 'src/Coaching.cs')) { $sourceNames += 'Coaching' }
 if (Test-Path -LiteralPath (Join-Path $projectRoot 'src/Practice.cs')) { $sourceNames += 'Practice' }
 $sources = $sourceNames | ForEach-Object { Join-Path $projectRoot "src/$_.cs" }

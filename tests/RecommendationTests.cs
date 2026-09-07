@@ -69,6 +69,16 @@ class RecommendationTests {
    Check(Convert.ToInt32(J.A(J.Get(picked,"perks"))[0])==8021,"Selection retained other build runes");
    Check(OverlaySettings.PlanItems(d,picker.PlanJson,out champ,out patch).SequenceEqual(new[]{3031,3046,3091}),"Selection mixed purchase paths");picker.Close();
   }
+  using(var direct=new RecommendationPicker(d,"Vayne",null,()=>true,false)){
+   Render(direct,Path.Combine(home,"builds-direct-unavailable.png"));
+   var actions=direct.Controls.OfType<Button>().Where(b=>b.Visible&&(b.Text.StartsWith("Save plan")||b.Text.StartsWith("Preview / apply"))).ToArray();
+   Check(actions.Length==3&&actions.All(b=>!b.Enabled),"Direct build actions must be unavailable without data");
+   Check(!direct.Controls.OfType<Button>().Any(b=>b.Visible&&b.Text=="Use selected build"),"Direct screen retained picker-only confirmation");
+   direct.LoadFeedForPreview(paired);Check(actions.All(b=>b.Enabled),"Direct selection did not enable save/apply");
+   direct.Text="Rift Ready · SYNTHETIC TEST DATA · Builds & runes";Render(direct,Path.Combine(home,"builds-direct.png"));
+   direct.Controls.OfType<ComboBox>().Single(c=>c.AccessibleName=="Recommendation role").SelectedItem="TOP";
+   Check(actions.All(b=>!b.Enabled),"Direct actions retained stale role choice");direct.Close();
+  }
   Console.WriteLine(checks+" recommendation checks passed");return 0;
  }catch(Exception ex){Console.Error.WriteLine(ex);return 1;}}
  static object Choice(int[] value){return new{games=40,wins=22,players=12,value=value};}

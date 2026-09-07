@@ -1,5 +1,17 @@
 # Rift Ready working instructions
 
+- User requested Riot API-backed personal rank/LP/progression on2026-09-07. Added to private production-application draft; not submitted or implemented as a backend. Personal profiles are all ranks, separate from Diamond+ recommendation aggregates. Historical graph must record official snapshots, never infer LP from wins/losses.
+
+- Idle home includes actual tier badges, divisional LP bar and locally recorded rank progression. See docs/rank-history.md. Preserve rank-history.json and .bak across updates; exclude from source/packages. Never invent earlier LP. Bootstrap badges with scripts/cache-rank-badges.py. Local only; public remains0.11.0.
+
+- Idle home visual preference: closer to Blitz reference, flat continuous match rows/dividers, larger portraits, compact Last10 champion summary, rank/performance left column. Keep RR branding and charcoal/teal; never invent LP trends or grades to fill reference visuals. Home preview harness renders full application with cached portraits and sample-data title.
+
+- No-game overview uses HomeDashboard: local own-account Solo rank and recent10 all-queue matches/champion summaries, scroll rows with mouse wheel. HomeData parses only identified self; nullable stats and full-team-only KP/damage share.60s account/session cache is memory-only, cleared disconnect; no external Riot key needed. No LP delta graphs, grades or placement estimates. Local client history support/live validation unverified.
+
+- User removed the original manual editor from the active app flow. Runes / builds opens RecommendationPicker directly with save and guarded preview/apply controls; overlay retains chooser mode. Legacy BuildPlanner source remains for compatibility/tests only, not navigation. No sample recommendations in production when feed unavailable.
+
+- Latest public release is **0.11.0**, published2026-09-07: visual recommendation/path browser, direct overlay selection, dark native titlebars and shortcut icon fix. Signed public download and0.9.3 updater verified. Live Diamond+ feed remains unconnected; collector/key/database are not installed. Source tag decdceede30f48b2099ffc2eafee8dfa55c523dc. This supersedes prior local/unpublished and0.10.0 release-state entries below.
+
 - Build-path browsing follows the public OneTricks reference: Paths / Options, first-core item filtering and All paths reset. Option shares use only listed qualifying bundles, never implied whole-population pick rates. Keep rune/core bundle identity when filtering; no OneTricks scraping/feed or expert roster is connected.
 
 - Native title bars should blend with charcoal theme. Theme.TitleBar applies DWM dark frame (20 with legacy19 fallback) and supported caption/text/border colors; keeps native controls/snap/resize and respects high contrast at application. Apply on handle creation; do not replace with borderless chrome casually.

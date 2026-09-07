@@ -29,6 +29,7 @@ public class Player {
  public bool? Dead;
 }
 public class Snapshot {
+ public HomeProfile Home;
  public OverlaySnapshot Overlay;
  public string Result="";public long GameId;
  public string Phase="Waiting",Account="",Mode="",Notice=""; public double Time;
@@ -92,6 +93,17 @@ public class DataStore {
  }
 }
 public class LeagueClient : IDisposable {
+ HomeProfile homeCache;string homeIdentity="";DateTime homeUpdated=DateTime.MinValue;
+ void ClearHome(){homeCache=null;homeIdentity="";homeUpdated=DateTime.MinValue;}
+ async Task<HomeProfile> Home(string url,string auth,object me){
+  string puuid=J.S(me,"puuid"),identity=url+"|"+auth+"|"+puuid+"|"+J.S(me,"summonerId");
+  if(homeIdentity!=identity){ClearHome();homeIdentity=identity;}
+  if(homeCache!=null&&(DateTime.UtcNow-homeUpdated).TotalSeconds<60)return homeCache;
+  object ranked=null,history=null;
+  try{ranked=await Get(url+"/lol-ranked/v1/current-ranked-stats",auth).ConfigureAwait(false);}catch{}
+  if(Regex.IsMatch(puuid,@"^[A-Za-z0-9_-]{1,128}$"))try{history=await Get(url+"/lol-match-history/v1/products/lol/"+puuid+"/matches?begIndex=0&endIndex=19",auth).ConfigureAwait(false);}catch{}
+  homeCache=HomeData.Parse(data,me,ranked,history);homeUpdated=DateTime.UtcNow;RankHistory.Record(Path.GetDirectoryName(data.Root),puuid,homeCache,homeUpdated);return homeCache;
+ }
  DataStore data; string lockPath="";Process transport;object transportLock=new object();
  public LeagueClient(DataStore d) {
   data=d;ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;
@@ -134,16 +146,17 @@ public class LeagueClient : IDisposable {
     if(p.Self) {p.CosmicInsight=J.A(J.Get(J.Get(active,"fullRunes"),"generalRunes")).Any(r=>J.N(r,"id")==8347);var stats=J.Get(active,"championStats"); if(J.Get(stats,"abilityHaste")!=null)p.Haste=J.N(stats,"abilityHaste");
      foreach(char key in "QWER") {var ability=J.Get(J.Get(active,"abilities"),key.ToString()); if(ability!=null)p.Ranks[key.ToString()]=(int)J.N(ability,"abilityLevel");}}
     s.Players.Add(p);
-   } s.Overlay=OverlayData.Parse(data,root,s);return s;
+   } homeUpdated=DateTime.MinValue;s.Overlay=OverlayData.Parse(data,root,s);return s;
   } catch(Exception) { }
   try {
-   string path=FindLock(); if(path=="")return new Snapshot{Phase=ended?"WaitingForStats":"Waiting"};
+   string path=FindLock(); if(path==""){ClearHome();return new Snapshot{Phase=ended?"WaitingForStats":"Waiting"};}
    string[] bits; using(var f=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.ReadWrite))using(var r=new StreamReader(f))bits=r.ReadToEnd().Split(':');
-   int port; if(bits.Length<5 || !int.TryParse(bits[2],out port) || port<1 || port>65535)return new Snapshot();
+   int port; if(bits.Length<5 || !int.TryParse(bits[2],out port) || port<1 || port>65535){ClearHome();return new Snapshot();}
    string auth=Convert.ToBase64String(Encoding.UTF8.GetBytes("riot:"+bits[3])); string url="https://127.0.0.1:"+port;
    var phase=Convert.ToString(await Get(url+"/lol-gameflow/v1/gameflow-phase",auth).ConfigureAwait(false));
    if(ended&&!Postgame.Active(phase))phase="WaitingForStats";
    if(Postgame.Active(phase)){
+    homeUpdated=DateTime.MinValue;
     try{var session=await Get(url+"/lol-gameflow/v1/session",auth).ConfigureAwait(false);long gameId=(long)J.N(J.Get(session,"gameData"),"gameId");
      var result=await Get(url+"/lol-end-of-game/v1/eog-stats-block",auth).ConfigureAwait(false);return Postgame.Parse(data,result,gameId,phase);
     }catch{return new Snapshot{Phase=phase,Notice="Waiting for this match's final results. Retrying automatically; unavailable stats are not estimated."};}
@@ -156,8 +169,9 @@ public class LeagueClient : IDisposable {
      var p=new Player{Champion=data.Resolve(J.S(raw,"championId")),Team=team=="myTeam"?"ALLY":"ENEMY",Role=J.S(raw,"assignedPosition"),Self=team=="myTeam"&&(int)J.N(raw,"cellId")==local};
      if(p.Champion=="0")p.Champion=""; p.Summoners.Add(J.S(raw,"spell1Id"));p.Summoners.Add(J.S(raw,"spell2Id"));s.Players.Add(p);
     }
-   } return s;
-  } catch(Exception ex) {var web=ex as WebException;string detail=web==null?ex.GetType().Name:web.Status.ToString();if(web!=null && web.Response is HttpWebResponse)detail+=" "+(int)((HttpWebResponse)web.Response).StatusCode;if(ex.InnerException!=null)detail+=" / "+ex.InnerException.Message;return new Snapshot{Notice="Client connection unavailable ("+detail+"). References cleared; retrying automatically."};}
+   } else if(phase!="InProgress"&&phase!="GameStart"&&phase!="Reconnect")s.Home=await Home(url,auth,me).ConfigureAwait(false);
+   return s;
+  } catch(Exception ex) {ClearHome();var web=ex as WebException;string detail=web==null?ex.GetType().Name:web.Status.ToString();if(web!=null && web.Response is HttpWebResponse)detail+=" "+(int)((HttpWebResponse)web.Response).StatusCode;if(ex.InnerException!=null)detail+=" / "+ex.InnerException.Message;return new Snapshot{Notice="Client connection unavailable ("+detail+"). References cleared; retrying automatically."};}
  }
  public async Task<double> Clock(){var raw=await Get("https://127.0.0.1:2999/liveclientdata/gamestats",null).ConfigureAwait(false);if(J.Get(raw,"gameTime")==null)throw new IOException("Game clock unavailable");return J.N(raw,"gameTime");}
  public void Dispose(){lock(transportLock){if(transport!=null){try{if(!transport.HasExited){transport.StandardInput.Close();if(!transport.WaitForExit(500)){transport.Kill();transport.WaitForExit(2000);}}}catch{}transport.Dispose();transport=null;}}}

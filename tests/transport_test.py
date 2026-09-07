@@ -43,6 +43,12 @@ class TransportTests(unittest.TestCase):
         self.assertTrue(all(r['ok'] for r in replies))
         self.assertEqual(replies[1]['data']['gameTime'],12)
 
+    def test_history_is_bounded_authenticated_read_only(self):
+        url='https://127.0.0.1:1234/lol-match-history/v1/products/lol/fake-puuid/matches?begIndex=0&endIndex=19'
+        calls,replies=self.run_messages([dict(url=url,auth='fake'),dict(url=url),dict(url=url.replace('19','999'),auth='fake'),dict(url=url,auth='fake',method='POST',body={}),dict(url='https://127.0.0.1:1234/lol-ranked/v1/current-ranked-stats',auth='fake')],b'{}')
+        self.assertEqual(len(calls),2)
+        self.assertEqual([r['ok'] for r in replies],[True,False,False,False,True])
+
     def test_postgame_is_read_only(self):
         calls,replies=self.run_messages([
             dict(url='https://127.0.0.1:1234/lol-end-of-game/v1/eog-stats-block'),

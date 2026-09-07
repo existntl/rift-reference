@@ -12,9 +12,12 @@ for line in sys.stdin:
             raise ValueError('Only local League endpoints are supported')
         method=message.get('method','GET')
         loadout=parsed.path=='/lol-perks/v1/pages' or re.fullmatch(r'/lol-item-sets/v1/item-sets/[1-9][0-9]*/sets',parsed.path)
-        if parsed.query or parsed.fragment or method not in ('GET','POST'):
+        history=bool(re.fullmatch(r'/lol-match-history/v1/products/lol/[A-Za-z0-9_-]{1,160}/matches',parsed.path)) and parsed.query=='begIndex=0&endIndex=19'
+        if (history or parsed.path=='/lol-ranked/v1/current-ranked-stats') and not message.get('auth'):
+            raise ValueError('Local client authentication required')
+        if (parsed.query and not history) or parsed.fragment or method not in ('GET','POST'):
             raise ValueError('Request not allowed')
-        if method=='GET' and parsed.path!='/lol-end-of-game/v1/eog-stats-block' and not parsed.path.startswith(('/liveclientdata/','/lol-gameflow/','/lol-summoner/','/lol-champ-select/')):
+        if method=='GET' and not history and parsed.path not in ('/lol-end-of-game/v1/eog-stats-block','/lol-ranked/v1/current-ranked-stats') and not parsed.path.startswith(('/liveclientdata/','/lol-gameflow/','/lol-summoner/','/lol-champ-select/')):
             raise ValueError('Endpoint not allowed')
         if method=='POST' and (not loadout or not message.get('auth') or not isinstance(message.get('body'),dict)):
             raise ValueError('Write not allowed')

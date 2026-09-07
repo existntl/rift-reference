@@ -13,7 +13,7 @@ public static class Recommendations {
  public static string Patch(string version){return String.Join(".",(version??"").Split('.').Take(2));}
  public static async Task<object> Fetch(){
   string endpoint=Environment.GetEnvironmentVariable("RIFT_RECOMMENDATIONS_URL");
-  if(String.IsNullOrWhiteSpace(endpoint))throw new IOException("Diamond+ data is not connected yet. The publisher needs a Riot API key and a hosted feed. Your manual plan remains available.");
+  if(String.IsNullOrWhiteSpace(endpoint))throw new IOException("Diamond+ data is not connected yet. Build choices will appear when the recommendation feed is available.");
   Uri uri;if(!Uri.TryCreate(endpoint,UriKind.Absolute,out uri)||!String.IsNullOrEmpty(uri.UserInfo)||(uri.Scheme!="https"&&!(uri.Scheme=="http"&&uri.IsLoopback)))throw new IOException("Recommendation feed must use HTTPS (local testing may use loopback HTTP).");
   using(var handler=new HttpClientHandler{AllowAutoRedirect=false})using(var client=new HttpClient(handler){Timeout=TimeSpan.FromSeconds(20)}){
    using(var response=await client.GetAsync(uri,HttpCompletionOption.ResponseHeadersRead)){

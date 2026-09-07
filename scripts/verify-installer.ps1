@@ -20,14 +20,18 @@ $reviews = '[{"Id":"upgrade-check","NextGame":"Keep an exit"}]'
 [IO.File]::WriteAllText((Join-Path $target 'reviews.json'),$reviews,[Text.Encoding]::UTF8)
 [IO.File]::WriteAllText((Join-Path $target 'reviews.json.bak'),$reviews,[Text.Encoding]::UTF8)
 $overlay = '{"Enabled":true,"Gold":false,"Buffs":true,"Purchase":true,"Target":3031,"Champion":"Vayne"}'
+$rankHistory = '{"format":"rift-rank-history-1","accounts":{}}'
+foreach ($name in @('rank-history.json','rank-history.json.bak')) { [IO.File]::WriteAllText((Join-Path $target $name),$rankHistory,[Text.Encoding]::UTF8) }
 foreach ($name in @('overlay.json','overlay.json.bak')) { [IO.File]::WriteAllText((Join-Path $target $name),$overlay,[Text.Encoding]::UTF8) }
 Invoke-Installer '--extract-test' $target
 $original = (Get-FileHash -LiteralPath (Join-Path $target 'RiftReference.exe')).Hash
+foreach ($name in @('rank-history.json','rank-history.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $rankHistory) { throw "Upgrade lost $name" } }
 if ($original -ne (Get-FileHash -LiteralPath (Join-Path $projectRoot 'build/app/RiftReference.exe')).Hash) { throw 'Upgrade did not install the current app' }
 foreach ($name in @('overlay.json','overlay.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $overlay) { throw "Upgrade lost $name" } }
 if ([IO.File]::ReadAllText((Join-Path $target 'preferences.json')) -ne $settings) { throw 'Upgrade lost preferences' }
 foreach ($name in @('reviews.json','reviews.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $reviews) { throw "Upgrade lost $name" } }
 Invoke-Installer '--rollback-test' $target
+foreach ($name in @('rank-history.json','rank-history.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $rankHistory) { throw "Rollback lost $name" } }
 foreach ($name in @('overlay.json','overlay.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $overlay) { throw "Rollback lost $name" } }
 if ([IO.File]::ReadAllText((Join-Path $target 'preferences.json')) -ne $settings) { throw 'Rollback lost preferences' }
 foreach ($name in @('reviews.json','reviews.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $reviews) { throw "Rollback lost $name" } }

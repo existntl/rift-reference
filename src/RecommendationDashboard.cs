@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Drawing;
 using System.Collections.Generic;
@@ -13,9 +14,15 @@ public sealed class RecommendationPicker : Form {
  readonly Label status,selectionTitle,selectionSubtitle,pathFilter; readonly FlowLayoutPanel buildList,details;
  readonly Panel runePanel,skillPanel; object feed,selected; object[] builds=new object[0]; bool rankByWins,showOptions; int firstItemFilter;
  public string PlanJson {get;private set;}
+ readonly LeagueClient client; readonly Func<bool> demo; readonly bool standalone;
+ Button save,applyRunes,applyItems; bool applying,loading;
  sealed class ChampionChoice {public string Id,Name;public override string ToString(){return Name;}}
  public RecommendationPicker(DataStore d,string champ):this(d,champ,true){}
- public RecommendationPicker(DataStore d,string champ,bool fetchOnShown){
+ public RecommendationPicker(DataStore d,string champ,bool fetchOnShown):this(d,champ,null,null,fetchOnShown,false){}
+ public RecommendationPicker(DataStore d,string champ,LeagueClient c,Func<bool> isDemo):this(d,champ,c,isDemo,true,true){}
+ public RecommendationPicker(DataStore d,string champ,LeagueClient c,Func<bool> isDemo,bool fetchOnShown):this(d,champ,c,isDemo,fetchOnShown,true){}
+ RecommendationPicker(DataStore d,string champ,LeagueClient c,Func<bool> isDemo,bool fetchOnShown,bool mainScreen){
+  client=c;demo=isDemo;standalone=mainScreen;
   data=d;icons=new LoadoutIcons(d);Text="Rift Ready · Builds & runes";ClientSize=new Size(1280,860);MinimumSize=MaximumSize=Size;StartPosition=FormStartPosition.CenterParent;AutoScaleMode=AutoScaleMode.None;Font=new Font("Segoe UI",10);BackColor=Theme.Background;ForeColor=Theme.Ink;Icon=Brand.Icon;
   Theme.TitleBar(this);
   LabelAt(this,"BUILDS & RUNES",24,17,360,32,18,Theme.Ink);
@@ -37,8 +44,14 @@ public sealed class RecommendationPicker : Form {
   runePanel=new Panel{Location=new Point(320,186),Size=new Size(536,412),BackColor=Theme.Panel};Controls.Add(runePanel);
   skillPanel=new Panel{Location=new Point(320,610),Size=new Size(536,162),BackColor=Theme.Panel};Controls.Add(skillPanel);
   details=new FlowLayoutPanel{Location=new Point(874,103),Size=new Size(382,670),AutoScroll=true,FlowDirection=FlowDirection.TopDown,WrapContents=false,BackColor=Theme.Panel,Padding=new Padding(14,10,8,10)};Controls.Add(details);
-  status=LabelAt(this,"No data loaded. Your manual plan remains available.",24,793,986,51,9,Theme.Muted);
+  status=LabelAt(this,"No recommendation data loaded. Choose a build when data is available.",24,793,986,51,9,Theme.Muted);
   use=ButtonAt(this,"Use selected build",1032,797,224,42,UseBuild);use.Enabled=false;
+  if(standalone){use.Visible=false;status.SetBounds(24,838,1232,42);MaximumSize=Size.Empty;ClientSize=new Size(1280,884);MinimumSize=MaximumSize=Size;
+   save=ButtonAt(this,"Save plan…",24,789,160,38,SavePlan);
+   applyRunes=ButtonAt(this,"Preview / apply runes",724,789,247,38,()=>Apply(true));
+   applyItems=ButtonAt(this,"Preview / apply item set",986,789,270,38,()=>Apply(false));
+  }
+  UpdateActions();FormClosing+=(s,e)=>{if(applying)e.Cancel=true;};
   champions.SelectedIndexChanged+=(s,e)=>Populate();role.SelectedIndexChanged+=(s,e)=>Populate();
   EmptyDetails();StyleSort();if(fetchOnShown)Shown+=async(s,e)=>await LoadFeed();
  }
@@ -50,9 +63,9 @@ public sealed class RecommendationPicker : Form {
  static int[] Values(object choice){return J.A(J.Get(choice,"value")).Select(Convert.ToInt32).ToArray();}
  static string Summary(object choice){return J.N(choice,"games").ToString("N0")+" games · "+J.N(choice,"players").ToString("N0")+" players · "+(100*J.N(choice,"wins")/Math.Max(1,J.N(choice,"games"))).ToString("0.0")+"% wins";}
  public void LoadFeedForPreview(object value){feed=value;Populate();}
- async Task LoadFeed(){refresh.Enabled=false;use.Enabled=false;status.Text="Loading anonymous match aggregates…";try{var value=await Recommendations.Fetch();if(!IsDisposed){feed=value;Populate();}}catch(Exception ex){if(!IsDisposed){feed=null;builds=new object[0];selected=null;Clear(buildList);EmptyDetails();status.Text=ex.Message;}}finally{if(!IsDisposed)refresh.Enabled=true;}}
- void Populate(){if(buildList==null||use==null)return;selected=null;builds=new object[0];firstItemFilter=0;use.Enabled=false;Clear(buildList);EmptyDetails();StyleSort();if(feed==null)return;
-  try{builds=Recommendations.Bundles(data,feed,Champion,Role);SortBuilds();status.Text=builds.Length==0?"No complete builds meet the 30-game / 10-player minimum for this champion and role. Your manual plan remains available.":"Observed combinations, not guaranteed results. Win rates include games reaching three core items. Use selected build fills the editor; applying to League still requires review.";}
+ async Task LoadFeed(){if(loading||applying)return;loading=true;UpdateActions();status.Text="Loading anonymous match aggregates…";try{var value=await Recommendations.Fetch();if(!IsDisposed){feed=value;Populate();}}catch(Exception ex){if(!IsDisposed){feed=null;builds=new object[0];selected=null;Clear(buildList);EmptyDetails();status.Text=ex.Message;}}finally{loading=false;if(!IsDisposed)UpdateActions();}}
+ void Populate(){if(buildList==null||use==null)return;selected=null;builds=new object[0];firstItemFilter=0;UpdateActions();Clear(buildList);EmptyDetails();StyleSort();if(feed==null)return;
+  try{builds=Recommendations.Bundles(data,feed,Champion,Role);SortBuilds();status.Text=builds.Length==0?"No builds meet the 30-game / 10-player minimum for this champion and role.":"Win rates include games reaching three core items. Select a build to review its runes and purchases. Nothing is applied automatically.";}
   catch(Exception ex){builds=new object[0];Clear(buildList);EmptyDetails();status.Text=ex.Message;}
  }
  void StyleSort(){common.BackColor=rankByWins?Theme.Panel:Color.FromArgb(30,64,64);winRate.BackColor=rankByWins?Color.FromArgb(30,64,64):Theme.Panel;common.ForeColor=rankByWins?Theme.Ink:Theme.Accent;winRate.ForeColor=rankByWins?Theme.Accent:Theme.Ink;paths.ForeColor=showOptions?Theme.Ink:Theme.Accent;options.ForeColor=showOptions?Theme.Accent:Theme.Ink;allPaths.Text="All paths";allPaths.ForeColor=firstItemFilter==0?Theme.Muted:Theme.Accent;pathFilter.Text=firstItemFilter==0?"Any first core item":ItemName(firstItemFilter);tips.SetToolTip(pathFilter,pathFilter.Text);tips.SetToolTip(allPaths,firstItemFilter==0?"Options groups listed builds by their first core item.":"First core item: "+ItemName(firstItemFilter)+". Click to show all paths.");}
@@ -68,8 +81,26 @@ public sealed class RecommendationPicker : Form {
   var ordered=rankByWins?groups.OrderByDescending(g=>g.Wins/Math.Max(1,g.Games)).ThenByDescending(g=>g.Games):groups.OrderByDescending(g=>g.Games).ThenByDescending(g=>g.Wins);
   foreach(var group in ordered){int id=group.Id;string summary=group.Games.ToString("N0")+" games · "+(100*group.Wins/Math.Max(1,group.Games)).ToString("0.0")+"% wins";string share=(100*group.Games/Math.Max(1,total)).ToString("0.0")+"% of listed builds · "+group.Paths+" paths";var button=new FirstItemButton{Title=ItemName(id),SummaryText=summary,ShareText=share,ItemIcon=icons.Get("items",id),Chosen=firstItemFilter==id,Size=new Size(250,108),Margin=new Padding(0,0,0,9),AccessibleName="Filter first core item: "+ItemName(id)+". "+summary+". "+share};button.Click+=(s,e)=>{firstItemFilter=id;showOptions=false;SortBuilds();};buildList.Controls.Add(button);}
  }
- void SelectBuild(object raw){selected=raw;foreach(var button in buildList.Controls.OfType<BundleButton>()){button.Chosen=Object.ReferenceEquals(button.Raw,raw);button.Invalidate();}use.Enabled=true;var value=J.Get(raw,"value");var perks=J.A(J.Get(value,"perks")).Select(Convert.ToInt32).ToArray();selectionTitle.Text=data.Name(Champion)+" · "+RuneName(perks[0]);selectionSubtitle.Text=Summary(raw)+"\nRune page + three-item core combination";BuildRunes(value);BuildSkills(J.Get(J.Get(raw,"details"),"skillOrder"));BuildDetails(raw);}
- void UseBuild(){if(selected==null)return;try{PlanJson=Recommendations.BundlePlan(data,Champion,Role,selected);DialogResult=DialogResult.OK;}catch(Exception ex){status.Text=ex.Message;}}
+ void SelectBuild(object raw){selected=raw;foreach(var button in buildList.Controls.OfType<BundleButton>()){button.Chosen=Object.ReferenceEquals(button.Raw,raw);button.Invalidate();}UpdateActions();var value=J.Get(raw,"value");var perks=J.A(J.Get(value,"perks")).Select(Convert.ToInt32).ToArray();selectionTitle.Text=data.Name(Champion)+" · "+RuneName(perks[0]);selectionSubtitle.Text=Summary(raw)+"\nRune page + three-item core combination";BuildRunes(value);BuildSkills(J.Get(J.Get(raw,"details"),"skillOrder"));BuildDetails(raw);}
+ void UpdateActions(){bool ready=selected!=null&&!applying&&!loading;use.Enabled=ready;
+  if(save!=null)save.Enabled=applyRunes.Enabled=applyItems.Enabled=ready;
+  refresh.Enabled=!applying&&!loading;champions.Enabled=role.Enabled=common.Enabled=winRate.Enabled=paths.Enabled=options.Enabled=allPaths.Enabled=buildList.Enabled=!applying;
+ }
+ public string SelectedPlanJson(){if(selected==null||loading||applying)throw new InvalidOperationException("Select an available build first.");Recommendations.Bundles(data,feed,Champion,Role);return Recommendations.BundlePlan(data,Champion,Role,selected);}
+ void SavePlan(){try{string json=SelectedPlanJson();using(var dialog=new SaveFileDialog{Filter="Rift loadout (*.json)|*.json",FileName="RR-"+Champion+".json"})if(dialog.ShowDialog(this)==DialogResult.OK){File.WriteAllText(dialog.FileName,json,System.Text.Encoding.UTF8);status.Text="Plan saved. Select it in Game overlay settings to use its item targets.";}}catch(Exception ex){status.Text=ex.Message;}}
+ async void Apply(bool rune){if(applying)return;try{
+  var plan=J.Parse(SelectedPlanJson());string champ=J.S(plan,"champion");int[] perks=J.A(J.Get(plan,"perks")).Select(Convert.ToInt32).ToArray();
+  var sections=J.A(J.Get(plan,"sections")).Select(row=>new KeyValuePair<string,string>(J.S(row,"name"),J.S(row,"items"))).ToArray();
+  object payload=rune?Loadouts.RunePage(data,champ,(int)J.N(plan,"primary"),(int)J.N(plan,"secondary"),perks):Loadouts.ItemSet(data,champ,sections);
+  string preview=rune?String.Join("\n",perks.Select(RuneName)):String.Join("\n\n",sections.Select(s=>s.Key+": "+String.Join(", ",s.Value.Split(',').Select(v=>ItemName(Int32.Parse(v.Trim()))))));
+  if(MessageBox.Show(this,data.Name(champ)+"\n\n"+preview+"\n\n"+J.S(plan,"source")+"\n\nCreate "+(rune?"and select a new rune page":"a new custom item set")+" in League?","Review loadout",MessageBoxButtons.OKCancel,MessageBoxIcon.Information)!=DialogResult.OK)return;
+  if(demo!=null&&demo()){status.Text="Demo preview complete. Nothing was sent to League.";return;}
+  if(client==null)throw new InvalidOperationException("League client is unavailable. Nothing was sent.");
+  applying=true;UpdateActions();status.Text="Checking your selected champion and sending to League…";
+  await client.ApplyLoadout(champ,payload,rune);
+  if(!IsDisposed)status.Text=rune?"League accepted the new rune page. Check your runes in the client before lock-in.":"League accepted the custom item set. Choose RR · "+data.Name(champ)+" in the shop's Item Sets dropdown.";
+ }catch(Exception ex){if(!IsDisposed)status.Text=ex.Message;}finally{applying=false;if(!IsDisposed)UpdateActions();}}
+ void UseBuild(){if(selected==null)return;try{PlanJson=SelectedPlanJson();DialogResult=DialogResult.OK;}catch(Exception ex){status.Text=ex.Message;}}
  void EmptyDetails(){selectionTitle.Text="Choose a build";selectionSubtitle.Text="Selected runes and observed skill order";Clear(runePanel);Clear(skillPanel);Clear(details);LabelAt(runePanel,"RUNES",18,15,490,28,12,Theme.Accent);LabelAt(runePanel,"Rune choices appear here when a qualifying build is available.",18,75,490,70,11,Theme.Muted);LabelAt(skillPanel,"SKILL ORDER",18,15,490,25,11,Theme.Accent);LabelAt(skillPanel,"No observed sequence available.",18,56,490,55,10,Theme.Muted);foreach(string title in new[]{"SUMMONER SPELLS","STARTING ITEMS","CORE PURCHASE ORDER","MATCH-END ITEMS","SITUATIONAL ITEMS"})DetailSection(title,null,"Select a qualifying build to view its data.",false,false);}
  string RuneName(int id){foreach(var tree in Loadouts.Trees(data)){if(J.N(tree,"id")==id)return J.S(tree,"name");foreach(var slot in J.A(J.Get(tree,"slots")))foreach(var rune in J.A(J.Get(slot,"runes")))if(J.N(rune,"id")==id)return J.S(rune,"name");}switch(id){case 5008:return "Adaptive force";case 5005:return "Attack speed";case 5007:return "Ability haste";case 5001:return "Scaling health";case 5010:return "Move speed";case 5011:return "Health";case 5013:return "Tenacity";default:return "Rune "+id;}}
  string ItemName(int id){object item;return data.Items.TryGetValue(id.ToString(),out item)?J.S(item,"name"):"Item "+id;}

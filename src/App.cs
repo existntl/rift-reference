@@ -13,6 +13,8 @@ public class Preferences {public bool Adjust=true;public bool SecondMonitor=true
  public bool Migrate(){bool changed=SettingsVersion<2;if(SettingsVersion<1){RespawnLaneOnly=false;EnemiesLeft=true;}if(SettingsVersion<2){TrainingFocus=Coaching.NormalizeFocus(Focus);SettingsVersion=2;}string normalized=Coaching.NormalizeFocus(TrainingFocus);changed|=normalized!=TrainingFocus;TrainingFocus=normalized;return changed;}
 }
 public class Dashboard : Form {
+ int homeOffset;
+ protected override void OnMouseWheel(MouseEventArgs e){base.OnMouseWheel(e);if(state.Players.Count==0&&!Postgame.Active(state.Phase)){homeOffset=Math.Max(0,Math.Min(9,homeOffset+(e.Delta<0?1:-1)));Invalidate();}}
  GameOverlay overlay;OverlayOptions overlayOptions=new OverlayOptions();Button overlayButton;
  DataStore data;LeagueClient client;Snapshot state=new Snapshot(); Snapshot lastGame;MobileCompanion mobile;
  Preferences prefs=new Preferences(); string home; bool busy, demo; DateTime lastSuccess;
@@ -52,7 +54,7 @@ public class Dashboard : Form {
   review=Button("Review",()=>OpenPractice(true));
   dashboardButton=Button("Overview",()=>{Invalidate();});
   phoneButton=Button("Phone / tablet",()=>Settings(null,3));
-  buildButton=Button("Runes / builds",()=>{var self=state.Players.FirstOrDefault(p=>p.Self);using(var form=new BuildPlanner(data,client,self==null?"":self.Champion,()=>demo||state.Demo))form.ShowDialog(this);});
+  buildButton=Button("Runes / builds",()=>{var self=state.Players.FirstOrDefault(p=>p.Self);using(var form=new RecommendationPicker(data,self==null?"":self.Champion,client,()=>demo||state.Demo))form.ShowDialog(this);});
   ((NavigationButton)dashboardButton).Symbol="dashboard";((NavigationButton)dashboardButton).Active=true;
   ((NavigationButton)playbook).Symbol="book";((NavigationButton)review).Symbol="review";((NavigationButton)settings).Symbol="settings";((NavigationButton)phoneButton).Symbol="phone";
   Resize+=(s,e)=>LayoutButtons();Shown+=(s,e)=>{if(prefs.SecondMonitor && Screen.AllScreens.Length>1){Bounds=Screen.AllScreens.First(x=>!x.Primary).WorkingArea;WindowState=FormWindowState.Maximized;}LayoutButtons();};
@@ -163,18 +165,18 @@ public class Dashboard : Form {
  }
  void DrawMatch(Graphics g,int w){g.Clear(bg);g.TextRenderingHint=System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
   TextAt(g,"LEAGUE OF LEGENDS  /  OVERVIEW",small,muted,28,17,w-440,23);
-  using(var heading=new Font("Segoe UI",24,FontStyle.Bold))TextAt(g,Postgame.Active(state.Phase)?"Match summary":state.Players.Count==0?"Your next game starts here.":state.Phase=="ChampSelect"?"Champion select":"Match overview",heading,ink,26,42,w-550,47);review.Enabled=CanReview();
+  using(var heading=new Font("Segoe UI",24,FontStyle.Bold))TextAt(g,Postgame.Active(state.Phase)?"Match summary":state.Players.Count==0?"Player overview":state.Phase=="ChampSelect"?"Champion select":"Match overview",heading,ink,26,42,w-550,47);review.Enabled=CanReview();
   ((NavigationButton)live).Active=!demo;((NavigationButton)demoButton).Active=demo&&state.Phase=="In game";((NavigationButton)draftButton).Active=demo&&state.Phase=="ChampSelect";((NavigationButton)postButton).Active=demo&&Postgame.Active(state.Phase);postButton.Invalidate();
   live.Invalidate();demoButton.Invalidate();draftButton.Invalidate();
   string phase=state.Phase=="ChampSelect"?"CHAMPION SELECT":state.Phase.ToUpperInvariant();
   string info=(demo?"DEMO · SIMULATED DATA":phase)+"    /    "+(state.Account==""?"Waiting for League":state.Account)+"    /    "+(audioStatus!=""?audioStatus:!prefs.AudioEnabled?"Audio off":demo?"Audio paused":"Audio on · "+prefs.AudioVolume+"%");
   if(Postgame.Active(state.Phase))info=(demo?"DEMO · SIMULATED DATA":phase)+"    /    "+(state.Players.Count>0?"Final scoreboard":"Waiting for final statistics");
   TextAt(g,info,small,demo?Color.FromArgb(213,184,126):accent,28,94,w-50,24);
-  TextAt(g,Postgame.Active(state.Phase)?(state.Result==""?"Results pending":state.Result)+" · Duration "+Postgame.Duration(state.Time)+" · "+state.Notice:(state.Phase=="ChampSelect"?"Draft brief · Kit guidance and composition patterns · Data ":"Cooldown references · Unknown ranks are estimates · Data ")+data.Version+" · Patch match unverified",small,muted,28,120,w-50,23);
+  TextAt(g,Postgame.Active(state.Phase)?(state.Result==""?"Results pending":state.Result)+" · Duration "+Postgame.Duration(state.Time)+" · "+state.Notice:state.Players.Count==0&&state.Phase!="ChampSelect"?"Your profile and recent matches · Local League client · Unavailable statistics stay blank":(state.Phase=="ChampSelect"?"Draft brief · Kit guidance and composition patterns · Data ":"Cooldown references · Unknown ranks are estimates · Data ")+data.Version+" · Patch match unverified",small,muted,28,120,w-50,23);
   leftHeader=Rectangle.Empty;rightHeader=Rectangle.Empty;int y=147;
   if(Postgame.Active(state.Phase)){DrawPostgame(g,w,y);return;}
   if(state.Phase=="ChampSelect"){DrawDraft(g,w,y);return;}
-  if(state.Players.Count==0){DrawEmpty(g,w,y);return;}
+  if(state.Players.Count==0){if(state.Phase=="InProgress"||state.Phase=="Reconnect")DrawEmpty(g,w,y);else HomeDashboard.Draw(g,new Rectangle(28,y,w-56,ClientSize.Height-y-24),data,state.Home,Portrait,homeOffset);return;}
   bool draft=state.Phase=="ChampSelect"; bool adjust=prefs.Adjust && state.Mode=="CLASSIC" && !draft;
   var lane=LaneView.Select(state);var referenceLane=lane;
   bool compactRoster=prefs.ShowCoaching&&(ClientSize.Height<1000||w<1700);

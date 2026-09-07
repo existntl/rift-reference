@@ -1,5 +1,39 @@
 # Rift Reference handoff
 
+## API application scope extension (2026-09-07)
+
+User wants rank badge/LP/progression powered by Riot API and added to the started request. Updated private docs/riot-production-application.md with ACCOUNT-V1, LEAGUE-V4 and MATCH-V5 personal-profile scope, official rank snapshots, no invented historical/per-match LP, server-side key and separate profile access/retention requirements. All-rank personal profiles remain separate from Diamond+ recommendations. Draft only; no portal submission, API backend or release performed. Existing local-client implementation remains in place.
+
+## Rank badge and progression (local, 2026-09-07)
+
+Added actual Riot tier badges, divisional LP progress bar and recorded ranked ladder graph to idle home. See docs/rank-history.md for asset bootstrap and local persistence. Graph starts from observed rank snapshots, with no invented earlier history. Preserves rank-history.json and .bak on upgrade/rollback; excludes them from packages/source.13 home parsing and14 rank history checks plus app --test passed.1920x1080 and1280 sample renders inspected; installer upgrade/rollback passed. Live-client integration remains unverified. Local only; public remains0.11.0.
+
+## Blitz-style home polish (local, 2026-09-07)
+
+User requested closer match to Blitz UI. HomeDashboard now uses flat charcoal continuous match rows with dividers, larger portraits, gold KDA text, screenshot-order metrics, wider rank/performance column with RR logo ring, and compact Last10 champion summary. Unknown data/result semantics preserved; footer keeps scroll hint even with notices. Idle heading is Player overview. No synthetic LP history, grades or copied rank emblems.
+
+13 home parsing checks and application tests pass. Full1920 preview inspected (build/home-7d9f9b5b019d441491464aadc1eb89d5/home-1920-sample.png); compact1280x950 content verified via updated offline harness build/home-3dc6ea92d76d48f79831c9e6c5c1b64d. Harness avoids second-monitor Shown maximization when testing small widths. Local only, public remains0.11.0.
+
+## Profile home screen (local, 2026-09-07)
+
+User supplied Blitz-style idle dashboard reference. Added HomeDashboard with Solo rank/LP/season record left, recent champion records, recent10 all-queue summary and scrollable match rows with result/KDA/CS/min/vision/min/damage/min/KP/team damage share. Missing values remain unknown; no invented LP trends, grades or placement scores. Main idle view uses it; draft, live-data-loss and postgame retain their existing screens. History uses current-summoner identity and bounded local ranked/history endpoints through restricted read-only transport.60s memory cache per account/session, cleared disconnect and refreshed after live/postgame. No raw history written to disk or added to mobile payloads.
+
+13 parsing checks and5 transport tests passed; application checks pass.1920x1080 sample and1280 empty layouts inspected in ignored build/home-*; placeholders in standalone renders do not replace app's portrait loader. Actual local client history schema/availability still needs live validation. Direct-build-screen change and this home dashboard are local only; public remains0.11.0.
+
+## Direct builds screen (local, 2026-09-07)
+
+User no longer wants original editor. Main Runes / builds opens RecommendationPicker standalone directly; save plan and guarded preview/apply runes/items moved into dashboard. Overlay still uses picker mode. Legacy BuildPlanner retained only as compatibility/test code, not app navigation. Empty feed disables save/apply; no synthetic production data. Applying captures validated plan, reviews, checks demo and client, disables edits while pending and keeps existing phase/champion guards. Feed refresh now consistently updates action availability.
+
+17 collector tests,33 recommendation checks and application --test passed; direct populated synthetic preview inspected at1920x1080 (build/app/builds-direct.png). User installation/public release remains0.11.0; this follow-up has not been published.
+
+## Published0.11.0 (2026-09-07)
+
+User authorized publishing all pending changes. Published https://github.com/existntl/rift-reference/releases/tag/v0.11.0 as Latest with matching installer and signed latest.json. Includes connected dashboard/path browsing, direct overlay build selection, native dark title bars and explicit shortcut icons. Live Diamond+ feed still unavailable; no collector, key, database or private application draft is packaged. Existing website latest-download link automatically follows this release; website content unchanged.
+
+17 collector tests,29 native recommendation checks,98 overlay checks, application tests and installer upgrade/rollback from0.9.3 passed. Downloaded public files passed publisher signature/hash/size and tamper rejection. Isolated0.9.3 updater discovered, downloaded and verified0.11.0 without installing. Evidence build/public-0.11.0. Installer SHA25670c5f38eeebd0287da563040d4d9ff241de501922111dd8d506c80950cd6e69a. No normal installation performed.
+
+Source published through connector with non-force fast-forward to decdceede30f48b2099ffc2eafee8dfa55c523dc, tree984af63cacce14fe6bcf3d2e7b1ea0a5ee6a63f9; release tag points there. Private docs/riot-production-application.md excluded. Earlier local/unpublished notes are historical. Release-state documentation was updated after publication locally.
+
 ## OneTricks-style path browsing (local, 2026-09-07)
 
 User asked to inspect OneTricks in Brave and implement its build-path approach. Brave was not exposed by browser inventory; public https://www.onetricks.gg/champions/builds/Vayne inspected instead, disclosed to user. Recommendation dashboard now has Paths / Options, first-core-item option cards with aggregate games/wins and explicitly limited shares of listed builds, and All paths reset. Clicking an option filters whole bundles and preserves valid selection or selects the first matching bundle. Champion/role/feed changes reset the filter. No OneTricks data feed/scraping, expert identities or unsupported matchup inference added.
