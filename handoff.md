@@ -1,5 +1,45 @@
 # Rift Reference handoff
 
+## OneTricks-style path browsing (local, 2026-09-07)
+
+User asked to inspect OneTricks in Brave and implement its build-path approach. Brave was not exposed by browser inventory; public https://www.onetricks.gg/champions/builds/Vayne inspected instead, disclosed to user. Recommendation dashboard now has Paths / Options, first-core-item option cards with aggregate games/wins and explicitly limited shares of listed builds, and All paths reset. Clicking an option filters whole bundles and preserves valid selection or selects the first matching bundle. Champion/role/feed changes reset the filter. No OneTricks data feed/scraping, expert identities or unsupported matchup inference added.
+
+17 collector tests,29 native recommendation checks and app --test pass. Lead reviewed options/filtered renders at1920x1080 in build/app/recommendation-path-options.png and recommendation-path-filtered.png. Synthetic fixtures only. No release, normal installation or live feed activation; public remains0.10.0.
+
+## Dark native title bars (local, 2026-09-07)
+
+User rejected the light Windows title strip. Added Theme.TitleBar, called for main dashboard, recommendation dashboard and Theme.Apply dialogs. DWM dark frame with legacy attribute fallback; exact charcoal caption/light text/subtle border on supporting Windows versions. Native window controls and geometry retained. High contrast uses system colors at application. Handle recreation reapplies styling. Microsoft reference: https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute.
+
+UI suite and app --test passed. Native DWM readback in isolated test returned success and dark=1. Inspected1920x1040 dashboard render for layout regressions; DrawToBitmap does not capture compositor dark chrome, so actual title appearance still needs onscreen confirmation. Evidence build/ui-6a8f1ff26b24473f9c7e8e95c0c4c070. Local source/build only; no installation or public release.
+
+## Connected visual build dashboard (local, 2026-09-07)
+
+Implemented the user's Blitz screenshot direction with a three-column native dashboard: frequency/win-rate build cards, full rune choices, observed skill upgrade sequence, summoner spells and item sections. `RecommendationDashboard.cs` owns the picker; `Recommendations.cs` validates v2 paired rune/core groups and detail sample bounds. `OverlaySettings` can open the same selector and select the first core target; applying runes/items still uses the existing review flow. Spell icons are cached with Data Dragon assets.
+
+Collector exports `rift-diamond-2`, grouping complete rune pages with observed three-item cores; detail modes are independently supported within each group, not necessarily observed together. Nullable SQLite details migration preserves rows and refetches legacy details. No fabricated pro identities, situational advice or skill timing. Read docs/recommendations.md. Synthetic preview data is test-only. No normal installation, release, website deployment or live collection performed for this change.
+
+Verification: 17 collector tests, 26 native recommendation checks, 98 overlay checks and application --test passed. Lead inspected sample dashboard, unavailable state and overlay settings at1920x1080. Tests cover coherent alternative selection, role changes, invalid feeds/details, saved-plan transfer and settings isolation. Legacy enrichment preserves known core data if a timeline is absent; an accepted ambiguous-undo timeline still invalidates it. Evidence is ignored build/app/recommendation-*.png and build/overlay-bf64adb62ea540e0bbba865d215ab84d. Source remains local; public remains0.10.0.
+
+## Windows icon repair (2026-09-07)
+
+User reported a generic taskbar icon. Inspection verified correct white/teal RR icons in installed0.10.0 executable, current build, and running app window. Desktop and Start Menu shortcuts had unspecified IconLocation. Backed them up under ignored build/icon-repair-* and set their explicit icon to the accepted logo copied as installed rift-ready.ico; targets unchanged. Refreshed Windows icon display with ie4uinit -show, without restarting Explorer or the app. Taskbar visual refresh may require reopening the app. Installer.cs now explicitly sets future shortcuts to executable icon index0; targeted compiled shortcut regression passed. No binaries installed/released, preferences unchanged. Source change remains local for the next release.
+
+## Riot development access setup (2026-09-06)
+
+User signed into Riot portal and generated a development key; portal confirms expiry September7 at23:25 Pacific. Key was redacted from browser output, never stored in source/chat. Private collector launcher now supports masked user entry and child-process-only key environment. First live collection still awaits local key entry; do not infer successful API calls from portal status. Production registration reaches an I AGREE terms gate, left untouched for owner review. Application text prepared in docs/riot-production-application.md, not submitted; no production key or public hosting. See docs/recommendations.md for private launcher and feed setup.
+
+Parallel agents implemented/tested the launcher and reviewed the collector; lead reran both suites. Twelve collector tests and launcher credential/lifecycle checks pass; launcher rendering inspected at1920x1080. Redirects cannot forward keys; omitted false match wins count as losses; malformed schemas are excluded. Masked launcher opened (process26344 at launch) for user entry. Do not start a second collection while it is running. No live result verified yet.
+
+## Parallel work preference (2026-09-06)
+
+User explicitly approved a lead agent coordinating specialist agents for substantial tasks. Use independent assignments, shared project context, clear file ownership and coordinated database changes. Lead integrates and reviews all contributions and runs appropriate combined checks before reporting completion. Available concurrency is currently four including the lead; do not spawn agents just to fill slots or invent work. This supersedes the earlier no-subagents preference. No application/release changes are implied by this workflow update.
+
+## Diamond+ recommendations (local, 2026-09-06)
+
+User accepted Riot-match aggregation and selected NA / EUW / Korea; no API key yet. Added Python/SQLite collector and restricted loopback feed preview under services/recommendations, plus Diamond+ choices in Runes / builds. Current patch, ranked solo, seven-day window; complete rune pages and timeline-derived first-three-core paths, minimum30 games/10 players, frequency ordering with samples/wins. Rank is observed at collection, not match time. Ambiguous undos exclude item samples. Native validation preserves manual plans when unavailable and uses existing explicit apply. Saved plans feed overlay target selection; no automatic advancement. Read docs/recommendations.md for setup, sampling and activation limitations.
+
+Verification: 6 Python test cases, 10 native recommendation checks and 768 application checks passed; 1920x1080 fixture/unavailable picker and editor renders inspected. Synthetic choices are test-only. No key, live collection, deployment, public release, website changes or normal installation. Feed currently uses RIFT_RECOMMENDATIONS_URL developer override; public endpoint and production access still required. Public remains0.10.0 / website12. Source changes are local and uncommitted.
+
 ## Published 0.10.0 and website version 12 (2026-09-06)
 
 Public release https://github.com/existntl/rift-reference/releases/tag/v0.10.0 includes the matching installer and signed latest.json. Public download signature/hash/size verified; the extracted 0.9.3 app discovered, downloaded and verified 0.10.0 without installing it. Upgrade from the old installation working directory and rollback preserve preferences, reviews and overlay.json/recovery. 98 overlay plus 768 application checks pass. Normal installation unchanged; live League integration remains unverified.

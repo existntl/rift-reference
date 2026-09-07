@@ -1,5 +1,13 @@
 # Rift Ready working instructions
 
+- Build-path browsing follows the public OneTricks reference: Paths / Options, first-core item filtering and All paths reset. Option shares use only listed qualifying bundles, never implied whole-population pick rates. Keep rune/core bundle identity when filtering; no OneTricks scraping/feed or expert roster is connected.
+
+- Native title bars should blend with charcoal theme. Theme.TitleBar applies DWM dark frame (20 with legacy19 fallback) and supported caption/text/border colors; keeps native controls/snap/resize and respects high contrast at application. Apply on handle creation; do not replace with borderless chrome casually.
+
+- Local build dashboard follows the supplied Blitz reference: connected rune/core alternatives, Common / Win rate sorting, rune trees, observed skill upgrade sequence, spells and item sections. `rift-diamond-2` details are qualifying modes within the selected rune/core cohort, not one jointly observed complete loadout. No invented pro identities or situational recommendations. Overlay settings can choose the same saved build directly; target advancement remains manual. Public release unchanged; real collector output and hosting remain unverified.
+
+- Local Diamond+ recommendation collector and native picker: read docs/recommendations.md. Accepted NA1/EUW1/KR ranked solo, current patch, 7 days, minimum30 games/10 players. User generated a development key expiring September7,2026 at23:25 Pacific; it is not stored in source. Masked private launcher accepts local user entry. Real collection, production access, hosting and endpoint configuration remain pending; never claim the feed is live. Keep key in the separate collector environment, never the native app. Preserve explicit apply/review and saved-plan overlay target selection.
+
 - Current public release is 0.10.0, with matching installer and signed manifest; website version 12 describes overlays. Public signature/hash and the 0.9.3 updater download verified. 866 app/overlay checks and installer upgrade/rollback passed. No normal installation or live-game validation performed. GitHub source main matches the verified release tree. CLI GitHub credentials are absent: publish binaries through the signed-in in-app browser and source through the GitHub connector; never assume CLI authentication.
 
 - Layout editor has no shared toolbar/menu. Build/stats gears contain per-panel reset, transparency, next preview screen, and Use/Cancel layout. Ctrl+Enter accepts, Esc cancels, F6 cycles screens even when all panels are hidden. Restore closed panels in parent Game overlay settings, then reopen editor. Fixed buff cards remain without controls. Keep the parent settings shortcut/help text discoverable.
@@ -43,7 +51,7 @@ Read `handoff.md` before making changes. It records the release state, user pref
 
 - Carry authorized work through implementation and appropriate verification. Give concise progress updates. Do not repeatedly ask for permission already supplied.
 - Do not claim features in the aspirational specification are implemented without checking the code.
-- No subagents unless the user explicitly asks for delegation or parallel agents.
+- User explicitly authorized parallel agents on 2026-09-06. For substantial tasks, the lead agent delegates independent, bounded work and owns integration, review and final verification. Use up to the available concurrency limit (currently four including the lead); keep small or dependent tasks local. Assign separate file ownership where practical, coordinate shared interfaces, and serialize conflicting edits, database writes/migrations and releases. Shared project/data access does not authorize concurrent uncoordinated writes. Agents report changes, checks and unresolved issues to the lead; delegation does not expand the user's task scope.
 - Do not send messages to third parties without explicit authorization. Drafting release notes or a support request does not authorize sending a support message.
 - Verify current Riot rules before introducing new gameplay assistance. Enemy summoner/ability countdown tracking, including manually started timers, was excluded after reviewing current compliance guidance. Do not represent the app as Riot-approved; registration/audit is not verified.
 

@@ -19,8 +19,12 @@ def main():
         for rune in [tree] + [r for slot in tree['slots'] for r in slot['runes']]:
             jobs[f"runes/{rune['id']}.png"] = 'https://ddragon.leagueoflegends.com/cdn/img/' + rune['icon']
     items = json.loads((ROOT / 'item.json').read_text(encoding='utf-8-sig'))['data']
+    spells = json.loads((ROOT / 'summoner.json').read_text(encoding='utf-8-sig'))['data']
+    for spell in spells.values():
+        if 'CLASSIC' in spell.get('modes', []):
+            jobs[f"spells/{spell['key']}.png"] = f"https://ddragon.leagueoflegends.com/cdn/{version}/img/spell/{spell['image']['full']}"
     for key, item in items.items():
-        if item.get('maps', {}).get('11') and item.get('gold', {}).get('purchasable'):
+        if item.get('maps', {}).get('11'):
             jobs[f'items/{key}.png'] = f"https://ddragon.leagueoflegends.com/cdn/{version}/img/item/{item['image']['full']}"
     for key, name in {5008: 'AdaptiveForce', 5005: 'AttackSpeed', 5007: 'CDRScaling',
                       5010: 'MovementSpeed', 5001: 'HealthScaling', 5011: 'HealthPlus',

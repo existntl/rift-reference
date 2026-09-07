@@ -3,6 +3,27 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 namespace RiftReference {
 public static class Theme {
+    [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
+    static extern int DwmSetWindowAttribute(System.IntPtr window,int attribute,ref int value,int size);
+    public static void TitleBar(Form form) {
+        form.HandleCreated-=TitleBarCreated;form.HandleCreated+=TitleBarCreated;
+        if(form.IsHandleCreated)ApplyTitleBar(form);
+    }
+    static void TitleBarCreated(object sender,System.EventArgs e){ApplyTitleBar((Form)sender);}
+    static void ApplyTitleBar(Form form){
+        if(form.FormBorderStyle==FormBorderStyle.None)return;
+        try{
+            int dark=SystemInformation.HighContrast?0:1;
+            if(DwmSetWindowAttribute(form.Handle,20,ref dark,4)<0)DwmSetWindowAttribute(form.Handle,19,ref dark,4);
+            int caption=SystemInformation.HighContrast?-1:ColorTranslator.ToWin32(Background);
+            int text=SystemInformation.HighContrast?-1:ColorTranslator.ToWin32(Ink);
+            int border=SystemInformation.HighContrast?-1:ColorTranslator.ToWin32(Border);
+            // Exact caption colors are supported on Windows 11; Windows 10 retains its native dark frame.
+            DwmSetWindowAttribute(form.Handle,35,ref caption,4);
+            DwmSetWindowAttribute(form.Handle,36,ref text,4);
+            DwmSetWindowAttribute(form.Handle,34,ref border,4);
+        }catch(System.DllNotFoundException){}catch(System.EntryPointNotFoundException){}
+    }
     public static readonly Color Background=Color.FromArgb(15,16,20),Panel=Color.FromArgb(25,27,33),Border=Color.FromArgb(43,46,54),Accent=Color.FromArgb(66,205,198),Ink=Color.FromArgb(238,240,244),Muted=Color.FromArgb(148,154,167);
     public static void Surface(Graphics g, Rectangle box, Color fill, Color accent) {
         if(box.Width<20||box.Height<20)return;
@@ -15,7 +36,7 @@ public static class Theme {
         }g.SmoothingMode=old;
     }
     public static void Apply(Control root) {
-        var form=root as Form;if(form!=null)form.Icon=Brand.Icon;
+        var form=root as Form;if(form!=null){form.Icon=Brand.Icon;TitleBar(form);}
         root.BackColor=root is TextBoxBase || root is ListBox || root is ComboBox ? Panel : Background;
         root.ForeColor=Ink;
         var button=root as Button;

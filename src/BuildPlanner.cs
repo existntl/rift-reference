@@ -71,7 +71,8 @@ public sealed class BuildPlanner:Form {
   SelectChampion(selected);
   AddButton("Onetricks.gg",270,88,145,()=>OpenSource("https://www.onetricks.gg/champions/builds/"));
   AddButton("Probuilds",425,88,135,()=>OpenSource("https://probuilds.net/champions/details/"));
-  LabelAt("Source pages open in your browser. Automatic feeds are not connected.",580,91,665,32,9);
+  AddButton("Diamond+ choices…",580,88,220,()=>{using(var picker=new RecommendationPicker(data,SelectedChampion()))if(picker.ShowDialog(this)==DialogResult.OK)RestorePlan(picker.PlanJson);});
+  LabelAt("Riot matches · NA / EUW / KR",818,91,420,32,9);
   LabelAt("Source / patch note",24,137,170,23,9);source=new TextBox{Location=new Point(190,133),Size=new Size(1062,28),MaxLength=300,Text="My choices · compare the source's role, patch and sample size"};Controls.Add(source);
   var runeTab=new Panel{Location=new Point(24,213),Size=new Size(1232,538)};var itemTab=new Panel{Location=runeTab.Location,Size=runeTab.Size,Visible=false};Controls.Add(runeTab);Controls.Add(itemTab);
   var runeNav=new NavigationButton{Text="Rune page",Location=new Point(24,177),Size=new Size(155,34),Active=true};var itemNav=new NavigationButton{Text="Item sets",Location=new Point(185,177),Size=new Size(155,34)};Controls.Add(runeNav);Controls.Add(itemNav);

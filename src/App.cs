@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Drawing;
@@ -38,7 +38,7 @@ public class Dashboard : Form {
   overlay=new GameOverlay(data,()=>overlayOptions);
   overlayButton=Button("Game overlay",()=>OpenOverlay());
   updater=new UpdateManager(home);
-  Icon=Brand.Icon;
+  Icon=Brand.Icon;Theme.TitleBar(this);
   try {prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")))??new Preferences();}catch{}
   if(prefs.Migrate())SaveLayout();
   data.MinutesAndSeconds=prefs.MinutesAndSeconds;
