@@ -1,0 +1,14 @@
+/build/
+/dist/
+/cache/
+*.private.xml
+release-key*
+preferences.json*
+reviews.json*
+overlay.json*
+*.log
+__pycache__/
+*.exe
+*.zip
+*.previous-*
+/.RiftReference-stage-*/

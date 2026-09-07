@@ -1,0 +1,2 @@
+using System;using RiftReference;
+class DownloadProbe{static int Main(){try{var u=new UpdateManager(AppDomain.CurrentDomain.BaseDirectory);u.Check().GetAwaiter().GetResult();Console.WriteLine(u.Status);if(u.Available==null)return 1;var file=u.Prepare().GetAwaiter().GetResult();Console.WriteLine("PASS: existing app downloaded and verified update installer without installing it.");return 0;}catch(Exception e){Console.WriteLine(e.Message);return 1;}}}
