@@ -87,7 +87,7 @@ public sealed class RecommendationPicker : Form {
   refresh.Enabled=!applying&&!loading;champions.Enabled=role.Enabled=common.Enabled=winRate.Enabled=paths.Enabled=options.Enabled=allPaths.Enabled=buildList.Enabled=!applying;
  }
  public string SelectedPlanJson(){if(selected==null||loading||applying)throw new InvalidOperationException("Select an available build first.");Recommendations.Bundles(data,feed,Champion,Role);return Recommendations.BundlePlan(data,Champion,Role,selected);}
- void SavePlan(){try{string json=SelectedPlanJson();using(var dialog=new SaveFileDialog{Filter="Rift loadout (*.json)|*.json",FileName="RR-"+Champion+".json"})if(dialog.ShowDialog(this)==DialogResult.OK){File.WriteAllText(dialog.FileName,json,System.Text.Encoding.UTF8);status.Text="Plan saved. Select it in Game overlay settings to use its item targets.";}}catch(Exception ex){status.Text=ex.Message;}}
+ void SavePlan(){try{string json=SelectedPlanJson();using(var dialog=new SaveFileDialog{Filter="Rift loadout (*.json)|*.json",FileName="RR-"+Champion+".json"})if(dialog.ShowDialog(this)==DialogResult.OK){File.WriteAllText(dialog.FileName,json,System.Text.Encoding.UTF8);status.Text="Plan saved. Select it in Preferences > Game overlay to use its item targets.";}}catch(Exception ex){status.Text=ex.Message;}}
  async void Apply(bool rune){if(applying)return;try{
   var plan=J.Parse(SelectedPlanJson());string champ=J.S(plan,"champion");int[] perks=J.A(J.Get(plan,"perks")).Select(Convert.ToInt32).ToArray();
   var sections=J.A(J.Get(plan,"sections")).Select(row=>new KeyValuePair<string,string>(J.S(row,"name"),J.S(row,"items"))).ToArray();

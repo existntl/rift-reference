@@ -13,6 +13,7 @@ class PracticeUiTests {
     static void Capture(Form form,string name){using(var bitmap=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(bitmap,new Rectangle(Point.Empty,form.Size));bitmap.Save(Path.Combine(home,name+".png"));}}
     static object Get(Dashboard form,string field){return typeof(Dashboard).GetField(field,BindingFlags.Instance|BindingFlags.NonPublic).GetValue(form);}
     static void Set(Dashboard form,string field,object value){typeof(Dashboard).GetField(field,BindingFlags.Instance|BindingFlags.NonPublic).SetValue(form,value);}
+    static System.Collections.Generic.IEnumerable<T> Desc<T>(Control root) where T:Control {foreach(Control child in root.Controls){var value=child as T;if(value!=null)yield return value;foreach(var nested in Desc<T>(child))yield return nested;}}
     static void Modal(Action open,string title,Action<Form> operate){
         Exception failure=null;int ticks=0;
         using(var timer=new Timer{Interval=100}){
@@ -31,23 +32,47 @@ class PracticeUiTests {
         File.WriteAllText(Path.Combine(home,"preferences.json"),"{\"SettingsVersion\":1,\"EnemiesLeft\":false,\"AudioVolume\":37,\"Focus\":\"Positioning\"}");
         using(var dashboard=new Dashboard(home,true)){
             dashboard.Render(Path.Combine(home,"migrated.png"),false);
-            Modal(()=>dashboard.Settings(),"preferences",form=>{
-                var general=form.Controls.OfType<TabControl>().Single().TabPages[0];
-                var focus=general.Controls.OfType<ComboBox>().OrderBy(c=>c.Top).First();
+            Modal(()=>dashboard.OpenPreferences(),"Preferences",form=>{
+                Check(!Desc<TabControl>(form).Any(),"Native settings tabs remain");
+                var categories=Desc<NavigationButton>(form).Select(b=>b.Text).ToArray();
+                Check(categories.SequenceEqual(new[]{"General","Game overlay","Audio & reminders","Phone / tablet"}),"Preference categories were not consolidated");
+                var general=Desc<Panel>(form).Single(p=>p.Name=="GeneralPage");
+                var focus=Desc<ComboBox>(general).Single(c=>c.Name=="TrainingFocus");
                 Check(Convert.ToString(focus.SelectedItem)=="Main threat","Settings did not show migrated focus");
                 focus.SelectedItem="Recall purpose";
-                general.Controls.OfType<CheckBox>().Single(c=>c.Text.StartsWith("Show lane plan")).Checked=false;
-                form.Controls.OfType<Button>().Single(b=>b.Text=="Save preferences").PerformClick();
+                Desc<CheckBox>(general).Single(c=>c.Text.StartsWith("Show lane plan")).Checked=false;
+                Desc<NavigationButton>(form).Single(b=>b.Text=="Game overlay").PerformClick();
+                var overlayPage=Desc<OverlayPreferencesPage>(form).Single();
+                Desc<CheckBox>(overlayPage).Single(c=>c.Text=="Personal stats panel").Checked=true;
+                form.Controls.OfType<Button>().Single(b=>b.Name=="SavePreferences").PerformClick();
             });
             var prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")));
             Check(prefs.TrainingFocus=="Recall purpose"&&!prefs.ShowCoaching&&!prefs.EnemiesLeft&&prefs.AudioVolume==37,"Preferences save lost values");
+            var overlay=new JavaScriptSerializer().Deserialize<OverlayOptions>(File.ReadAllText(Path.Combine(home,"overlay.json")));
+            Check(overlay.Stats,"Consolidated overlay preference did not save");
+            var savedOverlay=File.ReadAllText(Path.Combine(home,"overlay.json"));
+            Modal(()=>dashboard.OpenPreferences(null,1),"Preferences",form=>{
+                var overlayPage=Desc<OverlayPreferencesPage>(form).Single();
+                var enabled=Desc<CheckBox>(overlayPage).Single(c=>c.Text=="Enable the game overlay");
+                enabled.Checked=!enabled.Checked;
+                form.Controls.OfType<Button>().Single(b=>b.Name=="CancelPreferences").PerformClick();
+            });
+            Check(File.ReadAllText(Path.Combine(home,"overlay.json"))==savedOverlay,"Cancel changed saved overlay preferences");
             dashboard.Render(Path.Combine(home,"original-cards.png"),false);
+            dashboard.Show();
+            var mainNavigation=dashboard.Controls.OfType<NavigationButton>().Select(b=>b.Text).ToArray();
+            Check(mainNavigation.Contains("Preferences")&&mainNavigation.Contains("Updates")&&!mainNavigation.Contains("Phone / tablet")&&!mainNavigation.Contains("Game overlay"),"Main navigation did not consolidate settings");
+            Modal(()=>dashboard.OpenPreferences(null,3),"Preferences",form=>{
+                Check(Desc<Panel>(form).Single(p=>p.Name=="PhonePage").Visible,"Phone preferences did not open directly");
+            });
+            Modal(()=>dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Updates").PerformClick(),"Updates",form=>{
+                Check(!Desc<Control>(form).Any(c=>c.Name=="PreferencesPageHost")&&Desc<SettingsCard>(form).Any(c=>c.Name=="ReleaseCard"),"Updates are not a separate area");
+                Desc<CheckBox>(form).Single(c=>c.Text.StartsWith("Automatically check")).Checked=false;
+            });
+            prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")));
+            Check(!prefs.AutoUpdates,"Update preference did not save from the separate Updates area");
             ((Preferences)Get(dashboard,"prefs")).ShowCoaching=true;
             ((Preferences)Get(dashboard,"prefs")).EnemiesLeft=true;
-            dashboard.Show();
-            Modal(()=>dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Phone / tablet").PerformClick(),"preferences",form=>{
-                Check(form.Controls.OfType<TabControl>().Single().SelectedTab.Text=="Phone / tablet","Phone navigation opened wrong page");
-            });
             var demo=dashboard.Demo(false);demo.Players[4].Champion="Thresh";demo.Players[8].Champion="Ashe";Set(dashboard,"state",demo);Capture(dashboard,"pattern-guide");
             dashboard.Size=new Size(1720,980);Capture(dashboard,"default-window");dashboard.Size=new Size(1920,1040);
             demo.Players[9].Role="";Capture(dashboard,"incomplete-lane");

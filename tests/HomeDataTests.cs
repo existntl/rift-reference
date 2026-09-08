@@ -31,6 +31,7 @@ class HomeDataTests {
   p=HomeData.Parse(data,summoner,null,null);Check(p.Matches.Count==0&&!p.LP.HasValue&&p.Notice.Contains("unavailable"),"unavailable endpoints honest");
   p=HomeData.Parse(data,summoner,Json(new{queueMap=new{RANKED_FLEX_SR=new{tier="DIAMOND"}}}),history);Check(p.Rank==""&&!p.LP.HasValue,"flex cannot masquerade as solo");
   p=HomeData.Parse(data,summoner,Json(new{queues=new[]{new{queueType="RANKED_SOLO_5x5",tier="NONE",leaguePoints=0}}}),history);Check(p.Rank=="Unranked"&&!p.LP.HasValue,"unranked does not invent LP");
+  p=HomeData.Parse(data,summoner,rank,Json(new{games=Enumerable.Repeat(game,120).ToArray()}));Check(p.Matches.Count==100,"extended history bounded to 100 matches");
   Console.WriteLine(checks+" home data checks passed");return 0;
  }catch(Exception e){Console.Error.WriteLine(e.Message);return 1;}}
 }

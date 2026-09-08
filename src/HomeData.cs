@@ -23,7 +23,7 @@ public static class HomeData {
   if(solo!=null){string tier=J.S(solo,"tier"),division=J.S(solo,"division");profile.Rank=tier==""?"":tier=="NONE"||tier=="UNRANKED"?"Unranked":CultureInfo.InvariantCulture.TextInfo.ToTitleCase(tier.ToLowerInvariant())+(division==""||division=="NA"?"":" "+division);if(tier!="NONE"&&tier!="UNRANKED"&&tier!="")profile.LP=Number(solo,"leaguePoints");profile.Wins=Number(solo,"wins");profile.Losses=Number(solo,"losses");}
   profile.Tier=J.S(solo,"tier").ToUpperInvariant();profile.Division=J.S(solo,"division").ToUpperInvariant();var season=Number(solo,"seasonId");if(season.HasValue&&season.Value>0)profile.Season="season:"+season.Value.ToString(CultureInfo.InvariantCulture);
   var games=J.A(J.Get(J.Get(history,"games"),"games"));if(games.Length==0)games=J.A(J.Get(history,"games"));
-  foreach(var game in games.Take(20)){
+  foreach(var game in games.Take(100)){
    var participants=J.A(J.Get(game,"participants"));var identities=J.A(J.Get(game,"participantIdentities")).Where(x=>Self(J.Get(x,"player"),summoner)).ToArray();object me=null;
    if(identities.Length==1){var id=Number(identities[0],"participantId");if(id.HasValue&&id>0){var found=participants.Where(p=>Number(p,"participantId")==id).ToArray();if(found.Length==1)me=found[0];}}
    if(me==null){var found=participants.Where(p=>Self(p,summoner)).ToArray();if(found.Length==1)me=found[0];}if(me==null)continue;

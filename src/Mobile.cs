@@ -104,23 +104,34 @@ public sealed class MobileCompanion : IDisposable {
 }
 
 public static class MobileSettings {
-    public static TabPage Create(MobileCompanion service, Action publish) {
-        var page=new TabPage("Phone / tablet"){BackColor=Color.FromArgb(18,26,34),ForeColor=Color.FromArgb(231,239,247)};
-        var intro=new Label{Text="Use your phone or tablet as your second screen.\nConnect both devices to the same trusted home network.\nSharing is off each time Rift Ready starts.",Left=18,Top=20,Width=515,Height=65};
-        var addresses=new ComboBox{Left=18,Top=100,Width=310,DropDownStyle=ComboBoxStyle.DropDownList};
+    public static Panel CreatePanel(MobileCompanion service, Action publish) {
+        var page=new Panel{Name="PhonePage",BackColor=Theme.Background,ForeColor=Theme.Ink,AutoScroll=true,AutoScrollMinSize=new Size(0,704)};
+        var connection=new SettingsCard("PhoneConnectionCard",0,186,Theme.Accent);
+        connection.Controls.Add(new Label{Text="LOCAL CONNECTION",Left=24,Top=17,Width=680,Height=24,Font=new Font("Segoe UI",11,FontStyle.Bold),ForeColor=Theme.Ink});
+        connection.Controls.Add(new Label{Text="Sharing is off whenever Rift Ready starts.",Left=24,Top=40,Width=680,Height=24,ForeColor=Theme.Muted});
+        var intro=new Label{Text="Use your phone or tablet as a second screen. Connect both devices to the same trusted home network.",Left=24,Top=70,Width=680,Height=42};
+        var addresses=new ComboBox{Left=24,Top=116,Width=390,DropDownStyle=ComboBoxStyle.DropDownList};
         addresses.Items.AddRange(MobileCompanion.Addresses());if(addresses.Items.Count>0)addresses.SelectedIndex=0;
-        var toggle=new Button{Text=service.Running?"Stop sharing":"Start sharing",Left=345,Top=98,Width=170,Height=32};
-        var status=new Label{Text="Choose the PC address for your Wi-Fi or Ethernet network.",Left=18,Top=140,Width=515,Height=40};
-        var picture=new PictureBox{Left=18,Top=185,Width=280,Height=280,SizeMode=PictureBoxSizeMode.CenterImage,BackColor=Color.White};
-        var instructions=new Label{Text="1. Start sharing.\n\n2. Scan this QR code with your phone’s camera.\n\n3. Keep Rift Ready running on your PC.\n\nMinimizing the PC app keeps sharing active.",Left=320,Top=185,Width=200,Height=270};
-        var link=new TextBox{Left=18,Top=480,Width=420,ReadOnly=true};
-        var copy=new Button{Text="Copy link",Left=445,Top=478,Width=90,Height=28};
+        var toggle=new Button{Text=service.Running?"Stop sharing":"Start sharing",Left=432,Top=114,Width=190,Height=34};
+        var status=new Label{Text="Choose the PC address for your Wi-Fi or Ethernet network.",Left=24,Top=153,Width=680,Height=28,ForeColor=Theme.Muted};
+        var pairing=new SettingsCard("PhonePairingCard",202,486,Theme.Accent);
+        pairing.Controls.Add(new Label{Text="PAIR YOUR DEVICE",Left=24,Top=17,Width=680,Height=24,Font=new Font("Segoe UI",11,FontStyle.Bold),ForeColor=Theme.Ink});
+        pairing.Controls.Add(new Label{Text="Start sharing to create a fresh private link and QR code.",Left=24,Top=40,Width=680,Height=24,ForeColor=Theme.Muted});
+        var picture=new PictureBox{Left=24,Top=76,Width=260,Height=260,SizeMode=PictureBoxSizeMode.CenterImage,BackColor=Color.White};
+        var placeholder=new Label{Name="QrPlaceholder",Text="QR code appears here\nafter sharing starts.",Left=24,Top=76,Width=260,Height=260,TextAlign=ContentAlignment.MiddleCenter,BackColor=Color.White,ForeColor=Color.FromArgb(45,48,56)};
+        var instructions=new Label{Text="1. Start sharing.\n\n2. Scan the QR code with your phone’s camera.\n\n3. Keep Rift Ready running on your PC.\n\nMinimizing the PC app keeps sharing active.",Left=320,Top=82,Width=360,Height=238};
+        var link=new TextBox{Left=24,Top=356,Width=536,ReadOnly=true};
+        var copy=new Button{Text="Copy link",Left=576,Top=354,Width=126,Height=30};
         copy.Click+=(s,e)=>{if(service.Url!=null)try{Clipboard.SetText(service.Url);}catch{status.Text="Select the link and press Ctrl+C to copy it.";}};
-        var help=new Label{Text="If blocked, allow the bundled Python helper through Windows Firewall on Private networks only. Guest Wi-Fi may isolate devices.\nLocal HTTP is unencrypted: use a trusted network; do not forward ports.\nStop sharing disconnects all devices. Starting again creates a new code.",Left=18,Top=525,Width=515,Height=82};
-        Action refresh=()=>{if(page.IsDisposed)return;var old=picture.Image;picture.Image=service.Qr==null?null:new Bitmap(service.Qr);picture.Visible=service.Running;if(old!=null)old.Dispose();link.Text=service.Url??"";toggle.Text=service.Running?"Stop sharing":"Start sharing";addresses.Enabled=!service.Running;copy.Enabled=service.Running;};
+        var help=new Label{Text="Use a trusted private network and do not forward ports. Guest Wi-Fi may isolate devices. Stop sharing disconnects every device and invalidates the previous link.",Left=24,Top=404,Width=678,Height=58,ForeColor=Theme.Muted};
+        Action refresh=()=>{if(page.IsDisposed)return;var old=picture.Image;picture.Image=service.Qr==null?null:new Bitmap(service.Qr);picture.Visible=service.Running;placeholder.Visible=!service.Running;if(old!=null)old.Dispose();link.Text=service.Url??"";toggle.Text=service.Running?"Stop sharing":"Start sharing";addresses.Enabled=!service.Running;copy.Enabled=service.Running;};
         toggle.Click+=async(s,e)=>{toggle.Enabled=false;try{if(service.Running){service.Stop();status.Text="Sharing stopped. All previous pairing links are now invalid.";}else{status.Text="Starting local sharing…";await service.Start(Convert.ToString(addresses.SelectedItem));publish();if(!page.IsDisposed)status.Text="Sharing on your local network. Scan the QR code below.";}}catch(Exception ex){if(!page.IsDisposed)status.Text=ex.Message;}finally{if(!page.IsDisposed){toggle.Enabled=true;refresh();}}};
         page.Disposed+=(s,e)=>{if(picture.Image!=null)picture.Image.Dispose();};
-        page.Controls.AddRange(new Control[]{intro,addresses,toggle,status,picture,instructions,link,copy,help});refresh();return page;
+        connection.Controls.AddRange(new Control[]{intro,addresses,toggle,status});pairing.Controls.AddRange(new Control[]{placeholder,picture,instructions,link,copy,help});page.Controls.AddRange(new Control[]{connection,pairing});refresh();return page;
+    }
+    public static TabPage Create(MobileCompanion service, Action publish) {
+        var tab=new TabPage("Phone / tablet"){BackColor=Color.FromArgb(18,26,34),ForeColor=Color.FromArgb(231,239,247)};
+        var page=CreatePanel(service,publish);page.Dock=DockStyle.Fill;tab.Controls.Add(page);return tab;
     }
 }
 }

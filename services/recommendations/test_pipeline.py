@@ -163,6 +163,9 @@ class PipelineTests(unittest.TestCase):
         now = [0];calls = []
         def sleep(seconds): now[0] += seconds
         def limited(req, **kwargs):
+            self.assertEqual(req.get_header('User-agent'), 'RiftReady-PrivateCollector/0.12.9')
+            self.assertEqual(req.get_header('Accept'), 'application/json')
+            self.assertEqual(req.get_header('X-riot-token'), 'secret')
             calls.append(now[0]);raise HTTPError(req.full_url, 429, '', {'Retry-After': '9'}, None)
         api = Riot('secret', clock=lambda: now[0], sleep=sleep, open_url=limited)
         with self.assertRaises(RuntimeError): api.get('na1', '/test')
@@ -273,6 +276,19 @@ class PipelineTests(unittest.TestCase):
         with self.assertRaises(RuntimeError) as error: collect(Fake(), self.db, '16.17', CATALOG)
         self.assertNotIn('sensitive', str(error.exception))
 
+
+class AccessCheckTests(unittest.TestCase):
+    def test_denial_stops_and_records_only_fixed_fields(self):
+        from unittest.mock import patch
+        import pipeline
+        with tempfile.TemporaryDirectory() as directory:
+            args = ['pipeline.py', '--data', directory, '--output', directory, '--check-access']
+            with patch('sys.argv', args), patch.dict(pipeline.os.environ, {'RIOT_API_KEY': 'fake-test-key'}), patch.object(pipeline.Riot, 'get', side_effect=RuntimeError('Riot HTTP 403; secret-token')) as request:
+                with self.assertRaises(RuntimeError): pipeline.main()
+            self.assertEqual(request.call_count, 1)
+            result = json.loads((Path(directory) / 'access-check.json').read_text())
+            self.assertEqual(result, {'checks': [{'region': 'NA1', 'service': 'status', 'outcome': 'HTTP-403'}]})
+            self.assertFalse((Path(directory) / 'private.sqlite').exists())
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Drawing;
@@ -12,10 +12,20 @@ namespace RiftReference {
 public class Preferences {public bool Adjust=true;public bool SecondMonitor=true;public int PollSeconds=5;public string Focus="Punish windows";public string TrainingFocus="Support position";public bool ShowCoaching=true;public bool AutoUpdates=true,AudioEnabled=true,ToneCues=true,VoiceCues=true,RespawnCues=true,RespawnLaneOnly=false,MinutesAndSeconds=true,TenSecondCue=true,ThirtySecondCue=true,MinuteCue=true;public int SettingsVersion=0;public bool EnemiesLeft=true;public bool SecondClick=false;public int AudioVolume=25,JungleFirst=120,JungleInterval=90,JungleEnd=480;
  public bool Migrate(){bool changed=SettingsVersion<2;if(SettingsVersion<1){RespawnLaneOnly=false;EnemiesLeft=true;}if(SettingsVersion<2){TrainingFocus=Coaching.NormalizeFocus(Focus);SettingsVersion=2;}string normalized=Coaching.NormalizeFocus(TrainingFocus);changed|=normalized!=TrainingFocus;TrainingFocus=normalized;return changed;}
 }
-public class Dashboard : Form {
+public class Dashboard : MinimalWindow {
  int homeOffset;
- protected override void OnMouseWheel(MouseEventArgs e){base.OnMouseWheel(e);if(state.Players.Count==0&&!Postgame.Active(state.Phase)){homeOffset=Math.Max(0,Math.Min(9,homeOffset+(e.Delta<0?1:-1)));Invalidate();}}
- GameOverlay overlay;OverlayOptions overlayOptions=new OverlayOptions();Button overlayButton;
+ HistoryScrollBar historyScroll=new HistoryScrollBar{Visible=false,SmallChange=1,AccessibleName="Match history",AccessibleDescription="Scroll recent matches using arrow keys, Page Up, Page Down, Home or End."};
+ protected override void OnMouseWheel(MouseEventArgs e){base.OnMouseWheel(e);if(historyScroll.Visible&&e.Delta!=0){historyScroll.Value=Math.Max(0,Math.Min(historyScroll.Maximum-historyScroll.LargeChange+1,historyScroll.Value+(e.Delta<0?1:-1)));}}
+ void LayoutHistoryScroll(){
+  var bounds=new Rectangle(28,147,ClientSize.Width-NavigationWidth-56,ContentHeight-171);
+  int count=state.Home==null||state.Home.Matches==null?0:state.Home.Matches.Count(m=>m!=null);count=Math.Min(100,count);
+  bool show=state.Players.Count==0&&!Postgame.Active(state.Phase)&&state.Phase!="ChampSelect"&&state.Phase!="InProgress"&&state.Phase!="Reconnect"&&count>0&&bounds.Width>=500&&bounds.Height>=200;
+  historyScroll.Visible=show;if(!show){homeOffset=0;return;}
+  int visible=Math.Min(count,HomeDashboard.VisibleMatches(bounds));homeOffset=Math.Max(0,Math.Min(homeOffset,count-visible));
+  historyScroll.Maximum=count-1;historyScroll.LargeChange=visible;historyScroll.Value=homeOffset;historyScroll.Enabled=count>visible;
+  var track=HomeDashboard.HistoryScrollBounds(bounds);track.Offset(NavigationWidth,TitleHeight);historyScroll.Bounds=track;
+ }
+ GameOverlay overlay;GameBarIntegration gameBar;OverlayOptions overlayOptions=new OverlayOptions();
  DataStore data;LeagueClient client;Snapshot state=new Snapshot(); Snapshot lastGame;MobileCompanion mobile;
  Preferences prefs=new Preferences(); string home; bool busy, demo; DateTime lastSuccess;
  Timer timer=new Timer(); Dictionary<string,Image> portraits=new Dictionary<string,Image>();
@@ -26,7 +36,7 @@ public class Dashboard : Form {
  Font normal=new Font("Segoe UI",11),small=new Font("Segoe UI",9),title=new Font("Segoe UI",25,FontStyle.Bold),bold=new Font("Segoe UI",12,FontStyle.Bold);
  Font cooldown=new Font("Segoe UI",25,FontStyle.Bold),compactCd=new Font("Segoe UI",17,FontStyle.Bold),micro=new Font("Segoe UI",8);
  Color gold=Color.FromArgb(255,213,116);
- Button live,demoButton,draftButton,postButton,settings,playbook,review,dashboardButton,phoneButton,buildButton;
+ Button live,demoButton,draftButton,postButton,settings,updatesButton,playbook,review,dashboardButton,buildButton;
  const int NavigationWidth=180;
  Rectangle leftHeader,rightHeader;int dragSide=-1;Point dragStart;
  void SaveLayout(){try{File.WriteAllText(Path.Combine(home,"preferences.json"),new JavaScriptSerializer().Serialize(prefs));}catch{audioStatus="Could not save layout preferences";}}
@@ -35,10 +45,12 @@ public class Dashboard : Form {
  protected override void OnMouseUp(MouseEventArgs e){base.OnMouseUp(e);if(dragSide>=0&&Math.Abs(e.X-dragStart.X)>SystemInformation.DragSize.Width&&((dragSide==0&&rightHeader.Contains(e.Location))||(dragSide==1&&leftHeader.Contains(e.Location)))){prefs.EnemiesLeft=!prefs.EnemiesLeft;SaveLayout();Invalidate();}dragSide=-1;Capture=false;Cursor=Cursors.Default;}
  Color AbilityColor(int i){return new[]{Color.FromArgb(105,196,255),Color.FromArgb(182,147,255),Color.FromArgb(255,170,100),Color.FromArgb(255,119,170)}[i];}
  public Dashboard(string root,bool startDemo) {
+  Controls.Add(historyScroll);historyScroll.ValueChanged+=(s,e)=>{homeOffset=historyScroll.Value;Invalidate();};
   home=root;data=new DataStore(Path.Combine(root,"data"));client=new LeagueClient(data);mobile=new MobileCompanion(root);
   try{overlayOptions=new JavaScriptSerializer().Deserialize<OverlayOptions>(File.ReadAllText(Path.Combine(home,"overlay.json"),System.Text.Encoding.UTF8))??new OverlayOptions();}catch{}
   overlay=new GameOverlay(data,()=>overlayOptions);
-  overlayButton=Button("Game overlay",()=>OpenOverlay());
+  gameBar=new GameBarIntegration(data,()=>overlayOptions);
+  if(overlayOptions.Enabled&&overlayOptions.GameBar)Shown+=(s,e)=>{try{GameBarIntegration.Open();}catch{}};
   updater=new UpdateManager(home);
   Icon=Brand.Icon;Theme.TitleBar(this);
   try {prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")))??new Preferences();}catch{}
@@ -49,21 +61,21 @@ public class Dashboard : Form {
   demoButton=Button("Demo match",()=>{demo=true;state=Demo(false);PublishMobile();Invalidate();});
   draftButton=Button("Demo draft",()=>{demo=true;state=Demo(true);PublishMobile();Invalidate();});
   postButton=Button("Demo results",()=>{demo=true;state=Postgame.Demo(data,Demo(false));PublishMobile();Invalidate();});
-  settings=Button("Preferences",()=>Settings());
+  settings=Button("Preferences",()=>OpenPreferences());
+  updatesButton=Button("Updates",()=>Updates());
   playbook=Button("Playbook",()=>OpenPractice(false));
   review=Button("Review",()=>OpenPractice(true));
   dashboardButton=Button("Overview",()=>{Invalidate();});
-  phoneButton=Button("Phone / tablet",()=>Settings(null,3));
   buildButton=Button("Runes / builds",()=>{var self=state.Players.FirstOrDefault(p=>p.Self);using(var form=new RecommendationPicker(data,self==null?"":self.Champion,client,()=>demo||state.Demo))form.ShowDialog(this);});
   ((NavigationButton)dashboardButton).Symbol="dashboard";((NavigationButton)dashboardButton).Active=true;
-  ((NavigationButton)playbook).Symbol="book";((NavigationButton)review).Symbol="review";((NavigationButton)settings).Symbol="settings";((NavigationButton)phoneButton).Symbol="phone";
+  ((NavigationButton)playbook).Symbol="book";((NavigationButton)review).Symbol="review";((NavigationButton)settings).Symbol="settings";((NavigationButton)updatesButton).Symbol="update";
   Resize+=(s,e)=>LayoutButtons();Shown+=(s,e)=>{if(prefs.SecondMonitor && Screen.AllScreens.Length>1){Bounds=Screen.AllScreens.First(x=>!x.Primary).WorkingArea;WindowState=FormWindowState.Maximized;}LayoutButtons();};
   timer.Interval=overlayOptions.Enabled?1000:Math.Max(3,Math.Min(30,prefs.PollSeconds))*1000;timer.Tick+=(s,e)=>Tick();timer.Start();
   demo=startDemo;if(demo)state=Demo(false);else Tick();
   audioTimer.Tick+=(s,e)=>AudioTick();audioTimer.Start();
  }
  Button Button(string label,Action action){var b=new NavigationButton{Text=label,BackColor=bg,ForeColor=ink,Font=normal,Size=new Size(140,34),TabStop=true};b.Click+=(s,e)=>action();Controls.Add(b);return b;}
- void OpenOverlay(){overlay.Suspend();using(var form=new OverlaySettings(data,overlayOptions)){if(form.ShowDialog(this)==DialogResult.OK){try{OverlayStorage.Save(home,form.Result);overlayOptions=form.Result;timer.Interval=overlayOptions.Enabled?1000:Math.Max(3,Math.Min(30,prefs.PollSeconds))*1000;}catch(Exception ex){MessageBox.Show(this,"Could not save overlay settings: "+ex.Message);}}}}
+ void OpenOverlay(){overlay.Suspend();using(var form=new OverlaySettings(data,overlayOptions)){if(form.ShowDialog(this)==DialogResult.OK){try{bool open=form.Result.Enabled&&form.Result.GameBar&&(!overlayOptions.GameBar||!overlayOptions.Enabled);OverlayStorage.Save(home,form.Result);overlayOptions=form.Result;timer.Interval=overlayOptions.Enabled?1000:Math.Max(3,Math.Min(30,prefs.PollSeconds))*1000;if(open)try{GameBarIntegration.Open();}catch{MessageBox.Show(this,"Press Win + G and choose Rift Ready from Widgets to open the fullscreen overlay.");}}catch(Exception ex){MessageBox.Show(this,"Could not save overlay settings: "+ex.Message);}}}}
  async void AudioTick(){
   if(IsDisposed||audioBusy)return;
   if(!prefs.AudioEnabled||demo||settingsOpen||state.Phase!="In game"){schedule.Reset();respawns.Reset();if(!settingsOpen)audio.Stop();return;}
@@ -76,9 +88,10 @@ public class Dashboard : Form {
   }catch{schedule.Reset();audio.Stop();audioStatus="Audio paused: match clock unavailable";Invalidate();}finally{audioBusy=false;}
  }
  void LayoutButtons(){
-  int x=ClientSize.Width-500;foreach(var b in new[]{live,demoButton,draftButton,postButton}){b.Size=new Size(112,34);b.Location=new Point(x,35);x+=118;}
-  int y=165;foreach(var b in new[]{dashboardButton,buildButton,playbook,review,phoneButton,overlayButton}){b.Size=new Size(NavigationWidth-24,44);b.Location=new Point(12,y);y+=52;}
-  settings.Size=new Size(NavigationWidth-24,44);settings.Location=new Point(12,ClientSize.Height-142);
+  int x=ClientSize.Width-500;foreach(var b in new[]{live,demoButton,draftButton,postButton}){b.Size=new Size(112,34);b.Location=new Point(x,35+TitleHeight);x+=118;}
+  int y=165+TitleHeight;foreach(var b in new[]{dashboardButton,buildButton,playbook,review}){b.Size=new Size(NavigationWidth-24,44);b.Location=new Point(12,y);y+=52;}
+  settings.Size=new Size(NavigationWidth-24,44);settings.Location=new Point(12,ContentHeight-194+TitleHeight);
+  updatesButton.Size=new Size(NavigationWidth-24,44);updatesButton.Location=new Point(12,ContentHeight-142+TitleHeight);
  }
  bool CanReview(){return demo||(state.Phase!="In game"&&state.Phase!="InProgress"&&state.Phase!="Reconnect"&&state.Phase!="ChampSelect");}
  void OpenPractice(bool reflection,string renderPath=null){
@@ -89,8 +102,8 @@ public class Dashboard : Form {
   }finally{settingsOpen=false;schedule.Reset();}
  }
  bool CanUpdate(){return state.Phase!="In game"&&state.Phase!="ChampSelect"&&state.Phase!="InProgress"&&state.Phase!="Reconnect"&&!UpdateManager.GameRunning();}
- async Task CheckUpdates(){if(updateBusy)return;if(!CanUpdate()){updater.Status="Updates are paused until your match or champion select ends.";return;}updateBusy=true;lastUpdateCheck=DateTime.UtcNow;try{await updater.Check();}catch(Exception ex){updater.Status=ex.Message;}finally{updateBusy=false;if(!IsDisposed){settings.Text=updater.Available==null?"Preferences":"Update available";Invalidate();}}}
- void PublishMobile(){if(!IsDisposed){mobile.Publish(data,state,prefs);overlay.Update(state);}}
+ async Task CheckUpdates(){if(updateBusy)return;if(!CanUpdate()){updater.Status="Updates are paused until your match or champion select ends.";return;}updateBusy=true;lastUpdateCheck=DateTime.UtcNow;try{await updater.Check();}catch(Exception ex){updater.Status=ex.Message;}finally{updateBusy=false;if(!IsDisposed){updatesButton.Text=updater.Available==null?"Updates":"Update available";Invalidate();}}}
+ void PublishMobile(){if(!IsDisposed){mobile.Publish(data,state,prefs);overlay.Update(state);gameBar.Update(state);}}
  async void Tick(){if(IsDisposed)return;if(demo){PublishMobile();return;}if(busy)return;busy=true;try{var next=await client.Poll();if(IsDisposed||demo)return;
   if(next.Phase=="In game"){lastGame=next;lastSuccess=DateTime.Now;}
   string respawn=respawns.Observe(next,data,prefs.RespawnLaneOnly,Math.Max(15,prefs.PollSeconds+5));
@@ -104,21 +117,23 @@ public class Dashboard : Form {
    s.Players.Add(p);
   }return s;
  }
- protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);var g=e.Graphics;g.Clear(bg);DrawNavigation(g);
-  int width=Math.Max(1,ClientSize.Width-NavigationWidth);using(var canvas=new Bitmap(width,Math.Max(1,ClientSize.Height)))using(var content=Graphics.FromImage(canvas)){DrawMatch(content,width);g.DrawImageUnscaled(canvas,NavigationWidth,0);}
-  if(!leftHeader.IsEmpty)leftHeader.Offset(NavigationWidth,0);if(!rightHeader.IsEmpty)rightHeader.Offset(NavigationWidth,0);
+ protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);var g=e.Graphics;g.Clear(bg);
+  LayoutHistoryScroll();
+  using(var navigation=new Bitmap(NavigationWidth,ContentHeight))using(var nav=Graphics.FromImage(navigation)){DrawNavigation(nav);g.DrawImageUnscaled(navigation,0,TitleHeight);}
+  int width=Math.Max(1,ClientSize.Width-NavigationWidth);using(var canvas=new Bitmap(width,ContentHeight))using(var content=Graphics.FromImage(canvas)){DrawMatch(content,width);g.DrawImageUnscaled(canvas,NavigationWidth,TitleHeight);}
+  if(!leftHeader.IsEmpty)leftHeader.Offset(NavigationWidth,TitleHeight);if(!rightHeader.IsEmpty)rightHeader.Offset(NavigationWidth,TitleHeight);
  }
  void DrawNavigation(Graphics g){
-  using(var b=new SolidBrush(Color.FromArgb(12,13,17)))g.FillRectangle(b,0,0,NavigationWidth,ClientSize.Height);
-  using(var p=new Pen(Theme.Border))g.DrawLine(p,NavigationWidth-1,0,NavigationWidth-1,ClientSize.Height);
+  using(var b=new SolidBrush(Color.FromArgb(12,13,17)))g.FillRectangle(b,0,0,NavigationWidth,ContentHeight);
+  using(var p=new Pen(Theme.Border))g.DrawLine(p,NavigationWidth-1,0,NavigationWidth-1,ContentHeight);
   g.DrawImage(Brand.Logo,20,12,55,55);
   using(var f=new Font("Segoe UI",12,FontStyle.Bold))TextAt(g,"RIFT READY",f,ink,20,68,150,24);
   using(var p=new Pen(Theme.Border))g.DrawLine(p,20,108,NavigationWidth-20,108);
   TextAt(g,"LEAGUE OF LEGENDS",micro,muted,20,124,150,23);
-  TextAt(g,"YOUR COMPANION",micro,muted,20,ClientSize.Height-198,145,24);
-  TextAt(g,mobile.Running?"Phone sharing on":"Local to your PC",small,mobile.Running?accent:muted,20,ClientSize.Height-174,145,24);
-  TextAt(g,"Rift Ready "+ReleaseInfo.Version,small,muted,20,ClientSize.Height-82,148,24);
-  TextAt(g,"ANALYZE · PLAN · CLIMB",micro,muted,20,ClientSize.Height-54,145,36);
+  TextAt(g,"YOUR COMPANION",micro,muted,20,ContentHeight-198,145,24);
+  TextAt(g,mobile.Running?"Phone sharing on":"Local to your PC",small,mobile.Running?accent:muted,20,ContentHeight-174,145,24);
+  TextAt(g,"Rift Ready "+ReleaseInfo.Version,small,muted,20,ContentHeight-82,148,24);
+  TextAt(g,"ANALYZE · PLAN · CLIMB",micro,muted,20,ContentHeight-54,145,36);
  }
  void DrawDraft(Graphics g,int w,int y){
   var self=state.Players.FirstOrDefault(p=>p.Self);int gap=16,half=(w-56-gap)/2;
@@ -133,7 +148,7 @@ public class Dashboard : Form {
   y+=174;int right=28+half+gap;
   Card(g,28,y,half,142,(self==null?"YOUR CHAMPION":data.Name(self.Champion).ToUpperInvariant())+" · STRENGTHS",Pregame.Strength(data,self));
   Card(g,right,y,half,142,"VULNERABILITIES · PLAN AROUND THEM",Pregame.Weakness(data,self));y+=158;
-  int tall=Math.Max(275,ClientSize.Height-y-134);
+  int tall=Math.Max(275,ContentHeight-y-134);
   Card(g,28,y,half,tall,"MATCHUP CONSIDERATIONS",Pregame.Matchup(data,state));
   Card(g,right,y,half,tall,"TEAM WIN CONDITIONS · OPTIONS",Pregame.Composition(data,state));y+=tall+16;
   Card(g,28,y,w-56,90,"PREPARE YOUR LOADOUT · RUNES / BUILDS IN THE SIDEBAR","Compare Onetricks.gg or Probuilds in your browser, choose runes and arrange custom shop sections. Preview and apply each separately to your client. Source feeds are not connected; no automatic changes.");
@@ -145,7 +160,7 @@ public class Dashboard : Form {
   var self=state.Players.FirstOrDefault(p=>p.Self);string own=self==null?"":self.Team;int half=(w-72)/2;
   var teams=state.Players.GroupBy(p=>p.Team).OrderBy(t=>(t.Key==own)==prefs.EnemiesLeft?1:0).ToArray();
   if(teams.Length!=2){Card(g,28,y,w-56,150,"SCOREBOARD UNAVAILABLE","This view supports two-team results. Your available personal statistics are above.");y+=170;}
-  else {int maxRows=teams.Max(t=>t.Count());int row=Math.Max(42,Math.Min(62,(ClientSize.Height-y-318)/Math.Max(1,maxRows)));
+  else {int maxRows=teams.Max(t=>t.Count());int row=Math.Max(42,Math.Min(62,(ContentHeight-y-318)/Math.Max(1,maxRows)));
    for(int side=0;side<2;side++){int x=28+side*(half+16);var team=teams[side];
     TextAt(g,own==""?"TEAM "+team.Key:team.Key==own?"ALLIES":"ENEMIES",bold,team.Key==own?accent:Color.FromArgb(242,157,153),x,y,half,27);
     int champ=Math.Min(220,half*3/10);float cell=(half-champ)/5f;string[] labels={"K / D / A","CS / MIN","CHAMP DMG","GOLD","VISION"};
@@ -176,10 +191,10 @@ public class Dashboard : Form {
   leftHeader=Rectangle.Empty;rightHeader=Rectangle.Empty;int y=147;
   if(Postgame.Active(state.Phase)){DrawPostgame(g,w,y);return;}
   if(state.Phase=="ChampSelect"){DrawDraft(g,w,y);return;}
-  if(state.Players.Count==0){if(state.Phase=="InProgress"||state.Phase=="Reconnect")DrawEmpty(g,w,y);else HomeDashboard.Draw(g,new Rectangle(28,y,w-56,ClientSize.Height-y-24),data,state.Home,Portrait,homeOffset);return;}
+  if(state.Players.Count==0){if(state.Phase=="InProgress"||state.Phase=="Reconnect")DrawEmpty(g,w,y);else HomeDashboard.Draw(g,new Rectangle(28,y,w-56,ContentHeight-y-24),data,state.Home,Portrait,homeOffset);return;}
   bool draft=state.Phase=="ChampSelect"; bool adjust=prefs.Adjust && state.Mode=="CLASSIC" && !draft;
   var lane=LaneView.Select(state);var referenceLane=lane;
-  bool compactRoster=prefs.ShowCoaching&&(ClientSize.Height<1000||w<1700);
+  bool compactRoster=prefs.ShowCoaching&&(ContentHeight<1000||w<1700);
   bool rosterFallback=compactRoster||lane.Allies.Count!=lane.Enemies.Count||lane.Allies.Count>2||lane.Enemies.Count>2;
   if(rosterFallback)lane=new LaneView{Others=state.Players.ToList()};
   int gap=16;int half=(w-56-gap)/2;
@@ -200,7 +215,7 @@ public class Dashboard : Form {
    int champ=230;float cell=(w-56-champ)/6f;
    string[] headers={compactRoster?"MATCH · COMPACT VIEW":rosterFallback?"LANE INCOMPLETE · ROSTER":"REST OF THE MATCH","Q","W","E","R","SUMMONER 1","SUMMONER 2"};
    TextAt(g,headers[0],small,muted,35,y,champ,22);for(int j=1;j<7;j++)TextAt(g,headers[j],bold,j<=4?AbilityColor(j-1):muted,28+champ+(j-1)*cell,y,cell,22);y+=24;
-   int row=Math.Max(44,Math.Min(48,(ClientSize.Height-y-(prefs.ShowCoaching?284:219))/others.Length));
+   int row=Math.Max(44,Math.Min(48,(ContentHeight-y-(prefs.ShowCoaching?284:219))/others.Length));
    string own=(state.Players.FirstOrDefault(p=>p.Self)??state.Players[0]).Team;
    for(int i=0;i<others.Length;i++){
     var p=others[i];int top=y+i*row;using(var b=new SolidBrush(i%2==0?panel:Color.FromArgb(20,22,27)))g.FillRectangle(b,28,top,w-56,row-3);
@@ -216,7 +231,7 @@ public class Dashboard : Form {
     }
    }y+=others.Length*row+9;
   }
-  int h=Math.Max(100,ClientSize.Height-y-54);
+  int h=Math.Max(100,ContentHeight-y-54);
   if(prefs.ShowCoaching){
    var plan=Coaching.LanePlan(data,state);var threats=Coaching.ThreatCard(data,state);
    int available=w-56-2*gap;int planWidth=(int)(available*.42),threatWidth=(int)(available*.34);int focusWidth=available-planWidth-threatWidth;
@@ -227,7 +242,7 @@ public class Dashboard : Form {
    var cards=Matchups.Cards(data,referenceLane,adjust);int count=cards.Length/2;int cw=(w-56-(count-1)*gap)/count;
    for(int i=0;i<count;i++)Card(g,28+i*(cw+gap),y,cw,h,cards[i*2],cards[i*2+1]);
   }
-  TextAt(g,"Observe the cast yourself. Gold numbers are reference durations, not remaining time. Unknown ranks use independent maximum-rank assumptions. Data "+data.Version+" · patch match unverified.",small,muted,28,ClientSize.Height-42,w-56,35);
+  TextAt(g,"Observe the cast yourself. Gold numbers are reference durations, not remaining time. Unknown ranks use independent maximum-rank assumptions. Data "+data.Version+" · patch match unverified.",small,muted,28,ContentHeight-42,w-56,35);
  }
  void LaneCard(Graphics g,Player p,int x,int y,int w,int h,bool adjust,bool ally){
   Theme.Surface(g,new Rectangle(x,y,w,h),panel,accent);
@@ -278,7 +293,27 @@ public class Dashboard : Form {
  }
  void Card(Graphics g,int x,int y,int w,int h,string heading,string body){Theme.Surface(g,new Rectangle(x,y,w,h),panel,accent);TextAt(g,heading,bold,ink,x+18,y+12,w-36,28);using(var line=new Pen(Theme.Border))g.DrawLine(line,x+18,y+42,x+w-18,y+42);TextAt(g,body,normal,Color.FromArgb(196,202,213),x+18,y+51,w-36,h-58);}
  void TextAt(Graphics g,string text,Font f,Color c,float x,float y,float w,float h){TextRenderer.DrawText(g,text,f,new Rectangle((int)x,(int)y,(int)Math.Max(1,w),(int)Math.Max(1,h)),c,TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix|TextFormatFlags.EndEllipsis);}
- public void Settings(string renderFolder=null,int selectedTab=0){settingsOpen=true;schedule.Reset();audio.Stop();
+ public void OpenPreferences(string renderFolder=null,int selectedSection=0){settingsOpen=true;schedule.Reset();audio.Stop();
+  try{using(var form=new PreferencesDialog(data,prefs,overlayOptions,mobile,PublishMobile,audio,()=>state,selectedSection)){
+   if(renderFolder!=null){form.CapturePages(renderFolder);return;}
+   if(form.ShowDialog(this)!=DialogResult.OK)return;
+   try{
+    bool open=form.OverlayResult.Enabled&&form.OverlayResult.GameBar&&(!overlayOptions.Enabled||!overlayOptions.GameBar);
+    OverlayStorage.Save(home,form.OverlayResult);
+    File.WriteAllText(Path.Combine(home,"preferences.json"),new JavaScriptSerializer().Serialize(form.Result));
+    prefs=form.Result;overlayOptions=form.OverlayResult;data.MinutesAndSeconds=prefs.MinutesAndSeconds;timer.Interval=overlayOptions.Enabled?1000:prefs.PollSeconds*1000;audioStatus="";
+    if(open)try{GameBarIntegration.Open();}catch{MessageBox.Show(this,"Open Game Bar and choose Rift Ready from Widgets to start the fullscreen overlay.");}
+    Invalidate();
+   }catch(Exception ex){MessageBox.Show(this,"Could not save preferences: "+ex.Message);}
+  }}finally{settingsOpen=false;audio.Stop();schedule.Reset();}
+ }
+ public void Updates(string renderPath=null){settingsOpen=true;schedule.Reset();audio.Stop();
+  try{using(var form=new UpdatesDialog(updater,prefs.AutoUpdates,()=>CheckUpdates(),CanUpdate,value=>{prefs.AutoUpdates=value;SaveLayout();})){
+   if(renderPath!=null){form.CaptureImage(renderPath);return;}
+   form.ShowDialog(this);if(form.InstallLaunched)Close();
+  }}finally{settingsOpen=false;audio.Stop();schedule.Reset();}
+ }
+ void LegacySettings(string renderFolder=null,int selectedTab=0){settingsOpen=true;schedule.Reset();audio.Stop();
   try{using(var f=new Form{Text="Rift Ready preferences",Size=new Size(620,Math.Min(760,Screen.FromControl(this).WorkingArea.Height)),AutoScroll=true,StartPosition=FormStartPosition.CenterParent,FormBorderStyle=FormBorderStyle.FixedDialog,MaximizeBox=false,MinimizeBox=false}){
    var tabs=new TabControl{Left=15,Top=15,Width=575,Height=635};var general=new TabPage("Dashboard");var sounds=new TabPage("Attention training");var updates=new TabPage("Updates");tabs.TabPages.Add(general);tabs.TabPages.Add(sounds);tabs.TabPages.Add(updates);tabs.TabPages.Add(MobileSettings.Create(mobile,PublishMobile));tabs.SelectedIndex=Math.Max(0,Math.Min(3,selectedTab));
    var versionLabel=new Label{Text="Installed version: "+ReleaseInfo.Version,Left=20,Top=25,Width=500};var automatic=new CheckBox{Text="Automatically check for new versions outside matches",Checked=prefs.AutoUpdates,Left=20,Top=65,Width=520};
@@ -332,14 +367,14 @@ public class Dashboard : Form {
  public void Render(string path,bool draft,bool postgame=false){demo=true;state=postgame?Postgame.Demo(data,Demo(false)):Demo(draft);prefs.SecondMonitor=false;StartPosition=FormStartPosition.Manual;Location=new Point(-30000,-30000);Size=new Size(1920,1040);Show();LayoutButtons();using(var bmp=new Bitmap(Width,Height)){DrawToBitmap(bmp,new Rectangle(Point.Empty,Size));bmp.Save(path,System.Drawing.Imaging.ImageFormat.Png);}Hide();}
  public void RenderPractice(){demo=true;state=Demo(false);OpenPractice(false,Path.Combine(home,"playbook.png"));OpenPractice(true,Path.Combine(home,"review.png"));}
  public void Benchmark(){prefs.SecondMonitor=false;StartPosition=FormStartPosition.Manual;Location=new Point(-30000,-30000);var stop=new Timer{Interval=10000};stop.Tick+=(s,e)=>{stop.Stop();using(var p=System.Diagnostics.Process.GetCurrentProcess()){p.Refresh();File.WriteAllText(Path.Combine(home,"performance.txt"),"10-second offscreen lobby smoke test; includes startup CPU. Not an in-game benchmark.\nUI working set MB: "+(p.WorkingSet64/1048576.0).ToString("0.0")+"; cumulative CPU seconds: "+p.TotalProcessorTime.TotalSeconds.ToString("0.000")+"\n"+client.Metrics());}stop.Dispose();Close();};stop.Start();}
- protected override void Dispose(bool disposing){if(disposing){overlay.Dispose();mobile.Dispose();audioTimer.Dispose();audio.Dispose();timer.Dispose();client.Dispose();foreach(var p in portraits.Values)p.Dispose();normal.Dispose();small.Dispose();title.Dispose();bold.Dispose();cooldown.Dispose();compactCd.Dispose();micro.Dispose();}base.Dispose(disposing);}
+ protected override void Dispose(bool disposing){if(disposing){gameBar.Dispose();overlay.Dispose();mobile.Dispose();audioTimer.Dispose();audio.Dispose();timer.Dispose();client.Dispose();foreach(var p in portraits.Values)p.Dispose();normal.Dispose();small.Dispose();title.Dispose();bold.Dispose();cooldown.Dispose();compactCd.Dispose();micro.Dispose();}base.Dispose(disposing);}
 }
 static class Program {
  [STAThread] static int Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);string home=AppDomain.CurrentDomain.BaseDirectory;
   if(args.Contains("--test")){Tests.Run(home);return 0;}
   if(args.Contains("--audio-export")){foreach(var cue in new[]{AttentionCue.SecondClick,AttentionCue.TenSeconds,AttentionCue.ThirtySeconds,AttentionCue.Minute})File.WriteAllBytes(Path.Combine(home,cue+".wav"),AttentionAudio.Wave(cue,25));try{using(var voice=new System.Speech.Synthesis.SpeechSynthesizer()){voice.SetOutputToWaveFile(Path.Combine(home,"voice-preview.wav"));voice.Speak("Jungle check. A gank is possible. Check the minimap and river vision before pushing. Caitlyn is back alive.");}File.WriteAllText(Path.Combine(home,"audio-validation.txt"),"Three PCM tone files generated. Windows speech successfully synthesized the jungle-check and respawn messages to a WAV file. Audio device playback still needs user verification.");}catch(Exception ex){File.WriteAllText(Path.Combine(home,"audio-validation.txt"),"PCM tones generated; speech unavailable: "+ex.ToString());}return 0;}
   if(args.Contains("--probe")){using(var c=new LeagueClient(new DataStore(Path.Combine(home,"data")))){var s=c.Poll().GetAwaiter().GetResult();File.WriteAllText(Path.Combine(home,"connection-test.txt"),"Phase: "+s.Phase+"\nAccount detected: "+(s.Account!="")+"\nPlayers: "+s.Players.Count+"\n"+s.Notice);}return 0;}
-  using(var form=new Dashboard(home,args.Contains("--demo")||args.Contains("--render-settings")||args.Contains("--render")||args.Contains("--render-practice"))){if(args.Contains("--render-practice")){form.RenderPractice();return 0;}if(args.Contains("--render-settings")){form.Settings(home);return 0;}if(args.Contains("--render")){form.Render(Path.Combine(home,"demo-match.png"),false);form.Render(Path.Combine(home,"demo-draft.png"),true);form.Render(Path.Combine(home,"demo-postgame.png"),false,true);return 0;}if(args.Contains("--benchmark"))form.Benchmark();Application.Run(form);}return 0;
+  using(var form=new Dashboard(home,args.Contains("--demo")||args.Contains("--render-settings")||args.Contains("--render")||args.Contains("--render-practice"))){if(args.Contains("--render-practice")){form.RenderPractice();return 0;}if(args.Contains("--render-settings")){form.OpenPreferences(home);form.Updates(Path.Combine(home,"update-settings.png"));return 0;}if(args.Contains("--render")){form.Render(Path.Combine(home,"demo-match.png"),false);form.Render(Path.Combine(home,"demo-draft.png"),true);form.Render(Path.Combine(home,"demo-postgame.png"),false,true);return 0;}if(args.Contains("--benchmark"))form.Benchmark();Application.Run(form);}return 0;
  }catch(Exception ex){File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"error.log"),ex.ToString());if(!args.Contains("--test"))MessageBox.Show(ex.Message,"Rift Ready");return 1;}}
 }
 public static class Tests {

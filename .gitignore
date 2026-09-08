@@ -16,3 +16,5 @@ __pycache__/
 *.zip
 *.previous-*
 /.RiftReference-stage-*/
+# Private application text; exclude from public source and packages.
+/docs/riot-production-application.md

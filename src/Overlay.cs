@@ -10,7 +10,7 @@ using System.Web.Script.Serialization;
 
 namespace RiftReference {
 public sealed class OverlayOptions {
- public bool Enabled,Gold=true,Buffs=true,Purchase=true;
+ public bool Enabled,GameBar,Gold=true,Buffs=true,Purchase=true;
  public int Key=9,X=24,Y=160,Target;
  public int BoardX=0,BoardY=210,BoardScale=100,RowStart=160,RowGap=88;
  public bool AlliesLeft=true;
@@ -45,7 +45,7 @@ public static class OverlayData {
  }
  public static double? Value(DataStore data,List<int> inventory){if(inventory==null)return null;double total=0;foreach(int id in inventory){object item;if(!data.Items.TryGetValue(id.ToString(),out item))return null;var gold=Number(J.Get(item,"gold"),"total");if(!gold.HasValue)return null;total+=gold.Value;}return total;}
  public static OverlaySnapshot Parse(DataStore data,object root,Snapshot state){
-  var result=new OverlaySnapshot();if(state.Phase!="In game"||state.Mode!="CLASSIC"||J.N(J.Get(root,"gameData"),"mapNumber")!=11)return result;
+  var result=new OverlaySnapshot();if(state.Phase!="In game"||!SupportedMode(state.Mode)||J.N(J.Get(root,"gameData"),"mapNumber")!=11)return result;
   var active=J.Get(root,"activePlayer");string id=Identity(active);if(id=="")return result;
   var players=J.A(J.Get(root,"allPlayers"));var selves=players.Where(p=>Identity(p)==id).ToArray();if(selves.Length!=1)return result;var self=selves[0];string team=J.S(self,"team");if(team!="ORDER"&&team!="CHAOS")return result;
   result.Champion=data.Resolve(J.S(self,"championName"));result.Patch=J.S(J.Get(root,"gameData"),"gameVersion");result.Gold=Number(active,"currentGold");
@@ -77,7 +77,8 @@ public static class OverlayData {
  public static bool Purchasable(DataStore data,int id){object item;return data.Items.TryGetValue(id.ToString(),out item)&&J.Get(J.Get(item,"gold"),"purchasable") is bool&&(bool)J.Get(J.Get(item,"gold"),"purchasable")&&J.Get(J.Get(item,"maps"),"11") is bool&&(bool)J.Get(J.Get(item,"maps"),"11");}
  public static string GoldText(OverlaySnapshot s){if(!s.SelfValue.HasValue||!s.EnemyValue.HasValue)return "Lane comparison unavailable";double diff=s.SelfValue.Value-s.EnemyValue.Value;return (diff>0?"+":"")+diff.ToString("0")+"g vs "+s.Opponent;}
  public static string Duration(double seconds){int n=(int)Math.Ceiling(Math.Max(0,seconds));return (n/60)+"m "+(n%60).ToString("00")+"s";}
- public static bool Fresh(Snapshot s,DateTime now,DateTime received){return !s.Demo&&s.Phase=="In game"&&s.Mode=="CLASSIC"&&s.Overlay!=null&&(now-received).TotalSeconds>=0&&(now-received).TotalSeconds<=4;}
+ public static bool SupportedMode(string mode){return mode=="CLASSIC"||mode=="PRACTICETOOL";}
+ public static bool Fresh(Snapshot s,DateTime now,DateTime received){return !s.Demo&&s.Phase=="In game"&&SupportedMode(s.Mode)&&s.Overlay!=null&&(now-received).TotalSeconds>=0&&(now-received).TotalSeconds<=4;}
 }
 
 // Desktop windows only. No injection, memory reads, input interception or game writes.
@@ -103,22 +104,39 @@ public sealed class GameOverlay:IDisposable {
  [DllImport("user32.dll")]static extern bool ClientToScreen(IntPtr window,ref NativePoint point);
  [DllImport("user32.dll")]static extern short GetAsyncKeyState(int key);
  readonly DataStore data;readonly Func<OverlayOptions> options;readonly Timer timer=new Timer{Interval=100};
- readonly OverlayWindow gold=new OverlayWindow(),details=new OverlayWindow(),buffs=new OverlayWindow(),stats=new OverlayWindow();readonly CompactOverlayVisuals visuals;Snapshot state=new Snapshot();DateTime received;OverlayOptions lastOptions;OverlaySnapshot lastData;Size lastGameSize;
- public GameOverlay(DataStore d,Func<OverlayOptions> get){data=d;options=get;visuals=new CompactOverlayVisuals(d);gold.TransparencyKey=Color.Magenta;gold.BackColor=Color.Magenta;gold.Opacity=1;buffs.TransparencyKey=Theme.Background;timer.Tick+=(s,e)=>Refresh();timer.Start();}
+ readonly OverlayWindow gold=new OverlayWindow(),details=new OverlayWindow(),buffs=new OverlayWindow(),stats=new OverlayWindow();readonly CompactOverlayVisuals visuals;Snapshot state=new Snapshot();DateTime received;OverlayOptions lastOptions;OverlaySnapshot lastData;Rectangle lastGameBounds;
+ readonly bool desktopWindows;
+ public GameOverlay(DataStore d,Func<OverlayOptions> get,bool showDesktopWindows=true){desktopWindows=showDesktopWindows;data=d;options=get;visuals=new CompactOverlayVisuals(d);gold.TransparencyKey=Color.Magenta;gold.BackColor=Color.Magenta;gold.Opacity=1;buffs.TransparencyKey=Theme.Background;timer.Tick+=(s,e)=>Refresh();timer.Start();}
  public void Update(Snapshot value){if(Object.ReferenceEquals(state,value))return;state=value;received=DateTime.UtcNow;lastData=null;Refresh();}
- public void Suspend(){gold.Hide();details.Hide();buffs.Hide();stats.Hide();}
- static bool GameBounds(out Rectangle bounds){bounds=Rectangle.Empty;try{IntPtr window=GetForegroundWindow();uint id;GetWindowThreadProcessId(window,out id);using(var p=Process.GetProcessById((int)id)){if(!p.ProcessName.Equals("League of Legends",StringComparison.OrdinalIgnoreCase))return false;}Rect r;var origin=new NativePoint();if(!GetClientRect(window,out r)||!ClientToScreen(window,ref origin))return false;bounds=new Rectangle(origin.X,origin.Y,r.Right-r.Left,r.Bottom-r.Top);return bounds.Width>=800&&bounds.Height>=600;}catch{return false;}}
- void Refresh(){var opt=options();Rectangle game;if(!opt.Enabled||!OverlayData.Fresh(state,DateTime.UtcNow,received)||!GameBounds(out game)){Suspend();return;}
-  PanelSizing.Migrate(opt);details.Opacity=PanelTransparency.Clamp(opt.BuildOpacity)/100.0;buffs.Opacity=PanelTransparency.Clamp(opt.BuffsOpacity)/100.0;stats.Opacity=PanelTransparency.Clamp(opt.StatsOpacity)/100.0;
-  if(lastData!=state.Overlay||lastOptions!=opt||lastGameSize!=game.Size){visuals.Configure(state,opt,game.Size,gold,details,buffs);lastData=state.Overlay;lastOptions=opt;lastGameSize=game.Size;}
-  gold.Bounds=ScoreboardLayout.Bounds(game,opt);
-  details.Location=PanelPositions.Build(game,details.Size,opt);
+ readonly NativeOverlayBridge nativeBridge=NativeOverlayBridge.FromEnvironment();bool nativeHeld,nativePublished,nativeFailed;
+ public void Suspend(){gold.Hide();details.Hide();buffs.Hide();stats.Hide();if(nativeBridge!=null&&!nativeFailed)try{nativeBridge.Heartbeat(false);}catch{nativeFailed=true;}nativePublished=false;}
+ public static bool GameBounds(out Rectangle bounds){bounds=Rectangle.Empty;try{IntPtr window=GetForegroundWindow();uint id;GetWindowThreadProcessId(window,out id);using(var p=Process.GetProcessById((int)id)){if(!p.ProcessName.Equals("League of Legends",StringComparison.OrdinalIgnoreCase))return false;}Rect r;var origin=new NativePoint();if(!GetClientRect(window,out r)||!ClientToScreen(window,ref origin))return false;bounds=new Rectangle(origin.X,origin.Y,r.Right-r.Left,r.Bottom-r.Top);return bounds.Width>=800&&bounds.Height>=600;}catch{return false;}}
+ void Refresh(){var opt=options();Rectangle game;if(!opt.Enabled||opt.GameBar||!OverlayData.Fresh(state,DateTime.UtcNow,received)||!GameBounds(out game)){Suspend();return;}
+  RefreshForGame(opt,game);
+ }
+ // The 100ms loop tracks focus and the scoreboard key. Content is only refreshed
+ // on a new live sample, settings object or viewport size, not on every key poll.
+ void RefreshForGame(OverlayOptions opt,Rectangle game){
+  bool changed=lastData!=state.Overlay||lastOptions!=opt||lastGameBounds.Size!=game.Size;
+  if(changed){PanelSizing.Migrate(opt);details.Opacity=PanelTransparency.Clamp(opt.BuildOpacity)/100.0;buffs.Opacity=PanelTransparency.Clamp(opt.BuffsOpacity)/100.0;stats.Opacity=PanelTransparency.Clamp(opt.StatsOpacity)/100.0;
+   visuals.Configure(state,opt,game.Size,gold,details,buffs);
+   var natural=StatsPanel.Size(opt);stats.ClientSize=PanelSizing.Fit(natural,opt.StatsWidth,opt.StatsHeight,game.Size);stats.Painter=g=>PanelSizing.Draw(g,stats.ClientSize,natural,p=>StatsPanel.Draw(p,state.Overlay.Stats,opt));stats.Invalidate();
+   lastData=state.Overlay;lastOptions=opt;
+  }
+  if(changed||lastGameBounds!=game){gold.Bounds=ScoreboardLayout.Bounds(game,opt);details.Location=PanelPositions.Build(game,details.Size,opt);buffs.Location=new Point(game.Left+Math.Max(0,(game.Width-buffs.Width)/2),game.Top+24);stats.Location=StatsPanel.Position(game,stats.Size,opt);lastGameBounds=game;}
   bool held=opt.Key>0&&opt.Key<256&&(GetAsyncKeyState(opt.Key)&0x8000)!=0;
+  if(nativeBridge!=null&&!nativeFailed){try{
+   var shown=new[]{opt.Gold&&held,opt.Purchase,opt.Buffs&&BuffCards.Active(state).Count>0,opt.Stats};
+   if(!shown.Any(v=>v)){nativeBridge.Heartbeat(false);nativePublished=false;}
+   else if(changed||!nativePublished||nativeHeld!=held){using(var frame=NativeOverlayBridge.Compose(game.Size,new[]{gold,details,buffs,stats},shown,game.Location)){nativePublished=nativeBridge.Publish(NativeOverlayBridge.Pixels(frame),frame.Width,frame.Height,true);nativeHeld=held;}}
+   else nativeBridge.Heartbeat(true);
+  }catch(Exception ex){nativeFailed=true;nativePublished=false;try{nativeBridge.Heartbeat(false);}catch{}System.Diagnostics.Trace.WriteLine("Native renderer disabled: "+ex.GetType().Name);}
+  }
+  if(!desktopWindows){gold.Hide();details.Hide();buffs.Hide();stats.Hide();return;}
   if(opt.Gold&&held){if(!gold.Visible)gold.Show();}else gold.Hide();
   if(opt.Purchase){if(!details.Visible)details.Show();}else details.Hide();
-  buffs.Location=new Point(game.Left+Math.Max(0,(game.Width-buffs.Width)/2),game.Top+24);
   if(opt.Buffs&&BuffCards.Active(state).Count>0){if(!buffs.Visible)buffs.Show();}else buffs.Hide();
-  stats.ClientSize=PanelSizing.Fit(StatsPanel.Size(opt),opt.StatsWidth,opt.StatsHeight,game.Size);stats.Painter=g=>PanelSizing.Draw(g,stats.ClientSize,StatsPanel.Size(opt),p=>StatsPanel.Draw(p,state.Overlay.Stats,opt));stats.Location=StatsPanel.Position(game,stats.Size,opt);if(opt.Stats){if(!stats.Visible)stats.Show();stats.Invalidate();}else stats.Hide();
+  if(opt.Stats){if(!stats.Visible)stats.Show();}else stats.Hide();
  }
  public static void Fill(DataStore d,Snapshot state,OverlayOptions opt,OverlayWindow gold,OverlayWindow details){
   var s=state.Overlay??new OverlaySnapshot();gold.ClientSize=new Size(420,156);gold.Heading="RIFT READY  /  LANE ITEM VALUE";gold.Main=OverlayData.GoldText(s);gold.Rows.Clear();gold.Detail="Inventory value estimate · excludes unspent gold\nData "+d.Version+" · patch match unverified";
@@ -137,7 +155,7 @@ public sealed class GameOverlay:IDisposable {
  public static void Preview(DataStore d,string path){
   CompactOverlayVisuals.RenderPreview(d,path);
  }
- public void Dispose(){timer.Dispose();gold.Dispose();details.Dispose();buffs.Dispose();stats.Dispose();visuals.Dispose();}
+ public void Dispose(){timer.Dispose();if(nativeBridge!=null)nativeBridge.Dispose();gold.Dispose();details.Dispose();buffs.Dispose();stats.Dispose();visuals.Dispose();}
 }
 
 public sealed class OverlaySettings:Form {
@@ -145,7 +163,7 @@ public sealed class OverlaySettings:Form {
  readonly CheckBox enabled=new CheckBox(),gold=new CheckBox(),buffs=new CheckBox(),purchase=new CheckBox();readonly NumericUpDown x=new NumericUpDown(),y=new NumericUpDown();HashSet<int> planIds;
  public OverlayOptions Result;
  public OverlaySettings(DataStore d,OverlayOptions original){data=d;draft=original.Copy();Text="Rift Ready · Game overlay";ClientSize=new Size(680,705);FormBorderStyle=FormBorderStyle.FixedDialog;MaximizeBox=false;MinimizeBox=false;StartPosition=FormStartPosition.CenterParent;Font=new Font("Segoe UI",10);AutoScaleMode=AutoScaleMode.None;
-  Label("GAME OVERLAY",24,18,620,30);Label("Borderless / Windowed League · hides when you switch apps",24,52,620,26);
+  Label("GAME OVERLAY",24,18,620,30);Label("Hides when you switch apps. Choose fullscreen support below.",24,52,630,26);
   var statsSettings=new Button{Text="Stats panel…",Left=24,Top=650,Width=170,Height=34};statsSettings.Click+=(s,e)=>StatsPanel.Settings(this,draft);Controls.Add(statsSettings);
   var buildChoices=new Button{Text="Choose build…",Left=204,Top=650,Width=195,Height=34};buildChoices.Click+=(s,e)=>{try{var selected=champions.SelectedItem as BuildChoice;if(selected==null)throw new ArgumentException("Select your champion first.");using(var picker=new RecommendationPicker(data,data.Resolve(selected.Id.ToString())))if(picker.ShowDialog(this)==DialogResult.OK)UseRecommendationPlan(picker.PlanJson);}catch(Exception ex){status.Text=ex.Message;}};Controls.Add(buildChoices);
   var align=new Button{Text="Align scoreboard…",Left=424,Top=278,Width=204,Height=32};align.Click+=(s,e)=>{using(var form=new ScoreboardAlignment(data,draft))if(form.ShowDialog(this)==DialogResult.OK){draft.BoardX=form.Result.BoardX;draft.BoardY=form.Result.BoardY;draft.BoardScale=form.Result.BoardScale;draft.RowStart=form.Result.RowStart;draft.RowGap=form.Result.RowGap;draft.AlliesLeft=form.Result.AlliesLeft;}};Controls.Add(align);
@@ -157,7 +175,11 @@ public sealed class OverlaySettings:Form {
   Label("Find item",24,365,110,24);search.SetBounds(137,361,491,28);Controls.Add(search);search.TextChanged+=(s,e)=>Populate();items.SetBounds(24,404,604,30);items.DropDownStyle=ComboBoxStyle.DropDownList;Controls.Add(items);Populate();items.SelectedItem=items.Items.Cast<BuildChoice>().FirstOrDefault(c=>c.Id==draft.Target);
   status.SetBounds(24,453,610,62);status.Text="Choose a target before the match. Load a plan saved in Runes / builds, including Diamond+ choices, to select one of its items.";Controls.Add(status);
   Label("Gold comparison uses inventory value, not total earned gold.\nBuffs show estimated team windows, not individual holders.\nPurchase estimates use bundled prices; the shop is authoritative.\nLayout editor: gear controls · Ctrl+Enter accepts · Esc cancels · F6 screen.\nRe-enable closed panels here. Layout preview uses sample data.",24,526,625,95);
-  var save=new Button{Text="Save overlay settings",Left=420,Top=650,Width=208,Height=34};save.Click+=(s,e)=>{draft.Enabled=enabled.Checked;draft.Gold=gold.Checked;draft.Buffs=buffs.Checked;draft.Purchase=purchase.Checked;draft.Key=(int)(Keys)keys.SelectedItem;var champion=champions.SelectedItem as BuildChoice;var item=items.SelectedItem as BuildChoice;draft.Champion=champion==null?"":data.Resolve(champion.Id.ToString());draft.Target=item==null?0:item.Id;Result=draft;DialogResult=DialogResult.OK;};Controls.Add(save);Theme.Apply(this);
+  var gameBar=new CheckBox{Text="Fullscreen overlay through Game Bar",Checked=draft.GameBar,Left=24,Top=85,Width=390,Height=28};
+  var save=new Button{Text="Save overlay settings",Left=420,Top=650,Width=208,Height=34};save.Click+=(s,e)=>{draft.Enabled=enabled.Checked;draft.GameBar=gameBar.Checked;draft.Gold=gold.Checked;draft.Buffs=buffs.Checked;draft.Purchase=purchase.Checked;draft.Key=(int)(Keys)keys.SelectedItem;var champion=champions.SelectedItem as BuildChoice;var item=items.SelectedItem as BuildChoice;draft.Champion=champion==null?"":data.Resolve(champion.Id.ToString());draft.Target=item==null?0:item.Id;Result=draft;DialogResult=DialogResult.OK;};Controls.Add(save);
+  foreach(Control control in Controls)if(control.Top>=90)control.Top+=75;ClientSize=new Size(680,780);
+  Controls.Add(gameBar);var openGameBar=new Button{Text="Open Game Bar",Left=445,Top=82,Width=183,Height=32};openGameBar.Click+=(s,e)=>{try{GameBarIntegration.Open();}catch{status.Text="Could not open Game Bar. Press Win + G and choose Rift Ready from Widgets.";}};Controls.Add(openGameBar);
+  Label(GameBarIntegration.SetupStatus,24,117,610,42);Theme.Apply(this);
  }
  void Label(string text,int x,int y,int w,int h){Controls.Add(new Label{Text=text,Left=x,Top=y,Width=w,Height=h});}
  public void UseRecommendationPlan(string json){string champ,patch;var ids=PlanItems(data,json,out champ,out patch);if(Recommendations.Patch(patch)!=Recommendations.Patch(data.Version))throw new ArgumentException("Refresh the build for your current patch.");planIds=new HashSet<int>(ids);draft.PlanPatch=patch;draft.Source="Diamond+ selected build";champions.SelectedItem=champions.Items.Cast<BuildChoice>().First(c=>data.Resolve(c.Id.ToString())==champ);search.Clear();Populate();items.SelectedItem=items.Items.Cast<BuildChoice>().FirstOrDefault(c=>c.Id==ids[0]);status.Text="Selected build loaded. First core item selected; choose another target as needed, then save overlay settings.";}

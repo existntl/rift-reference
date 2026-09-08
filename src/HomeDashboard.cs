@@ -9,6 +9,8 @@ using System.Windows.Forms;
 namespace RiftReference {
 // Post-game profile presentation. Unknown fields remain unknown, never synthetic scores.
 public static class HomeDashboard {
+ public static Rectangle HistoryScrollBounds(Rectangle bounds){return new Rectangle(bounds.Right-20,bounds.Y+116,20,Math.Max(0,VisibleMatches(bounds)*(bounds.Width-Math.Min(440,Math.Max(278,(int)(bounds.Width*.30)))-20<800?132:148)));}
+ public static int VisibleMatches(Rectangle bounds){int leftW=Math.Min(440,Math.Max(278,(int)(bounds.Width*.30)));int rightW=bounds.Width-leftW-20;return Math.Max(1,(bounds.Height-148)/(rightW<800?132:148));}
  static readonly Color Red=Color.FromArgb(238,100,113);
  static void Text(Graphics g,string value,Rectangle r,float size,Color color,bool bold=false){
   if(r.Width<=0||r.Height<=0)return;
@@ -48,7 +50,6 @@ public static class HomeDashboard {
  static void RankGraph(Graphics g,Rectangle r,HomeProfile profile){
   Label(g,"RANKED LADDER",r.X,r.Y,r.Width,20,9,Theme.Muted,true);
   var points=profile==null||profile.RankHistory==null?new List<RankPoint>():profile.RankHistory.Where(p=>p!=null&&p.Season==profile.Season).OrderBy(p=>p.At).ToList();
-  if(points.Count>30)points=points.Skip(points.Count-30).ToList();
   if(points.Count<2){Label(g,points.Count==1?"First rank snapshot recorded":"No ranked snapshots yet",r.X,r.Y+36,r.Width,26,11,Theme.Ink,true);Label(g,"Progress appears as your rank changes.",r.X,r.Y+65,r.Width,24,9,Theme.Muted);return;}
   var plot=new Rectangle(r.X+5,r.Y+48,r.Width-10,r.Height-84);
   double low=points.Min(p=>p.Ladder),high=points.Max(p=>p.Ladder);double pad=Math.Max(10,(high-low)*.15);low-=pad;high+=pad;
@@ -68,7 +69,7 @@ public static class HomeDashboard {
   if(bounds.Width<500||bounds.Height<200)return;
   var saved=g.Save();g.SetClip(bounds);g.SmoothingMode=SmoothingMode.AntiAlias;
   try{
-   var matches=profile==null||profile.Matches==null?new List<HomeMatch>():profile.Matches.Where(m=>m!=null).Take(10).ToList();
+   var matches=profile==null||profile.Matches==null?new List<HomeMatch>():profile.Matches.Where(m=>m!=null).Take(100).ToList();
    int gap=20,leftW=Math.Min(440,Math.Max(278,(int)(bounds.Width*.30)));int rightX=bounds.X+leftW+gap,rightW=bounds.Right-rightX;
    var rank=new Rectangle(bounds.X,bounds.Y,leftW,430);Card(g,rank);
    Label(g,"YOUR PROFILE",rank.X+26,rank.Y+19,leftW-52,22,9,Theme.Muted,true);
@@ -112,7 +113,8 @@ public static class HomeDashboard {
     if(profile!=null&&!string.IsNullOrWhiteSpace(profile.Notice))Label(g,profile.Notice,x,y+155,rightW-68,48,10,Theme.Muted);
     return;
    }
-   int rowH=rightW<800?132:148,visible=Math.Min(matches.Count,Math.Max(1,(bounds.Bottom-rowY-32)/rowH));offset=Math.Max(0,Math.Min(offset,matches.Count-visible));
+   int rowH=rightW<800?132:148,visible=Math.Min(matches.Count,VisibleMatches(bounds));offset=Math.Max(0,Math.Min(offset,matches.Count-visible));
+   rightW-=28;
    for(int i=0;i<visible;i++){
     HomeMatch m=matches[i+offset];var row=new Rectangle(rightX,rowY,rightW,rowH);Card(g,row);Color result=Win(m)?Theme.Accent:m.Result=="Defeat"?Red:Theme.Muted;
     int portraitSize=rightW<800?64:76,mx=row.X+portraitSize+44,mw=(row.Right-mx-20)/4;

@@ -101,7 +101,10 @@ public class LeagueClient : IDisposable {
   if(homeCache!=null&&(DateTime.UtcNow-homeUpdated).TotalSeconds<60)return homeCache;
   object ranked=null,history=null;
   try{ranked=await Get(url+"/lol-ranked/v1/current-ranked-stats",auth).ConfigureAwait(false);}catch{}
-  if(Regex.IsMatch(puuid,@"^[A-Za-z0-9_-]{1,128}$"))try{history=await Get(url+"/lol-match-history/v1/products/lol/"+puuid+"/matches?begIndex=0&endIndex=19",auth).ConfigureAwait(false);}catch{}
+  if(Regex.IsMatch(puuid,@"^[A-Za-z0-9_-]{1,128}$")){
+   try{history=await Get(url+"/lol-match-history/v1/products/lol/"+puuid+"/matches?begIndex=0&endIndex=99",auth).ConfigureAwait(false);}catch{}
+   if(history==null)try{history=await Get(url+"/lol-match-history/v1/products/lol/"+puuid+"/matches?begIndex=0&endIndex=19",auth).ConfigureAwait(false);}catch{}
+  }
   homeCache=HomeData.Parse(data,me,ranked,history);homeUpdated=DateTime.UtcNow;RankHistory.Record(Path.GetDirectoryName(data.Root),puuid,homeCache,homeUpdated);return homeCache;
  }
  DataStore data; string lockPath="";Process transport;object transportLock=new object();

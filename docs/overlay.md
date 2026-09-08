@@ -1,5 +1,48 @@
 # Native game overlay (local 0.10.0)
 
+## Single-line gold markers (local0.12.13)
+
+User requested role labels removed. Markers now show only a bold value and lead-direction
+arrow,64x24 reference pixels; unknown stays a dash. ClearType text and1px borders improve
+small-size readability. Comparison order remains Top/Jungle/Mid/Bot/Support; keep the
+scoreboard ordered accordingly. Existing saved position and row spacing are preserved.
+
+## Practice Tool (local0.12.12)
+
+Practice Tool reports PRACTICETOOL rather than CLASSIC. Both now pass the overlay mode
+gate; parsing still requires map11. Solo sessions can show purchase data but lack enough
+players for lane differences/team totals. No missing opponent or team values are invented.
+Live Practice Tool data ingestion verified; borderless/windowed remains required.
+
+## Fullscreen and FPS investigation (local0.12.10)
+
+The current renderer uses transparent topmost WinForms windows. True exclusive fullscreen
+support needs another rendering integration; increasing TopMost is insufficient.
+[Overwolf's overlay API](https://dev.overwolf.com/ow-electron/reference/Overwolf-electron-APIs/overlay/interfaces/IOverwolfOverlayApi/)
+documents injecting overlays into supported games. Its
+[onboarding process](https://dev.overwolf.com/ow-electron/getting-started/project-roadmap/)
+requires app proposal approval for full package access. This is a prospective framework
+integration, not implemented fullscreen support. Porofessor offers both Overwolf and
+standalone editions; Blitz internals have not been verified.
+
+[Microsoft's fullscreen explanation](https://devblogs.microsoft.com/directx/demystifying-full-screen-optimizations/)
+distinguishes true exclusive mode from fullscreen optimizations and describes compositor
+involvement when overlays are visible. A game's Fullscreen label alone does not identify its
+presentation path. [Riot's Vanguard FAQ](https://www.riotgames.com/en/DevRel/vanguard-faq)
+says API-based overlays should continue functioning and explicitly says no Vanguard allowlist.
+
+User observed144FPS fullscreen and~85 borderless with only this overlay. Windows10,GTX1070Ti,
+1080p144Hz,VSync off observed locally. Cause remains unmeasured. Compare the same stationary
+Practice Tool scene in borderless with overlay disabled/enabled, then fullscreen; record FPS
+with consistent graphics settings. If disabling the overlay restores FPS, isolate its panels;
+otherwise investigate the presentation/display path. Do not call renderer microbenchmarks
+proof of game FPS recovery.
+
+0.12.10 skips redundant stats redraw and geometry work on unchanged100ms focus/key polls.
+Gold markers shrink80x53 to64x34 and team strip to320x64; row centers and saved spacing stay
+unchanged. Alignment preview uses a true1920x1080 game area. Exact fit still needs a screenshot
+of the user's held-Tab scoreboard at their HUD settings.
+
 ## Panel gear controls (shared menu removed)
 
 The layout preview no longer has a shared toolbar. Each editable panel's gear contains its size/position reset, transparency, full panel reset, next preview screen, and Use/Cancel layout actions. Stats also has its metric selector. Ctrl+Enter accepts, Esc cancels, and F6 cycles preview screens, including when every panel is hidden. Re-enable closed panels using Game overlay settings visibility switches; then reopen the editor. Save overlay settings after accepting a layout. Fixed objective cards have no controls. This supersedes earlier Show panel and Reset defaults toolbar instructions below.

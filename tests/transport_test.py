@@ -50,6 +50,10 @@ class TransportTests(unittest.TestCase):
         self.assertEqual([r['ok'] for r in replies],[True,False,False,False,True])
 
     def test_postgame_is_read_only(self):
+        url='https://127.0.0.1:1234/lol-match-history/v1/products/lol/fake-puuid/matches?begIndex=0&endIndex=99'
+        calls,replies=self.run_messages([dict(url=url,auth='fake'),dict(url=url),dict(url=url.replace('99','999'),auth='fake')],b'{}')
+        self.assertEqual(len(calls),1)
+        self.assertEqual([r['ok'] for r in replies],[True,False,False])
         calls,replies=self.run_messages([
             dict(url='https://127.0.0.1:1234/lol-end-of-game/v1/eog-stats-block'),
             dict(url='https://127.0.0.1:1234/lol-end-of-game/v1/eog-stats-block',method='POST',auth='fake',body={}),

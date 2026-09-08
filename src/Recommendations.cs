@@ -12,6 +12,16 @@ namespace RiftReference {
 public static class Recommendations {
  public static string Patch(string version){return String.Join(".",(version??"").Split('.').Take(2));}
  public static async Task<object> Fetch(){
+  string local=Environment.GetEnvironmentVariable("RIFT_RECOMMENDATIONS_FILE");
+  if(!String.IsNullOrWhiteSpace(local)){
+   if(!Path.IsPathRooted(local)||local.StartsWith(@"\\"))throw new IOException("Private recommendation file must be on this PC.");
+   try{using(var file=new FileStream(local,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete)){
+    if(file.Length>2000000)throw new IOException("Private recommendation file exceeds limits.");
+    var bytes=new byte[2000001];int count=0,read;while(count<bytes.Length&&(read=await file.ReadAsync(bytes,count,bytes.Length-count))>0)count+=read;
+    if(count>2000000)throw new IOException("Private recommendation file exceeds limits.");
+    return J.Parse(System.Text.Encoding.UTF8.GetString(bytes,0,count));
+   }}catch(FileNotFoundException){throw new IOException("Private collection has not produced a feed yet. Run the collector, then refresh.");}
+  }
   string endpoint=Environment.GetEnvironmentVariable("RIFT_RECOMMENDATIONS_URL");
   if(String.IsNullOrWhiteSpace(endpoint))throw new IOException("Diamond+ data is not connected yet. Build choices will appear when the recommendation feed is available.");
   Uri uri;if(!Uri.TryCreate(endpoint,UriKind.Absolute,out uri)||!String.IsNullOrEmpty(uri.UserInfo)||(uri.Scheme!="https"&&!(uri.Scheme=="http"&&uri.IsLoopback)))throw new IOException("Recommendation feed must use HTTPS (local testing may use loopback HTTP).");

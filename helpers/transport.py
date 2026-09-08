@@ -12,7 +12,7 @@ for line in sys.stdin:
             raise ValueError('Only local League endpoints are supported')
         method=message.get('method','GET')
         loadout=parsed.path=='/lol-perks/v1/pages' or re.fullmatch(r'/lol-item-sets/v1/item-sets/[1-9][0-9]*/sets',parsed.path)
-        history=bool(re.fullmatch(r'/lol-match-history/v1/products/lol/[A-Za-z0-9_-]{1,160}/matches',parsed.path)) and parsed.query=='begIndex=0&endIndex=19'
+        history=bool(re.fullmatch(r'/lol-match-history/v1/products/lol/[A-Za-z0-9_-]{1,160}/matches',parsed.path)) and parsed.query in ('begIndex=0&endIndex=19','begIndex=0&endIndex=99')
         if (history or parsed.path=='/lol-ranked/v1/current-ranked-stats') and not message.get('auth'):
             raise ValueError('Local client authentication required')
         if (parsed.query and not history) or parsed.fragment or method not in ('GET','POST'):

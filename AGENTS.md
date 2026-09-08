@@ -1,5 +1,102 @@
 # Rift Ready working instructions
 
+- Local0.12.15 consolidates user settings into one themed Preferences window with
+  General, Game overlay, Audio & reminders, and Phone / tablet sections. Updates is
+  a separate main-navigation utility and window. Preserve independent
+  `preferences.json`/`overlay.json` schemas, overlay draft/cancel behavior, the
+  update match gate and signature checks, Game Bar launch behavior, and immediate
+  phone sharing controls. Public0.12.0 remains the release baseline until the matching
+  0.12.15 installer and signed update manifest are published together.
+
+- Game Bar local widget1.0.3.0 installed with same-package AppService desktop
+  live helper (experiments/gamebar). User photo confirmed pinned display-test
+  counter visible over fullscreen Practice Tool. Helper activation-argument bug
+  fixed; actual AppService open/send Success verified. Current game EndOfGame;
+  fresh-match visible data/FPS validation still pending. User accepted Game Bar
+  dependency for now. See docs/gamebar-overlay.md. Main app stays0.12.13/public0.12.0.
+  Use build-gamebar.ps1, sign-gamebar-test.ps1 and install-gamebar-test.ps1;
+  reuse approved development certificate. No game-process injection retry.
+
+- User chose an independent fullscreen integration. Experimental C++ D3D11 renderer,
+  normal user-mode Present adapter and isolated C# frame producer live under
+  experiments/native-overlay. Read docs/independent-overlay.md. Installed0.12.13 and
+  public0.12.0 remain unchanged. The own fullscreen host works; League compatibility
+  is unverified until an actual Practice Tool test. Do not claim production readiness.
+  Use scripts/verify-native-overlay.ps1; ordinary access denial ends the test, never
+  elevate or change anti-cheat/security protections to work around it.
+
+- Local0.12.13 removes role labels from gold markers at user request (supersedes
+  earlier visible-role-label requirement). Single-line64x24 markers,11pt bold values,
+  ClearType grid fit, antialiased arrows and1px panel borders. Preserve calibrated
+  BoardY100/RowStart244/RowGap75. Row semantics still Top/JG/Mid/Bot/Sup.
+
+- Local0.12.12 permits PRACTICETOOL as well as CLASSIC in overlay parser/freshness.
+  User's solo custom test reports PRACTICETOOL; prior CLASSIC-only gate hid everything.
+  Live read verified fresh=true and inventory known with fix. Map11 parsing and stale/demo
+  guards retained; incomplete enemy/team comparisons remain unavailable.
+
+- Local0.12.11 fixes blank/inaccessible main window on secondary monitor. WinForms
+  MaximizedBounds needs monitor-relative coordinates, not absolute WorkingArea.
+  Previous code doubled secondary X (1920 to3840). Initialize bounds on handle creation
+  and refresh on normal moves/maximize. All-monitor bounds tests cover startup and button.
+
+- Local0.12.10 installed: compact gold markers64x34 (was80x53), narrower team totals,
+  true16:9 alignment preview; saved row centers/spacing preserved pending real scoreboard
+  screenshot. Redundant100ms stats/geometry updates removed. User reports144FPS fullscreen
+  versus85 borderless with only Rift Ready overlay enabled; cause unresolved, require
+  same-scene borderless overlay-off/on comparison. True exclusive fullscreen still unsupported.
+  See docs/overlay.md fullscreen research. Do not claim FPS recovery or exact alignment.
+
+- 2026-09-07 private Riot HTTP403 resolved: same portal-tested key passes NA status
+  and ranked endpoints after explicit collector User-Agent and JSON Accept headers.
+  Real collection now saves match samples. Minimum30 games/10 players remains;
+  do not equate successful access with populated recommendations. Standalone private
+  launcher builds are immutable and guard duplicate sessions. Live local history
+  returned100 matches and one recorded LP snapshot. Public remains0.12.0.
+
+- Local installed 0.12.9 supports private builds via RIFT_RECOMMENDATIONS_FILE and
+  scripts/start-private-builds.ps1 (masked separate collector). History requests up
+  to 100 matches with 20-match fallback; graph shows all retained current-window
+  snapshots. Never fabricate old LP. Public release remains 0.12.0.
+
+- Local installed 0.12.8 uses Windows button order at top right: yellow minimize,
+  green maximize/restore, red close. Retain Apple-style circles.
+
+- Local installed 0.12.7 moves traffic-light window buttons to upper right, retaining
+  red/yellow/green order and right-edge anchoring. Supersedes left-side placement.
+
+- Local installed 0.12.6: user requested minimal Apple-style title bar on main window.
+  MinimalWindow provides a 32px title region and left red/yellow/green controls;
+  keep drag/resize hit testing, taskbar-aware maximize and keyboard-accessible buttons.
+  Dashboard content uses ContentHeight and TitleHeight offsets. Other dialogs retain
+  native title bars. Public release is still 0.12.0.
+
+- Local installed 0.12.5 removes the scrollbar dotted focus border at user request;
+  teal thumb brightness remains the focus cue. Public release remains 0.12.0.
+
+- Local installed 0.12.4 corrects scrollbar color to Theme.Accent teal (#42cdc6),
+  retaining the reference's rounded banded design. Supersedes green preference below.
+
+- Local installed 0.12.3 follows the user's far-right scrollbar image: slim rounded
+  green thumb with subtle horizontal bands, near-black track; rest of theme unchanged.
+
+- Local installed 0.12.2 styles match history with a charcoal track and rounded teal
+  thumb, brighter hover/focus, 20px interaction width and row-aligned height. Public
+  remains 0.12.0. Keep wheel, drag, page clicks and keyboard accessibility.
+
+- Local installed version 0.12.1 adds a native match-history scrollbar with bounded
+  wheel/drag/page navigation. Public release remains 0.12.0. See newest handoff entry.
+
+- 2026-09-07 API scope review: user accepted own linked all-rank Solo/Duo profiles with
+  proposed RSO linking, local-only LP history initially, and a separate public Diamond+
+  aggregate feed. Backend/RSO remain unimplemented. Private application draft is now
+  explicitly Git-ignored; never force-add/publish it. Terms/Privacy review drafts remain
+  unpublished in the continuation task's outputs. Owner/contact, markets/age eligibility,
+  profile regions/providers and proposed retention periods require review; they are not
+  implemented service guarantees. See newest handoff entry.
+
+- Latest public release is0.12.0 (2026-09-07): direct builds screen, player overview, actual rank badges, LP bar and local rank history. Public signed installer and older updater download verified. Source tag d74c297d75bff74f706677da06f4add3545d9e74. This supersedes older local-only/release entries. Riot API profile backend and live recommendation feed remain pending.
+
 - User requested Riot API-backed personal rank/LP/progression on2026-09-07. Added to private production-application draft; not submitted or implemented as a backend. Personal profiles are all ranks, separate from Diamond+ recommendation aggregates. Historical graph must record official snapshots, never infer LP from wins/losses.
 
 - Idle home includes actual tier badges, divisional LP bar and locally recorded rank progression. See docs/rank-history.md. Preserve rank-history.json and .bak across updates; exclude from source/packages. Never invent earlier LP. Bootstrap badges with scripts/cache-rank-badges.py. Local only; public remains0.11.0.
@@ -22,7 +119,7 @@
 
 - Current public release is 0.10.0, with matching installer and signed manifest; website version 12 describes overlays. Public signature/hash and the 0.9.3 updater download verified. 866 app/overlay checks and installer upgrade/rollback passed. No normal installation or live-game validation performed. GitHub source main matches the verified release tree. CLI GitHub credentials are absent: publish binaries through the signed-in in-app browser and source through the GitHub connector; never assume CLI authentication.
 
-- Layout editor has no shared toolbar/menu. Build/stats gears contain per-panel reset, transparency, next preview screen, and Use/Cancel layout. Ctrl+Enter accepts, Esc cancels, F6 cycles screens even when all panels are hidden. Restore closed panels in parent Game overlay settings, then reopen editor. Fixed buff cards remain without controls. Keep the parent settings shortcut/help text discoverable.
+- Layout editor has no shared toolbar/menu. Build/stats gears contain per-panel reset, transparency, next preview screen, and Use/Cancel layout. Ctrl+Enter accepts, Esc cancels, F6 cycles screens even when all panels are hidden. Restore closed panels in Preferences > Game overlay, then reopen editor. Fixed buff cards remain without controls. Keep the parent settings shortcut/help text discoverable.
 
 - Buff UI supersedes the draggable buff panel: fixed top-center Baron/Elder cards, 200x106 each with 8px gap, no chrome/team labels/move/resize/close. Ignore legacy buff size/position; keep existing enable switch and opacity. Only active kill-derived windows appear in game (Baron 180s, Elder 150s); ordinary dragons excluded. Layout editor shows sample cards. These remain estimated objective windows, not individual holder tracking.
 

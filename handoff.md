@@ -1,5 +1,411 @@
 # Rift Reference handoff
 
+## Consolidated themed Preferences and separate Updates0.12.15 (2026-09-08)
+
+The user requested one Preferences area for all settings, a separate Updates area,
+and styling consistent with Rift Ready. The0.12.15 release candidate replaces the
+native TabControl flow with a minimal-window Preferences shell and an internal left
+rail for General, Game overlay, Audio & reminders, and Phone / tablet. Game overlay
+and Phone / tablet were removed from the main feature navigation; Preferences and
+Updates are bottom utility actions. Updates now opens its own themed window and
+retains automatic checks, match/champion-select update gating, HTTPS download,
+publisher verification, release notes, and install behavior.
+
+The Preferences pages use charcoal cards, teal section markers and active states,
+dark owner-drawn combo boxes, consistent spacing, and the existing top-right
+yellow/green/red title controls. Overlay options are edited as a draft; Cancel leaves
+`overlay.json` untouched and Save retains the separate `preferences.json` and
+`overlay.json` schemas. Phone sharing still starts/stops immediately and remains
+embedded in Preferences. UI, mobile, server, postgame, home/rank history, window
+chrome, app self-check, and overlay tests pass. Fresh render evidence is in
+`build/app/*settings.png` and `build/app/overlay-preferences.png`; UI evidence is
+`build/ui-500bc7e6a98a43f08ec809beca4b39e3` and home evidence is
+`build/home-044a62d2e37b4c8584b0478ac82deb83`. A candidate installer exists at
+`dist/RiftReference-Setup.exe`. Public0.12.0 remains the release baseline until the
+matching installer and signed manifest are published together. The normal user
+installation is unchanged.
+
+## Supported Windows widget candidate (2026-09-07)
+
+User said proceed with a different compatible route. Investigated Game Bar widgets
+instead of retrying blocked module loading. InstalledGameBar7.326.8061.0 statusOk;
+LeagueWindowMode0/1920x1080. Askeduser Win+G whilegamefocused: does it appearoverLeague
+or switch/minimize? Answer pending. See docs/gamebar-overlay.md. No widgetbuilt,
+SDKinstalled or securitysettingschanged. Need actualGameBarvisibility before choosing
+this substantial UWP/XAML port; no claimfullscreenorFPSfixed.
+
+## League native loader blocked (2026-09-07)
+
+User opened Practice Tool for independent overlaytest. PID25256 was League executable
+C:\Riot Games\League of Legends\Game\League of Legends.exe, verified via limited
+QueryFullProcessImageName rights (.NET Process.Path was blank). Launcher now uses that
+read-only fallback. Actual ordinary loader failed `target loader module unavailable`
+Windows error5, during module enumeration BEFORE remote allocation/writing/LoadLibrary.
+No native overlay DLL loaded. Producer stopped, installedapp untouched. Do not claim
+gamefullscreenworks or attribute error specificallytoVanguard without evidence.
+No elevated/evasive retry. Nativeapp host tests remainvalid but League pathblocked.
+Fixed launcher misleading unconditional loadedDLLcleanuptext and preserve loader stderr
+in attach-errors.txt via separate subprocess. No second League attempt was made.
+
+## Independent renderer prototype (2026-09-07)
+
+User explicitly chose building own integration after Overwolf submission. Implemented
+native D3D11 renderer, explicit normal LoadLibrary/MinHook Present adapter and isolated
+API/pixel producer. Read docs/independent-overlay.md and integration/README.md. No League
+process running at inspection; asked user to open Practice Tool Fullscreen for live QA.
+Installed0.12.13/public0.12.0 remain unchanged. No League attach performed yet.
+Complete ordinary DLL load/Present hook test PASSED in owned fullscreen host with
+SEQUENTIAL swap chain: DXGIfullscreenTRUE1920x1080;82,089 nonbackground pixels on,
+zero afterdisable. Duplicate attach rejected. Evidence build/native-overlay/
+verify-3b3c6a7439a346ee87dba5bef3bb8e1f; repeat integration/verify.ps1.
+13bridge +26lifecycle +102overlay checks, app selftests,10GPU checks passed.
+Own1920x1080 DXGI fullscreenTRUE test:567frames/4000ms, CPU draw mean.0354ms; this is
+not a League benchmark. scripts/start-native-overlay-test.ps1 prepares a180sec opt-in
+test after build; fails closed if normalprocess loading denied. No anti-cheat changes.
+Overwolf submission succeeded with riftready.gg, ow-electron, no monetization;
+older unsubmitted notes below are historical. Independent route requires no OW runtime.
+
+## Fullscreen retest failed on current renderer (2026-09-07)
+
+User reports no overlay in fresh Practice Tool fullscreen. Verified running0.12.13,
+game.cfg WindowMode0 at1920x1080, overlay enabled/Purchase true, live probe reports
+PRACTICETOOL/10players/Fresh=true/InventoryKnown=true. Therefore previous mode gate
+is ruled out. This does not prove exact DXGI presentation path, but current native
+renderer does not meet user's fullscreen requirement on this setup. Proceed toward
+supported renderer integration; Overwolf access/approval remains external prerequisite.
+Existing proposal docs/fullscreen-framework-proposal-draft.md is not submitted.
+
+## Fullscreen priority: validation and integration prerequisites (2026-09-07)
+
+User explicitly requests fullscreen overlay support as very important. Current0.12.13
+unchanged; do not call fullscreen feature implemented. Inspected League compatibility
+registry: no matching HKCU/HKLM Layers entry; three GameConfigStore FSE settings0.
+No game running at inspection, saved WindowMode2. No system/game settings changed.
+Asked user to retest fresh Practice Tool in Fullscreen now mode gate is repaired;
+result pending. Existing native overlay may work with Windows FSO, which is not true
+exclusive fullscreen. Need actual visibility + same-scene FPS before larger migration.
+
+Primary research confirmed Overwolf Electron Overlay gaming package requires developer
+credentials even local dev; approved developer key or Console API credentials. Public
+proposal approval/full access needed, private-only apps not approved. No credentials/appID
+available, no new runtime installed or custom injection. Drafted docs/fullscreen-overlay.md
+and docs/fullscreen-framework-proposal-draft.md for concrete integration/access steps;
+proposal NOT submitted. GameBar is not proof of true FSE support. Overwolf app approval
+is not a Vanguard allowlist (Riot states no such list). Public release still0.12.0.
+
+## Cleaner gold markers0.12.13 (2026-09-07)
+
+User photo969f5e1c confirms calibrated overlay visible; requested no role indicators
+and better visual quality. Removed labels, reduced marker height34→24, centered single
+line bold11pt values (was9pt regular), enabled ClearType grid fit on opaque scoreboard
+panels, antialias only arrow triangles, use1px borders. Editor instructions updated;
+role comparison semantics unchanged and calibration preserved.102 overlay and768 app
+checks passed;1920 preview visually inspected. Installed hash-verified0.12.13 after
+graceful close; no dialogs open. Only app restarted, League left alone. Previous0.12.12
+backup retained, overlay.json hash unchanged, private feed enabled. Public0.12.0.
+
+## User photo confirms overlay; local scoreboard calibration (2026-09-07)
+
+Phone photo in current task attachment21add473 confirms0.12.12 Practice Tool overlay
+visible: team strip overlaps scoreboard header, first marker low, SUP below bottom.
+Calibrated installed overlay.json only from observed marker/row positions: BoardY100
+(was210),RowStart244 (was160),RowGap75 (was88),BoardScale100 andBoardX0 unchanged.
+First row moves370→344 reference pixels; last722→644; header lifted110. Approximate
+photo-based fit needs user visual check, not claimed pixel-perfect. No dialogs open;
+gracefully restarted Rift Ready only, preserved other settings/privatefeed and old alignment
+in overlay.json.before-photo-alignment.bak. No binary/version/public changes.
+
+## Practice Tool overlay mode gate fixed0.12.12 (2026-09-07)
+
+User still saw no overlay after switching borderless (game.cfg WindowMode2 verified).
+Live local probe revealed In game / PRACTICETOOL /1 player, Fresh=false and inventory
+unknown because both overlay parser and freshness accepted only CLASSIC. Added shared
+SupportedMode gate accepting CLASSIC or PRACTICETOOL. Existing map11, stale/demo and
+data completeness rules remain. Live probe against updated binary returned Fresh=true,
+InventoryKnown=true. Added four regression checks;102 overlay +768 app checks pass.
+Waited until user closed Preferences before restart to preserve edits. Installed verified
+0.12.12, backup previous-0.12.11, settings/private feed retained, League left running.
+User subsequently supplied a photo confirming visible Practice Tool overlay. Public0.12.0.
+
+## Secondary-monitor blank/inaccessible window fixed0.12.11 (2026-09-07)
+
+User reported blank app and unable to reopen after minimize. Initial process absent,
+reopened0.12.10 responded but content remained inaccessible. Native screenshots unavailable
+on this Windows build (SetIsBorderRequired E_NOINTERFACE), accessibility buttons visible.
+Reproduced exact geometry using transparent test form on both real monitors: secondary
+screen startsX1920 but maximized app landedX3840. Primary startup also omitted taskbar bounds.
+Root cause MinimalWindow assigned absolute Screen.WorkingArea to MaximizedBounds, which
+Windows interprets relative to monitor origin. Fixed relative work-area coordinates and
+initialization on handle creation, retained refresh on normal move/maximize button.
+Extended WindowChromeTests verifies actual Bounds equals each connected WorkingArea for
+startup and button maximize. Passes on both monitors;768 app checks pass.
+Installed hash-verified0.12.11 with previous-0.12.10 backup, only exe replaced; settings and
+private feed preserved. Restarted Rift Ready only to repair user-requested inaccessible app;
+League game left running. User confirmed app is visible and usable after fix. Public remains0.12.0.
+
+## Overlay size and performance investigation0.12.10 (2026-09-07)
+
+User played with overlay:144FPS fullscreen vs~85 borderless; no other overlay enabled.
+Read-only system check: Windows10 build19045, GTX1070Ti driver32.0.15.8183,1920x1080
+144Hz; saved League config WindowMode0,VSync0,GlobalScale0,minimap1.65. No game active
+during investigation, so actual frame-time comparison unavailable. Do not change driver,
+graphics/security settings or promise recovery from unmeasured hypotheses.
+
+Changed gold markers80x53 to64x34, team strip440x72 to320x64. Preserved role labels,
+direction semantics and saved row centers/spacing; exact alignment needs held-Tab screenshot.
+Alignment editor now previews1920x1080 instead of incorrect square1080x1080 reference.
+GameOverlay avoids repeated stats invalidation and geometry work on unchanged100ms polls;
+keeps focus/key response. Current stats disabled, so this does not explain reportedFPSloss.
+7 refresh tests,98 overlay checks and768 app checks pass. Offscreen stats benchmark
+1000draws126.8ms vs100draws15ms; explicitly not gameFPS evidence. Renders reviewed at1920.
+Evidence build/overlay-01210. Installed hash-verified0.12.10 after graceful app close, no game;
+exe.previous-0.12.9 backup and user JSON hashes preserved. Relaunched with private feed.
+Public remains0.12.0. No collector interruption or public deployment.
+
+Fullscreen investigation: native transparent topmost windows do not implement exclusive
+fullscreen composition. Overwolf documents graphics overlay injection and requires app
+proposal approval/full-feature access; distinct from Riot API access or Vanguard allowlisting
+(Riot explicitly says no Vanguard allowlist). Porofessor offers Overwolf and standalone;
+Blitz internal rendering not verified. Next diagnosis: same Practice Tool scene, borderless
+overlay disabled/enabled, fullscreen baseline, recordFPS. Need screenshot for exact row fit.
+
+## Private Riot access repaired and real collection started (2026-09-07)
+
+Same key returned200 in Riot portal NA status tester and403 with Python defaults.
+Explicit RiftReady-PrivateCollector/0.12.9 User-Agent and application/json Accept
+headers resolve it: local diagnostic status and ranked checks both passed, followed
+by real Match-v5/timeline collection. Key transferred through browser clipboard to
+masked native entry; clipboard cleared, no credential file or raw header logging.
+Current collector is legacy build/private-desktop/PrivateBuilds.exe, budget1500;
+do not interrupt it to replace launcher. Output private.sqlite is committed during
+collection. Interim local recommendations.json was exported from read-only SQLite;
+app Fetch/Bundles successfully validates its format, but initially zero qualifying
+builds. Need check final sample/eligible counts before claiming populated choices.
+Installed Builds & runes UI was also opened through native keyboard navigation;
+it loads the private feed and reports the sample minimum, with apply disabled.
+Latest observed collection: NA1 1377 player samples/165 matches (finished region),
+EUW1 475/72 (in progress); first run remains active. No qualifying bundle yet.
+
+Added scripts/build-private-launcher.ps1: maintained standalone themed GUI instead
+of hidden PowerShell dialog, source-hashed immutable exe, atomic compile and per-repo
+mutex. start-private-builds preserves running private session before app restart.
+Launcher --seeds200 lets pipeline budget cap seeds instead of always stopping at12;
+1500-budget behavior remains12 per region. Collector18 tests, masked launcher tests
+and two relaunch checks pass. Masked launcher tests require Windows PowerShell5.1;
+PowerShell Core Add-Type lacks matching desktop framework references.
+Future launcher builds display allowlisted region progress and final qualifying
+build/rune counts. Raw output remains discarded; regression covers secret-appended
+fake progress lines. Running older launcher is intentionally left undisturbed.
+
+LiveHomeProbe against installed local client returned100 matches and1 actual rank
+snapshot. LiveFeedProbe in ignored build/app validates the real local feed using the
+native parser and plan generation without applying any client changes. Local app
+remains0.12.9, public0.12.0. No public/private-feed publishing or support message sent.
+
+## Renewed key still HTTP403; access diagnostic added (2026-09-07)
+
+User screenshot confirms 403 after renewal. Corrected UI claim that renewal is always
+the fix: Riot docs say invalid path and authorization can both yield403. Added Test
+API access button and --check-access mode: checks NA status-v4 then Diamond league-v4,
+stops on failure, no matches/DB collection. Writes only fixed region/service/outcome
+fields to ignored output/access-check.json; never key/body/player identifiers. Test
+verifies denial stops immediately and diagnostics are sanitized. Opened updated
+visible launcher PID15836; user needs to paste key and select Test API access. Actual
+denied service remains unknown until then. No further renewal recommended yet.
+
+## Collector stopped; diagnostics improved (2026-09-07)
+
+User reported collection did not finish. No pipeline.py process was running; only
+app transport remained. Private SQLite was created but no feed exists. Original
+launcher discarded stderr, so root cause of that attempt is unknown. Added fixed,
+allowlisted UI diagnostics for HTTP status, network, throttling, budget, schema and
+module failures; no arbitrary stderr/keys displayed. Test confirms HTTP403 category
+is shown while key appended to fake stderr is discarded. Existing launcher checks
+passed. Opened updated visible launcher (PID18648); user must re-enter key and retry
+to obtain actual error. Do not claim the prior failure was HTTP403 without evidence.
+
+## Private development-key setup and longer history 0.12.9 (2026-09-07)
+
+User requested private development-key builds/runes plus older matches and LP graph.
+Added local file feed opt-in with 2MB bound and unchanged downstream validation.
+scripts/start-private-builds.ps1 starts installed app with RIFT_RECOMMENDATIONS_FILE
+and opens separate existing masked collector (1500-request budget). Key stays with
+collector only; no public feed/server or RSO service. First run may lack enough
+qualifying matches; minimum 30 games/10 players unchanged. Actual collection awaits
+user key entry; do not claim builds are populated or live API integration succeeded.
+
+Local League history requests 0..99 with 0..19 fallback; parser/display/scroll cap
+100. Existing server availability may limit actual records. LP graph removes 30-point
+display cap, showing retained current-window snapshots; no inferred historical LP.
+14 home,14 rank,36 recommendation,17 collector,5 transport and window/app checks pass.
+Masked launcher secret-handling tests pass. Installed exe plus updated transport.py,
+backed up both 0.12.8 files, preserved user data. Started private launcher. Public
+release remains 0.12.0. Evidence build/home-55c1f03e757944ae9770afb0740d5ede and build/app.
+
+## Windows button order 0.12.8 (2026-09-07)
+
+Reordered top-right circles to minimize, maximize/restore, close (yellow/green/red).
+Build and existing home/rank/app/window checks passed; compact render inspected.
+Installed hash-verified executable after graceful close, no game active, with 0.12.7
+backup and user data preserved. Evidence: build/home-9177f25a612f443b8b639602db01c64f.
+Public release remains 0.12.0.
+
+## Right-side window buttons 0.12.7 (2026-09-07)
+
+Moved traffic-light group to top right with 8px outer margin and right anchoring;
+updated title drag region to exclude right buttons. Existing home/rank/app/window
+checks passed; added resize alignment and left title drag coverage. Inspected compact
+render. Installed hash-verified executable after graceful close, no game active;
+0.12.6 backup retained, data preserved. Evidence:
+build/home-34e1900f0ee9474f91d5150490df4a65. Public remains 0.12.0.
+
+## Minimal main-window title bar 0.12.6 (2026-09-07)
+
+User requested Apple-like window buttons and minimal title bar. Main Dashboard now
+inherits MinimalWindow: 32px charcoal title region without title text, three left
+12px red/yellow/green dots in 24px hit targets, hover glyphs, accessible names/focus.
+Red closes, yellow minimizes, green maximizes/restores. WM_NCHITTEST supports dragging
+and edge/corner resizing; maximize uses screen working area. Other dialogs unchanged.
+ContentHeight and TitleHeight account for custom title area in drawings, controls,
+scrollbar and lane hit tests. Draw navigation into bitmap so GDI text offsets correctly.
+WindowChromeTests verifies controls and drag/resize hit tests. Existing home/rank/app,
+scrollbar and UI tests passed; 1920 and 1280 renders inspected. Evidence:
+build/home-fd14315b24754232b2f3b01cad7b3a84 and build/ui-79fe593020d24a71bf7a4b7e1aeac235.
+Installed hash-verified executable after graceful close without active League game;
+0.12.5 backup and all data preserved. Public remains 0.12.0. Full Windows snap/multiple
+monitor interaction is not exhaustively verified.
+
+## Scrollbar border removed 0.12.5 (2026-09-07)
+
+Removed scrollbar DrawFocusRectangle; retained focused thumb highlight and keyboard
+navigation. Existing home/rank/app/scroll interaction checks passed and focused 1920
+render confirmed border absent. Installed hash-verified executable after graceful
+close with no active game; previous 0.12.4 backed up, data preserved. Evidence:
+build/home-76cce25e788145c4aa358604e736abae. Public remains 0.12.0.
+
+## Theme color correction 0.12.4 (2026-09-07)
+
+User requested scrollbar match app colors. Uses Theme.Accent teal with lightly
+brightened hover/focus and translucent Theme.Background bands. Geometry and behavior
+unchanged. Build, home/rank/app and existing scrollbar checks passed; 1920 render
+inspected. Installed hash-verified executable after graceful close, no active game;
+0.12.3 backup retained and user data preserved. Evidence:
+build/home-c4ddb83538a34b06a20ce4bcf7ede54c. Public release remains 0.12.0.
+
+## Reference scrollbar 0.12.3 (2026-09-07)
+
+User supplied image and selected far-right green scrollbar. Updated thumb to green
+with subtle horizontal bands and near-black track, retaining slim rounded geometry,
+hover/focus feedback and existing interaction/accessibility. Build, home/rank/app and
+scrollbar interaction checks passed; inspected 1920 sample. Evidence:
+build/home-ee2eb6d9fc4f4f0d90d6652562eb0a26. Installed verified 0.12.3 executable after
+graceful close with no game active; backed up 0.12.2, preserved data. Public still 0.12.0.
+
+## Themed history scrollbar 0.12.2 (2026-09-07)
+
+Replaced native light scrollbar with HistoryScrollBar in Theme.cs: slim rounded muted
+teal thumb, charcoal track, teal hover/focus/drag, wider hit target, keyboard focus,
+accessible scrollbar role/value and high contrast system colors. Track ends at match
+rows above footer. Wheel, drag, page clicks, arrows/Home/End/Page keys retain bounded
+row navigation. HomeRender tests keyboard, wheel, drag end clamping and layout.
+Home/rank/app checks passed; inspected 1920 and 1280 sample layouts. Evidence:
+build/home-37669a9faa8c4e7b8f2a4a4c632c1edf. Installed verified executable after graceful
+close with no active League game; previous 0.12.1 executable backed up, data untouched.
+Public remains 0.12.0; this is a local installed update, not a published release.
+
+## Local scrollbar update 0.12.1 (2026-09-07)
+
+Added a native vertical scrollbar beside match history, including draggable thumb,
+arrow/page/keyboard navigation and synchronized wheel scrolling with bounded offsets.
+Hidden outside the profile history view; disabled when all matches fit. Verified home
+and rank checks, app checks, scrollbar end range, and sample render at 1920 and 1280.
+Installed the verified executable into the user's existing installation after graceful
+app close (no League game process active). Preserved all data and saved the previous
+executable as RiftReference.exe.previous-0.12.0. Public release remains 0.12.0;
+0.12.1 is local only. Source changes: App.cs, HomeDashboard.cs, ReleaseSecurity.cs,
+tests/HomeRender.cs. Evidence: build/home-c9a93a0ab5454e93a8ef3510ce5b40d8.
+
+Riot Chrome retry also failed. Developer support ticket 138375537 was successfully
+submitted and is Open: https://support-developer.riotgames.com/hc/en-us/requests/138375537.
+
+## Fresh-login retry also failed (2026-09-07)
+
+Signed out of Riot portal; user completed fresh authentication and confirmed done. Retried
+production registration with the saved full description, Default Group, League of Legends,
+tournaments No and published website/policy links. Same error: "Failed to create application!
+Selected app type is not available". This third submission attempt used a fresh authenticated
+session, making an old-session timeout less likely. No successful registration/application ID.
+Do not repeat the same flow without new evidence; manual browser retry or Riot support is next.
+
+## Riot submission attempted; portal rejected creation (2026-09-07)
+
+User explicitly confirmed accepting Riot terms and continuing. Accepted the displayed general
+and tournament policy acknowledgments, selected production registration, filled Rift Ready,
+Default Group, League of Legends, tournaments No, https://riftready.gg/ and the reviewed full
+scope/contact/policy links. Submit returned: "Failed to create application! Selected app type
+is not available". Repeated once through a fresh production-selection/agreement/form flow;
+same error. No application ID, successful creation, review status or verification token was
+issued. Do not claim submitted. Public policies/site remain published. No keys accessed.
+Terms acceptance confirmation is no longer pending; the portal error is the current blocker.
+Application text remains in continuation outputs/riot-submission-text.md; portal tab retained.
+
+## Public policies and pending Riot agreement (2026-09-07)
+
+User requested publish and submit. Published https://riftready.gg/terms and /privacy through
+the separate website checkout; current homepage announcement now0.12.0. Sites version13
+deployment succeeded, public pages HTTPS200. Public policies omit private application/editorial
+notes and do not present proposed backend retention controls as deployed. Native unchanged.
+
+Riot production registration reached I AGREE gate on /app-type. Browser rules require
+action-time confirmation for legal acceptance; asked user, awaiting response. No submission.
+Private portal-ready text: continuation outputs/riot-submission-text.md. Keep private draft
+ignored; next step is accept only after confirmation, fill actual portal fields, submit and
+verify outcome/website ownership requirements. Signed-in account MRSPOOKY; development-key
+page exists but keys were not revealed or regenerated.
+
+## Province confirmed (2026-09-07)
+
+User confirmed Vancouver, BC. Private application and review outputs updated; Terms propose
+BC/applicable federal law while preserving mandatory user rights, and Privacy adds BC OIPC
+complaint guidance. No street address inferred. Earlier province-unknown notes are historical.
+Policies remain drafts; nothing published or submitted.
+
+## Operator/audience draft update (2026-09-07)
+
+User supplied operator/contact details in the private application and policy drafts and
+delegated audience/age selection. Draft initial market: Canadian League players of all ranks,
+18+ and local age of majority (19 where applicable), no upper limit. No minor onboarding or
+international expansion initially. This is not a current enforced download restriction;
+do not assume collector participants are adults. Province, required address, effective date,
+providers, retention and eligibility implementation remain unresolved. Review output copies
+updated; no publication, email, submission or app change.
+
+## Private application and policy review (2026-09-07)
+
+User approved correcting the private application and preparing Terms/Privacy drafts, not
+submission/publication. Updated docs/riot-production-application.md to 0.12.0, verified apex
+website status, full local endpoint/mobile disclosures, pseudonymous collector storage,
+unverified live flows and separate production/RSO approval. Added explicit .gitignore rule.
+
+Accepted scope: own linked all-rank Solo/Duo API profile; proposed RSO verification; official
+LP snapshots remain local initially; separate NA/EUW/KR Diamond+ aggregate feed. No public
+profile lookup or cloud LP archive in proposed v1. Backend/RSO are not implemented. Profile
+regions remain unresolved (NA1 suggested for first validation only). Retention targets in
+Privacy draft are proposals, not approved commitments or deployed controls.
+
+Review deliverables are in C:/Users/fuck/Documents/Codex/2026-09-07/continue-rift-ready-development-from-the/outputs:
+riot-production-application-review.md (private copy), terms-of-service-draft.md,
+privacy-policy-draft.md and policy-review-decisions.md. Resolve operator/contact, effective
+date, markets/age eligibility, providers, retention and request handling before finalizing.
+Website still lacks Terms/Privacy pages and advertises 0.10.0; no site change in this task.
+No app code, release, install, credentials, portal submission or acceptance changed.
+
+## Published0.12.0 (2026-09-07)
+
+Published all pending implemented native changes to Latest release https://github.com/existntl/rift-reference/releases/tag/v0.12.0. Includes direct recommendation screen, Blitz-style idle player overview, actual rank badge/LP bar and locally recorded rank progression. Riot API-backed profile and live Diamond+ feed remain pending; private application draft excluded.
+
+All application checks,13 home parsing,14 rank-history,33 recommendation,17 collector and5 transport checks passed; installer upgrade/rollback from0.11.0 preserved preferences and rank history. Downloaded public manifest/installer verified signature/hash/size and tamper rejection; isolated older updater discovered/downloaded/verified0.12.0 without installing. No normal installation performed. Existing latest download URL follows this release. Evidence build/public-0.12.0. Installer SHA256 b19f973ba7b3fd5ff3c8505df82c3feb229476f55610e231c90620dd6940dc05. Exact83-file public source snapshot verified at commit d74c297d75bff74f706677da06f4add3545d9e74 (release tag), tree99c11761c369ca8e417311ef9a357cefcc821713. Release-state docs updated locally after publication.
+
 ## API application scope extension (2026-09-07)
 
 User wants rank badge/LP/progression powered by Riot API and added to the started request. Updated private docs/riot-production-application.md with ACCOUNT-V1, LEAGUE-V4 and MATCH-V5 personal-profile scope, official rank snapshots, no invented historical/per-match LP, server-side key and separate profile access/retention requirements. All-rank personal profiles remain separate from Diamond+ recommendations. Draft only; no portal submission, API backend or release performed. Existing local-client implementation remains in place.
@@ -447,3 +853,14 @@ screenshots, mobile demo preview, phone/tablet setup steps and trusted-LAN requi
 Site source commit e9ce34c is pushed to its Sites source repository. Public page returned
 HTTP 200 after publishing. App downloads continue to use the verified GitHub latest assets.
 
+
+## 2026-09-07 Overwolf proposal submitted
+
+User explicitly authorized submission and acceptance of Developer/Monetization Terms.
+Submitted the Rift Ready app idea through the signed-in Overwolf account using
+https://riftready.gg, ow-electron, business model None, categories Stats and Guides & Trainers,
+and League of Legends only. Proposal includes fullscreen/Practice Tool integration and
+accurate local-API/estimate scope. Success page verified:
+https://dev.overwolf.com/app-idea-form/success/ (We got you! / Success!).
+Provider says it will contact the account by email; check spam if no email within two days.
+Submission is not approval or developer credentials. Fullscreen integration remains pending.

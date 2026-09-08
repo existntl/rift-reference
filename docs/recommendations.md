@@ -1,8 +1,21 @@
 # Diamond+ recommendations
 
-Local implementation; **not live or published**. User selected NA1, EUW1 and KR and generated
-a development key in the Riot portal, expiring September 7, 2026 at 23:25 Pacific. Public app
-remains 0.10.0. No product registration/audit approval is claimed. The key is not stored in source.
+## Private testing launcher (0.12.9)
+
+Run scripts/start-private-builds.ps1 to restart the installed app with a private local
+feed and open a standalone, themed masked development-key window. Reopening preserves
+an existing private session. The collector alone receives the key in
+memory. The app reads RIFT_RECOMMENDATIONS_FILE, with the same patch, freshness and
+sample validation as a network feed. No server or public feed is started. Refresh
+Runes / builds after collection. The default 1500-call budget may take many minutes;
+the first run may not reach 30 games/10 players for a connected build. Expired keys
+must be renewed in Riot's portal. Regular app launches do not enable the private feed.
+
+Local private API access and collection are verified; the feed is **not published**.
+User selected NA1, EUW1 and KR. Public app remains0.12.0; local installed app is0.12.9.
+No product registration/audit approval is claimed. The key is not stored in source.
+The earlier403 with a portal-verified key was resolved by explicit collector User-Agent
+and JSON Accept headers. Both local access checks passed with that same key.
 
 ## Behavior and sampling
 

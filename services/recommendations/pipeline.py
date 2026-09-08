@@ -59,7 +59,9 @@ class Riot:
             # Conservative global pacing, even across independent regional buckets.
             self.next_call = self.clock() + 1.3
             req = Request('https://' + host + '.api.riotgames.com' + path,
-                          headers={'X-Riot-Token': self.key})
+                          headers={'X-Riot-Token': self.key,
+                                   'User-Agent': 'RiftReady-PrivateCollector/0.12.9',
+                                   'Accept': 'application/json'})
             try:
                 with self.open_url(req, timeout=30) as response:
                     self.throttle(response.headers)
@@ -378,6 +380,8 @@ def collect(api, db, patch, catalog, seeds=12, pages=1):
                     continue
                 timeline = api.get(route, base + '/timeline')
                 ingest(db, match, timeline, qualified, region, patch, catalog)
+        samples = db.execute('SELECT count(*) FROM samples WHERE patch=? AND played>=?', (patch, start)).fetchone()[0]
+        print('Collection progress: %s %d samples' % (region, samples), flush=True)
     with db:
         db.execute('DELETE FROM samples WHERE played<?', (start,))
 
@@ -390,8 +394,27 @@ def main():
     parser.add_argument('--pages', type=int, default=1)
     parser.add_argument('--budget', type=int, default=500)
     parser.add_argument('--export-only', action='store_true')
+    parser.add_argument('--check-access', action='store_true')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
+    if args.check_access:
+        api = Riot(os.environ.get('RIOT_API_KEY'), 6)
+        checks = []
+        for service, path in [('status', '/lol/status/v4/platform-data'),
+                              ('ranked', '/lol/league/v4/entries/RANKED_SOLO_5x5/DIAMOND/I?page=1')]:
+            try:
+                body = api.get('na1', path)
+                outcome = 'passed' if body is not None else 'not-found'
+            except RuntimeError as error:
+                code = re.match(r'^Riot HTTP (\d{3});', str(error))
+                outcome = 'HTTP-' + code.group(1) if code else 'request-failed'
+            checks.append({'region': 'NA1', 'service': service, 'outcome': outcome})
+            # Fixed fields only: never write keys, player data, response bodies or URLs.
+            (args.output / 'access-check.json').write_text(json.dumps({'checks': checks}), encoding='utf-8')
+            print('Access check: NA1 %s %s' % (service, outcome), flush=True)
+            if outcome != 'passed':
+                raise RuntimeError('Access test stopped; see the displayed result.')
+        return
     patch = patch_of((args.data / 'version.txt').read_text(encoding='utf-8-sig').strip())
     catalog = json.loads((args.data / 'item.json').read_text(encoding='utf-8-sig'))['data']
     with connect(args.output / 'private.sqlite') as db:
@@ -403,6 +426,9 @@ def main():
     temporary = target.with_suffix('.tmp')
     temporary.write_text(json.dumps(feed, separators=(',', ':')), encoding='utf-8')
     temporary.replace(target)
+    print('Collection result: %d builds %d rune pages' % (
+        sum(len(row['builds']) for row in feed['results']),
+        sum(len(row['runes']) for row in feed['results'])), flush=True)
     print('Wrote anonymous feed with %d champion/role groups.' % len(feed['results']))
 
 
