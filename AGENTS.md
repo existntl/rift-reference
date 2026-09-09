@@ -1,9 +1,12 @@
 # Rift Ready working instructions
 
-- Local **0.12.22** is the UX/performance follow-up, now authorized for publication.
-  Its installer and signed manifest passed local integrity and upgrade/rollback checks;
-  public remains 0.12.21 until the release is confirmed. Do not replace the normal
-  installation as part of publication. Keep Overview-only search,
+- Published **0.12.22** is the current release (2026-09-09), the UX/performance follow-up.
+  Public source tag: 9b9459427d04a559134f29f62513057b6cbd6b1c. Matching installer and
+  signed latest.json passed versioned/latest-feed integrity and tamper checks;
+  the 0.12.15 updater discovered, downloaded and verified it without installing.
+  Installer SHA-256: 0F6754AE9DC29D56C6E7BE2E738E8FDB495B4160E4EDBD57B65A148145EEE7EE.
+  Upgrade/rollback passed; normal installation and website content are unchanged.
+  Keep Overview-only search,
   visible Live-game Back/Forward, keyboard-accessible match rows/statistics and
   consistent Champions/Matchups labels. HomeOverview owns the history controls
   and cached overview pixels; scroll changes repaint only rows/footer, not the
@@ -13,7 +16,7 @@
   See docs/ux-audit-2026-09-08.md for measurements, visual evidence and native
   capture limitations. Sample records remain standalone test fixtures only.
 
-- Published **0.12.21** is the current release, including the reliability audit fixes.
+- Published **0.12.21** introduced the reliability audit fixes (retained in 0.12.22).
   Public source tag: 01a8a0f2efc75ae5ab5f0f5d0b430ee8fef36078. Matching installer and
   signed latest.json passed versioned and latest-feed signature/hash/size/tamper checks;
   the 0.12.15 updater discovered, downloaded and verified it without installing.

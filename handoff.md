@@ -1,5 +1,32 @@
 # Rift Reference handoff
 
+## Published 0.12.22 UX and interaction-performance fixes (2026-09-09)
+
+At the user's explicit publication request and subsequent signing permission,
+published https://github.com/existntl/rift-reference/releases/tag/v0.12.22 as Latest.
+Public tag targets 9b9459427d04a559134f29f62513057b6cbd6b1c, tree
+dce59e0ddb6823bf4c74378dde582a4914bd460e. Local release commit:
+9102ed6521ecc80329b5dc0bc5ca17139f180d8d. All 18 published changed files were checked
+against the local release contents. Source publication used a non-force fast-forward;
+the signed-in browser uploaded only the installer and matching signed latest.json.
+No existing versions or tags were overwritten. The original external signing key
+remained local, unchanged and excluded from every upload, package and source commit.
+
+Both public versioned downloads and latest-feed metadata passed publisher signature,
+installer hash/size, tampered metadata/wrong-installer rejection and HTTPS tests.
+The 0.12.15 updater discovered, downloaded and verified 0.12.22 without installing.
+GitHub's latest release and tag target were confirmed. Evidence: build/release-0.12.22,
+build/public-0.12.22 and build/public-update-probe-0.12.15-819dc1da.
+dist now matches the verified public pair; the previous release remains preserved
+in build/public-0.12.21. Installer: 23,899,136 bytes; SHA-256
+0F6754AE9DC29D56C6E7BE2E738E8FDB495B4160E4EDBD57B65A148145EEE7EE.
+
+Includes the UX/performance changes and verification documented below and in
+docs/ux-audit-2026-09-08.md. No fresh live-game, live mouse-drag or screen-reader
+validation is implied. Normal installed app, League, preferences and website content
+were not changed. Existing latest-download links automatically follow this release.
+Prior local-only and prepared-release notes below are historical.
+
 ## 0.12.22 publication prepared; signing authorized (2026-09-09)
 
 The user requested publication. Prepared docs/releases/0.12.22.md and built
