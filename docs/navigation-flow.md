@@ -19,7 +19,7 @@ branding are not app requirements. No audio analysis is claimed.
 
 Champions, champion reference, rank history, match details, Matchups and Review are
 main-window pages. Alt+Left/Right and visible arrows support navigation. Per the user's
-later clarification, Updates is a popup like Preferences (local 0.12.21), superseding
+later clarification, Updates is a popup like Preferences (published 0.12.21), superseding
 the Updates page in published 0.12.20. Both use fixed close-only chrome and a dimmed
 owner. Updates preserves the underlying page/history/draft and blocks installation
 during a match or with unsaved Review edits. Preferences preserves Save/Cancel behavior.

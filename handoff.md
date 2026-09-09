@@ -1,5 +1,30 @@
 # Rift Reference handoff
 
+## Published 0.12.21 reliability audit (2026-09-08)
+
+At the user's explicit request, published 0.12.21 as Latest:
+https://github.com/existntl/rift-reference/releases/tag/v0.12.21.
+Includes all audited fixes below and Updates restored as a popup like Preferences.
+Public tag targets 01a8a0f2efc75ae5ab5f0f5d0b430ee8fef36078, tree
+3700137569a9e4b95ee6a36771ee84b3bca4a1d2. Local release commit is aec6a604a4d2d716bdbb850f40fb6113309ed019;
+public/local source differs only in line endings and four UTF-8 BOMs, not behavior.
+Source was published by a non-force fast-forward through the GitHub connector; the
+signed-in browser uploaded the already-tested installer and matching signed latest.json.
+Existing versions/tags were not overwritten. Signing used the original external key;
+the key remained local, unchanged and excluded from every upload/package/source commit.
+
+Both direct versioned downloads and the unversioned latest feed passed publisher
+signature, hash/size, tampered metadata/wrong-installer rejection and HTTPS checks.
+The compiled 0.12.15 updater discovered, downloaded and verified 0.12.21 without
+installing. Public tag was confirmed to point to the audited source commit.
+Evidence: build/release-0.12.21, build/public-0.12.21 and
+build/public-update-probe-0.12.15-819dc1da. dist/latest.json and dist/RiftReference-Setup.exe
+now match the public pair. Installer: 23,649,792 bytes;
+SHA-256 B816D620900864B7B9828601FB7E75638A6A6704B202FE1D0B08586E9E998E2A.
+The normal installation, League and website content were not changed. Existing website
+links to GitHub's latest download automatically follow this release. No new live-game
+test or Riot/Overwolf approval is implied. Prior local-only notes below are historical.
+
 ## Local 0.12.21 audit and Updates popup (2026-09-08)
 
 User requested a fresh-eye code review with necessary fixes plus inefficiency/redundancy

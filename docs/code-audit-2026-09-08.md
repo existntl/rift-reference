@@ -1,6 +1,9 @@
 # Post-0.12.20 code audit
 
-Local version: **0.12.21**, not published or installed over the user's app.
+Audited version: **0.12.21**. Subsequently published at the user's request as
+[v0.12.21](https://github.com/existntl/rift-reference/releases/tag/v0.12.21), with public
+installer/signature and older-updater download verification. The normal installed app
+was not replaced. The findings and test evidence below describe the pre-release audit.
 Single-agent review of first-party desktop code, data/parsing and helper lifecycles,
 navigation/settings, release/update handling, tests and build workflow. The scope
 included correctness, unnecessary work, resource retention and duplicate behavior.

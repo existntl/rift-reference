@@ -1,6 +1,11 @@
 # Rift Ready working instructions
 
-- Local **0.12.21** is an unpublished audit build; public remains **0.12.20**.
+- Published **0.12.21** is the current release, including the reliability audit fixes.
+  Public source tag: 01a8a0f2efc75ae5ab5f0f5d0b430ee8fef36078. Matching installer and
+  signed latest.json passed versioned and latest-feed signature/hash/size/tamper checks;
+  the 0.12.15 updater discovered, downloaded and verified it without installing.
+  Installer SHA-256: B816D620900864B7B9828601FB7E75638A6A6704B202FE1D0B08586E9E998E2A.
+  Website content and the normal installed app were not changed by publication.
   The user explicitly restored Updates as a popup, matching Preferences: close-only,
   fixed rounded chrome, centered over a dimmed owner. All other active sections remain
   main-window pages. Opening Updates must preserve navigation and unsaved Review drafts;
@@ -18,7 +23,7 @@
 
 - Published 0.12.20 follows both September 8 video captures with main-window pages for
   Champions/reference, LP history, match details, Matchups, Review and Updates.
-  That release's Updates-page choice is superseded by the local requirement above.
+  That release's Updates-page choice is superseded by the current requirement above.
   Preserve Back/Forward, filters,
   overview scroll and unsaved review drafts; destructive review transitions use an
   inline Save/Discard/Keep editing prompt. See docs/navigation-flow.md. No unsupported
