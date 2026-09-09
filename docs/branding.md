@@ -1,5 +1,14 @@
 # Rift Ready branding
 
+## 0.12.18 desktop layout
+
+The user's latest mockup supersedes the previous charcoal-only main-window direction:
+use blue-black surfaces and the existing teal accent. The white-and-teal logo file is
+unchanged. A champion splash hero uses the most-played champion in loaded local history,
+not a fixed Vayne image. Assets are original Riot Data Dragon splash JPEGs from
+https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{Champion}_0.jpg and are
+cached under data/splashes. They are display artwork only, not a data source for statistics.
+
 ## Current white-and-teal mark (0.9.2)
 
 The second user-supplied board supersedes the all-mint mark. The lower-left leg and

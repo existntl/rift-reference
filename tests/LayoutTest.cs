@@ -21,7 +21,7 @@ class LayoutTest {
             Mouse(form,"OnMouseDown",left.X+20,left.Y+8);Mouse(form,"OnMouseUp",right.X+20,right.Y+8);
             prefs=json.Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")));
             if(prefs.EnemiesLeft)throw new Exception("Drag not saved");
-            Mouse(form,"OnMouseDown",50,left.Y+8);Mouse(form,"OnMouseUp",right.X+20,right.Y+8);
+            Mouse(form,"OnMouseDown",50,35);Mouse(form,"OnMouseUp",right.X+20,right.Y+8);
             prefs=json.Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")));
             if(prefs.EnemiesLeft)throw new Exception("Navigation drag changed teams");
             form.Render(Path.Combine(home,"draft-layout-test.png"),true);

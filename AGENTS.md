@@ -1,5 +1,18 @@
 # Rift Ready working instructions
 
+- 0.12.18 redesign follows the user's player-overview mockup: horizontal navigation,
+  blue-black surfaces with the existing teal accent, profile/performance sidebar,
+  summary ring and dense match-history table. Keep the original white-and-teal logo
+  unchanged. The hero artwork follows the most-played champion across up to 100 loaded
+  local matches (all queues); ties use the most recent appearance. Table filters must
+  not change the hero. Missing history/artwork uses a neutral background. Riot Data
+  Dragon splash art is fetched asynchronously and cached in data/splashes; only the
+  public champion key is sent, never account or match data. Overview search is local
+  champion/role filtering, not a public summoner lookup. Queue/range controls reset
+  and bound scrolling. Preserve inventory slot zero versus unavailable values.
+  Run verify-home (including DashboardUiTests), verify-ui and affected render checks.
+  Release publication status is recorded in the newest handoff entry.
+
 - Published 0.12.17 follows the user's Blitz dashboard and settings references without copying
   ads, branding or unsupported statistics. Preferences, Updates, stats and scoreboard-alignment
   settings use compact charcoal/off and Rift Ready teal/on pill toggles with keyboard,

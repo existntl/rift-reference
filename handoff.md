@@ -1,5 +1,36 @@
 # Rift Reference handoff
 
+## 0.12.18 player-overview redesign (2026-09-08)
+
+The user requested the supplied overview mockup, explicitly retaining the current logo,
+and then specified that the background must be the player's most-played champion.
+Implemented horizontal navigation, blue-black panels and the existing teal accent,
+profile/rank/performance sidebar, win-rate ring and match summary, and a dense history
+table with real item slots. Champions opens a local-history browser; selection filters
+Overview. Search filters local champion/role history, with all/solo/flex/ARAM queues and
+100/50/20 match ranges. No public summoner search or invented statistics was added.
+
+ChampionArtwork chooses the most frequent champion across the loaded last 100 all-queue
+matches, with most-recent appearance breaking ties. It is independent of table filters.
+The previous profile is retained in memory only while the same account remains connected.
+No history, missing assets or offline requests show a neutral hero. Public Riot splash
+images are fetched asynchronously over HTTPS and cached in data/splashes; account details
+and match records are not uploaded. Original logo SHA-256 remains
+200DC01A04D66023308E3D61D7D314725B9231907F33229BCBA36EC0F62A7C92.
+
+Local source version is 0.12.18. Publication was requested after the implementation turn
+was interrupted; release verification and publication are in progress. Public remains
+0.12.17 until the matching new installer and signed manifest are verified online.
+
+Passed: 769 app checks; 26 home-data and 14 rank-history checks; 149 dashboard
+control/artwork checks; all-monitor chrome; full UI settings/toggle/dropdown/loadout/
+postgame suite; 39 recommendation checks, 18 collector tests and 104 overlay checks.
+Home evidence: build/home-7ea7bc33fa0b4fd4b378b9e2b2272295. UI evidence:
+build/ui-6c7dc69859fa433b8a8cac6e05d187b0. Overlay evidence:
+build/overlay-1ed4912192f0464d99d2805ec76b1f4d. Inspect final release renders and run
+installer upgrade/rollback plus public signature/updater verification before declaring
+publication complete. The normal installation has not been replaced.
+
 ## Single-agent work preference (2026-09-08)
 
 The user withdrew the standing permission for sub-agents. Keep future Rift Ready work

@@ -26,6 +26,12 @@ workers, validates PNG signatures and reuses existing files.
 
 ## Validation and publishing
 
+The optional data/splashes cache holds original Riot Data Dragon hero artwork. Missing
+champion artwork is fetched asynchronously during use; it is not required for compilation.
+For offline Vayne preview renders, seed cache/data/splashes/Vayne.jpg from Riot's public
+Data Dragon splash endpoint. DashboardUiTests uses isolated synthetic images to verify
+champion switching, neutral fallback and filter independence without network access.
+
 `build/app/RiftReference.exe --test` writes test-results.txt beside the executable.
 `--render` and `--render-settings` write demo and preferences PNGs there.
 Run tests in isolated output folders; layout tests intentionally change preferences.

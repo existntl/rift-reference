@@ -12,8 +12,16 @@ public class HomeProfile {
 public class HomeMatch {
  public string Champion="",Role="",Result="";public int Queue;public double Duration;public DateTime? Played;
  public int? Kills,Deaths,Assists,CS,Vision,Damage;public double? KillParticipation,DamageShare;
+ public int?[] Items=new int?[7];
 }
 public static class HomeData {
+ public static string MostPlayedChampion(HomeProfile profile){return Filter(profile,"",0,100).Where(m=>!String.IsNullOrWhiteSpace(m.Champion)).GroupBy(m=>m.Champion,StringComparer.OrdinalIgnoreCase).OrderByDescending(group=>group.Count()).Select(group=>group.First().Champion).FirstOrDefault()??"";}
+ public static List<HomeMatch> Filter(HomeProfile profile,string search,int queue,int limit){
+  var rows=profile==null||profile.Matches==null?Enumerable.Empty<HomeMatch>():profile.Matches.Where(m=>m!=null);
+  if(queue!=0)rows=rows.Where(m=>m.Queue==queue);
+  string query=(search??"").Trim();if(query.Length>0)rows=rows.Where(m=>(m.Champion??"").IndexOf(query,StringComparison.OrdinalIgnoreCase)>=0||(m.Role??"").IndexOf(query,StringComparison.OrdinalIgnoreCase)>=0);
+  return rows.Take(Math.Max(1,Math.Min(100,limit))).ToList();
+ }
  static int? Number(object o,string key){double n;var raw=J.Get(o,key);if(raw==null||raw is bool||!double.TryParse(Convert.ToString(raw,CultureInfo.InvariantCulture),NumberStyles.Float,CultureInfo.InvariantCulture,out n)||double.IsNaN(n)||double.IsInfinity(n)||n<0||n>int.MaxValue||Math.Floor(n)!=n)return null;return (int)n;}
  static bool Self(object player,object summoner){string a=J.S(player,"puuid"),b=J.S(summoner,"puuid");if(a!=""&&b!="")return a==b;a=J.S(player,"summonerId");b=J.S(summoner,"summonerId");return a!=""&&a!="0"&&b!=""&&a==b;}
  static string Role(object p){string role=J.S(p,"teamPosition");var timeline=J.Get(p,"timeline");if(role=="")role=J.S(timeline,"lane");if(role=="BOTTOM"&&J.S(timeline,"role")=="DUO_SUPPORT")return "SUPPORT";if(role=="MIDDLE")return "MID";if(role=="BOTTOM")return "ADC";return role=="NONE"?"":role;}
@@ -28,6 +36,7 @@ public static class HomeData {
    if(identities.Length==1){var id=Number(identities[0],"participantId");if(id.HasValue&&id>0){var found=participants.Where(p=>Number(p,"participantId")==id).ToArray();if(found.Length==1)me=found[0];}}
    if(me==null){var found=participants.Where(p=>Self(p,summoner)).ToArray();if(found.Length==1)me=found[0];}if(me==null)continue;
    var stats=J.Get(me,"stats");var m=new HomeMatch{Champion=data.Resolve(J.S(me,"championId")),Queue=Number(game,"queueId")??0,Duration=Number(game,"gameDuration")??0,Role=Role(me),Kills=Number(stats,"kills"),Deaths=Number(stats,"deaths"),Assists=Number(stats,"assists"),Vision=Number(stats,"visionScore"),Damage=Number(stats,"totalDamageDealtToChampions")};
+   for(int slot=0;slot<m.Items.Length;slot++)m.Items[slot]=Number(stats,"item"+slot);
    var cs=Number(stats,"totalMinionsKilled");var jungle=Number(stats,"neutralMinionsKilled");if(cs.HasValue&&jungle.HasValue&&(long)cs+jungle<=int.MaxValue)m.CS=cs+jungle;
    object win=J.Get(stats,"win");m.Result=win is bool?((bool)win?"Victory":"Defeat"):"Unknown";
    double stamp=J.N(game,"gameCreation");if(stamp>0&&stamp<253402300799000){try{m.Played=new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc).AddMilliseconds(stamp);}catch{}}

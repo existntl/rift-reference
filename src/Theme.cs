@@ -7,6 +7,7 @@ using System.Windows.Forms;
 namespace RiftReference {
 public class MinimalWindow : Form {
     public const int TitleHeight=32;
+    protected virtual int CaptionHeight{get{return TitleHeight;}}
     protected int ContentHeight{get{return System.Math.Max(1,ClientSize.Height-TitleHeight);}}
     readonly WindowCaptionButton close,minimize,maximize;
     bool titleMovable=true,edgeResize=true,roundedDialog;
@@ -49,7 +50,7 @@ public class MinimalWindow : Form {
                 int hit=top?(left?13:right?14:12):bottom?(left?16:right?17:15):left?10:right?11:0;
                 if(hit!=0){m.Result=(System.IntPtr)hit;return;}
             }
-            int controls=close.Visible&&minimize.Visible?120:40;if(titleMovable&&point.Y<TitleHeight&&point.X<ClientSize.Width-controls)m.Result=(System.IntPtr)2;
+            int controls=close.Visible&&minimize.Visible?120:40;if(titleMovable&&point.Y<CaptionHeight&&point.X<ClientSize.Width-controls)m.Result=(System.IntPtr)2;
             return;
         }
         base.WndProc(ref m);
@@ -127,7 +128,7 @@ public sealed class RiftToggle : CheckBox {
 }
 public sealed class RiftComboBox : Control {
     const int TriggerRadius=8,PopupRadius=10,ItemHeight=34,PopupPadding=6,MaximumVisibleItems=8;
-    static readonly Color TriggerSurface=Color.FromArgb(48,51,60),TriggerHover=Color.FromArgb(55,58,68),PopupSurface=Color.FromArgb(17,18,23),SelectedSurface=Color.FromArgb(51,54,64),HoverSurface=Color.FromArgb(36,39,47);
+    static readonly Color TriggerSurface=Color.FromArgb(12,32,43),TriggerHover=Color.FromArgb(17,44,57),PopupSurface=Color.FromArgb(5,17,25),SelectedSurface=Color.FromArgb(23,49,59),HoverSurface=Color.FromArgb(15,36,47);
     readonly ObjectCollection items;ToolStripDropDown popup;DropList list;int selectedIndex=-1;bool hover,expanded;string searchPrefix="";DateTime searchUtc;
     public event EventHandler SelectedIndexChanged;
     public RiftComboBox(){
@@ -295,14 +296,14 @@ public static class Theme {
             DwmSetWindowAttribute(form.Handle,34,ref border,4);
         }catch(System.DllNotFoundException){}catch(System.EntryPointNotFoundException){}
     }
-    public static readonly Color Background=Color.FromArgb(15,16,20),TitleSurface=Color.FromArgb(19,21,26),Panel=Color.FromArgb(25,27,33),Border=Color.FromArgb(43,46,54),Accent=Color.FromArgb(66,205,198),Ink=Color.FromArgb(238,240,244),Muted=Color.FromArgb(148,154,167);
+    public static readonly Color Background=Color.FromArgb(4,14,21),TitleSurface=Color.FromArgb(4,16,23),Panel=Color.FromArgb(9,26,35),Border=Color.FromArgb(24,59,73),Accent=Color.FromArgb(66,205,198),Ink=Color.FromArgb(235,245,250),Muted=Color.FromArgb(151,180,198);
     public static void Surface(Graphics g, Rectangle box, Color fill, Color accent) {
         if(box.Width<20||box.Height<20)return;
         var old=g.SmoothingMode;g.SmoothingMode=SmoothingMode.AntiAlias;
         using(var path=new GraphicsPath()){
             const int d=12;int x=box.X,y=box.Y,w=box.Width-1,h=box.Height-1;
             path.AddArc(x,y,d,d,180,90);path.AddArc(x+w-d,y,d,d,270,90);path.AddArc(x+w-d,y+h-d,d,d,0,90);path.AddArc(x,y+h-d,d,d,90,90);path.CloseFigure();
-            using(var brush=new SolidBrush(fill))g.FillPath(brush,path);
+            using(var brush=new LinearGradientBrush(box,fill,ControlPaint.Dark(fill,.12f),LinearGradientMode.Vertical))g.FillPath(brush,path);
             using(var pen=new Pen(Border))g.DrawPath(pen,path);
         }g.SmoothingMode=old;
     }
@@ -323,12 +324,14 @@ public static class Theme {
 
 public sealed class NavigationButton : Button {
     public bool Active;
+    public bool HeaderTab;
     public string Symbol="";
     bool hover;
     public NavigationButton(){SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);FlatStyle=FlatStyle.Flat;Cursor=Cursors.Hand;}
     protected override void OnMouseEnter(System.EventArgs e){hover=true;Invalidate();base.OnMouseEnter(e);}
     protected override void OnMouseLeave(System.EventArgs e){hover=false;Invalidate();base.OnMouseLeave(e);}
     protected override void OnPaint(PaintEventArgs e){
+        if(HeaderTab){var canvas=e.Graphics;canvas.Clear(hover?Theme.Panel:Theme.TitleSurface);var tone=!Enabled?Theme.Muted:Active?Theme.Accent:Theme.Ink;TextRenderer.DrawText(canvas,Text,Font,ClientRectangle,tone,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter|TextFormatFlags.NoPrefix|TextFormatFlags.EndEllipsis);if(Active||Focused)using(var line=new SolidBrush(Theme.Accent))canvas.FillRectangle(line,12,Height-3,Width-24,3);return;}
         var g=e.Graphics;g.Clear(Active?Color.FromArgb(25,58,61):hover?Color.FromArgb(31,34,41):BackColor);
         var color=!Enabled?Color.FromArgb(83,88,99):Active?Theme.Accent:Theme.Ink;
         if(Active)using(var b=new SolidBrush(Theme.Accent))g.FillRectangle(b,0,0,3,Height);
@@ -348,7 +351,7 @@ public sealed class NavigationButton : Button {
                 else {g.DrawEllipse(pen,x,y,16,16);g.DrawEllipse(pen,x+5,y+5,6,6);g.DrawLine(pen,x+8,y-3,x+8,y);g.DrawLine(pen,x+8,y+16,x+8,y+19);}
             }
         }
-        TextRenderer.DrawText(g,Text,Font,new Rectangle(offset,0,Width-offset,Height),color,TextFormatFlags.VerticalCenter|(Symbol==""?TextFormatFlags.HorizontalCenter:TextFormatFlags.Left)|TextFormatFlags.EndEllipsis|TextFormatFlags.NoPrefix);
+        if(Width>44||Symbol=="")TextRenderer.DrawText(g,Text,Font,new Rectangle(offset,0,Width-offset,Height),color,TextFormatFlags.VerticalCenter|(Symbol==""?TextFormatFlags.HorizontalCenter:TextFormatFlags.Left)|TextFormatFlags.EndEllipsis|TextFormatFlags.NoPrefix);
         if(Focused)ControlPaint.DrawFocusRectangle(g,new Rectangle(4,4,Width-8,Height-8),Theme.Accent,BackColor);
     }
 }
