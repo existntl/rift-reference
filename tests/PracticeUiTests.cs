@@ -34,10 +34,11 @@ class PracticeUiTests {
             dashboard.Render(Path.Combine(home,"migrated.png"),false);
             Modal(()=>dashboard.OpenPreferences(),"Preferences",form=>{
                 Check(!Desc<TabControl>(form).Any(),"Native settings tabs remain");
+                Check(Desc<CheckBox>(form).Any()&&Desc<CheckBox>(form).All(c=>c is RiftToggle),"Preferences contain an unthemed checkbox");
                 var categories=Desc<NavigationButton>(form).Select(b=>b.Text).ToArray();
                 Check(categories.SequenceEqual(new[]{"General","Game overlay","Audio & reminders","Phone / tablet"}),"Preference categories were not consolidated");
                 var general=Desc<Panel>(form).Single(p=>p.Name=="GeneralPage");
-                var focus=Desc<ComboBox>(general).Single(c=>c.Name=="TrainingFocus");
+                var focus=Desc<RiftComboBox>(general).Single(c=>c.Name=="TrainingFocus");
                 Check(Convert.ToString(focus.SelectedItem)=="Main threat","Settings did not show migrated focus");
                 focus.SelectedItem="Recall purpose";
                 Desc<CheckBox>(general).Single(c=>c.Text.StartsWith("Show lane plan")).Checked=false;
@@ -67,6 +68,7 @@ class PracticeUiTests {
             });
             Modal(()=>dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Updates").PerformClick(),"Updates",form=>{
                 Check(!Desc<Control>(form).Any(c=>c.Name=="PreferencesPageHost")&&Desc<SettingsCard>(form).Any(c=>c.Name=="ReleaseCard"),"Updates are not a separate area");
+                Check(Desc<CheckBox>(form).All(c=>c is RiftToggle),"Updates contain an unthemed checkbox");
                 Desc<CheckBox>(form).Single(c=>c.Text.StartsWith("Automatically check")).Checked=false;
             });
             prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")));
@@ -90,7 +92,7 @@ class PracticeUiTests {
             Modal(()=>PracticeWindows.Review(dashboard,home,"Vayne","Main threat"),"Review",form=>{
                 var boxes=form.Controls.OfType<TextBox>().OrderBy(c=>c.Top).ToArray();
                 boxes[0].Text="Stayed for another wave without a purchase plan.";boxes[1].Text="Won a trade but delayed my reset.";boxes[2].Text="Name what another wave buys before staying.";
-                form.Controls.OfType<ComboBox>().Single().SelectedItem="Partly";
+                form.Controls.OfType<RiftComboBox>().Single().SelectedItem="Partly";
                 form.Controls.OfType<Button>().Single(b=>b.Text=="Save reflection").PerformClick();
                 Check(ReflectionStore.Read(home).Count==1,"Review Save did not persist");Capture(form,"saved-review");
             });

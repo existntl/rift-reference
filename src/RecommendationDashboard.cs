@@ -8,9 +8,9 @@ using System.Windows.Forms;
 
 namespace RiftReference {
 // A complete bundle is selected as one unit: its details never come from another build.
-public sealed class RecommendationPicker : Form {
+public sealed class RecommendationPicker : MinimalWindow {
  readonly DataStore data; readonly LoadoutIcons icons; readonly ToolTip tips=new ToolTip();
- readonly ComboBox champions,role; readonly Button common,winRate,refresh,use,paths,options,allPaths;
+ readonly RiftComboBox champions,role; readonly Button common,winRate,refresh,use,paths,options,allPaths;
  readonly Label status,selectionTitle,selectionSubtitle,pathFilter; readonly FlowLayoutPanel buildList,details;
  readonly Panel runePanel,skillPanel; object feed,selected; object[] builds=new object[0]; bool rankByWins,showOptions; int firstItemFilter;
  public string PlanJson {get;private set;}
@@ -23,16 +23,15 @@ public sealed class RecommendationPicker : Form {
  public RecommendationPicker(DataStore d,string champ,LeagueClient c,Func<bool> isDemo,bool fetchOnShown):this(d,champ,c,isDemo,fetchOnShown,true){}
  RecommendationPicker(DataStore d,string champ,LeagueClient c,Func<bool> isDemo,bool fetchOnShown,bool mainScreen){
   client=c;demo=isDemo;standalone=mainScreen;
-  data=d;icons=new LoadoutIcons(d);Text="Rift Ready · Builds & runes";ClientSize=new Size(1280,860);MinimumSize=MaximumSize=Size;StartPosition=FormStartPosition.CenterParent;AutoScaleMode=AutoScaleMode.None;Font=new Font("Segoe UI",10);BackColor=Theme.Background;ForeColor=Theme.Ink;Icon=Brand.Icon;
-  Theme.TitleBar(this);
-  LabelAt(this,"BUILDS & RUNES",24,17,360,32,18,Theme.Ink);
-  LabelAt(this,"Diamond+ at collection · NA / EUW / Korea · Ranked solo · Patch "+Recommendations.Patch(d.Version)+" · Last 7 days",24,55,1000,25,10,Theme.Muted);
-  champions=new ComboBox{Location=new Point(646,19),Size=new Size(218,28),DropDownStyle=ComboBoxStyle.DropDownList,AccessibleName="Recommendation champion",BackColor=Theme.Panel,ForeColor=Theme.Ink};
+  data=d;icons=new LoadoutIcons(d);Text="Rift Ready · Builds & runes";ClientSize=new Size(1280,860+TitleHeight);MinimumSize=MaximumSize=Size;StartPosition=FormStartPosition.CenterParent;AutoScaleMode=AutoScaleMode.None;Font=new Font("Segoe UI",10);BackColor=Theme.Background;ForeColor=Theme.Ink;Icon=Brand.Icon;
+  LabelAt(this,"BUILD EXPLORER",24,17,360,32,18,Theme.Ink);
+  LabelAt(this,"Anonymous Diamond+ match aggregates · NA / EUW / Korea · Ranked solo · Patch "+Recommendations.Patch(d.Version)+" · Last 7 days",24,55,1000,25,10,Theme.Muted);
+  champions=new RiftComboBox{Location=new Point(646,19),Size=new Size(218,30),AccessibleName="Recommendation champion"};
   foreach(var key in d.Champions.Keys.OrderBy(k=>d.Name(k)))champions.Items.Add(new ChampionChoice{Id=key,Name=d.Name(key)});
   Controls.Add(champions);for(int i=0;i<champions.Items.Count;i++)if(((ChampionChoice)champions.Items[i]).Id==d.Resolve(champ))champions.SelectedIndex=i;if(champions.SelectedIndex<0)champions.SelectedIndex=0;
-  role=new ComboBox{Location=new Point(880,19),Size=new Size(170,28),DropDownStyle=ComboBoxStyle.DropDownList,AccessibleName="Recommendation role",BackColor=Theme.Panel,ForeColor=Theme.Ink};role.Items.AddRange(new object[]{"TOP","JUNGLE","MIDDLE","BOTTOM","UTILITY"});role.SelectedIndex=3;Controls.Add(role);
+  role=new RiftComboBox{Location=new Point(880,19),Size=new Size(170,30),AccessibleName="Recommendation role"};role.Items.AddRange(new object[]{"TOP","JUNGLE","MIDDLE","BOTTOM","UTILITY"});role.SelectedIndex=3;Controls.Add(role);
   refresh=ButtonAt(this,"Refresh data",1066,16,190,34,async()=>await LoadFeed());
-  common=ButtonAt(this,"Most common",24,104,140,38,()=>{rankByWins=false;SortBuilds();});winRate=ButtonAt(this,"Win rate",170,104,128,38,()=>{rankByWins=true;SortBuilds();});
+  common=ButtonAt(this,"Common",24,104,132,38,()=>{rankByWins=false;SortBuilds();});winRate=ButtonAt(this,"Win rate",162,104,136,38,()=>{rankByWins=true;SortBuilds();});
   paths=ButtonAt(this,"Paths",24,153,134,34,()=>{showOptions=false;SortBuilds();});options=ButtonAt(this,"Options",164,153,134,34,()=>{showOptions=true;SortBuilds();});
   allPaths=ButtonAt(this,"All paths",24,195,85,34,()=>{firstItemFilter=0;showOptions=false;SortBuilds();});allPaths.AccessibleName="Clear first core item filter";
   pathFilter=LabelAt(this,"Any first core item",117,201,181,24,9,Theme.Muted);pathFilter.AutoEllipsis=true;
@@ -40,17 +39,19 @@ public sealed class RecommendationPicker : Form {
   LabelAt(this,"Runes and core items share a cohort. Each detail shows that cohort’s most common qualifying sequence.",24,665,267,60,9,Theme.Muted);
   LabelAt(this,"30+ games · 10+ players per choice\nNo verified pro-player feed connected.",24,728,267,44,9,Theme.Muted);
   selectionTitle=LabelAt(this,"Choose a build",326,102,528,32,15,Theme.Ink);
-  selectionSubtitle=LabelAt(this,"Selected runes and observed skill order",326,138,528,42,9,Theme.Muted);
+  selectionSubtitle=LabelAt(this,"Select one complete rune + core cohort; details never mix between builds.",326,138,528,42,9,Theme.Muted);
   runePanel=new Panel{Location=new Point(320,186),Size=new Size(536,412),BackColor=Theme.Panel};Controls.Add(runePanel);
   skillPanel=new Panel{Location=new Point(320,610),Size=new Size(536,162),BackColor=Theme.Panel};Controls.Add(skillPanel);
   details=new FlowLayoutPanel{Location=new Point(874,103),Size=new Size(382,670),AutoScroll=true,FlowDirection=FlowDirection.TopDown,WrapContents=false,BackColor=Theme.Panel,Padding=new Padding(14,10,8,10)};Controls.Add(details);
   status=LabelAt(this,"No recommendation data loaded. Choose a build when data is available.",24,793,986,51,9,Theme.Muted);
   use=ButtonAt(this,"Use selected build",1032,797,224,42,UseBuild);use.Enabled=false;
-  if(standalone){use.Visible=false;status.SetBounds(24,838,1232,42);MaximumSize=Size.Empty;ClientSize=new Size(1280,884);MinimumSize=MaximumSize=Size;
+  if(standalone){use.Visible=false;status.SetBounds(24,838,1232,42);MaximumSize=Size.Empty;ClientSize=new Size(1280,884+TitleHeight);MinimumSize=MaximumSize=Size;
    save=ButtonAt(this,"Save plan…",24,789,160,38,SavePlan);
    applyRunes=ButtonAt(this,"Preview / apply runes",724,789,247,38,()=>Apply(true));
    applyItems=ButtonAt(this,"Preview / apply item set",986,789,270,38,()=>Apply(false));
   }
+  foreach(Control control in Controls.Cast<Control>().Where(control=>!(control is WindowCaptionButton)).ToArray())control.Top+=TitleHeight;
+  Theme.Apply(champions);Theme.Apply(role);foreach(var button in new[]{common,winRate,refresh,use,paths,options,allPaths,save,applyRunes,applyItems})if(button!=null)Theme.Apply(button);
   UpdateActions();FormClosing+=(s,e)=>{if(applying)e.Cancel=true;};
   champions.SelectedIndexChanged+=(s,e)=>Populate();role.SelectedIndexChanged+=(s,e)=>Populate();
   EmptyDetails();StyleSort();if(fetchOnShown)Shown+=async(s,e)=>await LoadFeed();
@@ -68,7 +69,7 @@ public sealed class RecommendationPicker : Form {
   try{builds=Recommendations.Bundles(data,feed,Champion,Role);SortBuilds();status.Text=builds.Length==0?"No builds meet the 30-game / 10-player minimum for this champion and role.":"Win rates include games reaching three core items. Select a build to review its runes and purchases. Nothing is applied automatically.";}
   catch(Exception ex){builds=new object[0];Clear(buildList);EmptyDetails();status.Text=ex.Message;}
  }
- void StyleSort(){common.BackColor=rankByWins?Theme.Panel:Color.FromArgb(30,64,64);winRate.BackColor=rankByWins?Color.FromArgb(30,64,64):Theme.Panel;common.ForeColor=rankByWins?Theme.Ink:Theme.Accent;winRate.ForeColor=rankByWins?Theme.Accent:Theme.Ink;paths.ForeColor=showOptions?Theme.Ink:Theme.Accent;options.ForeColor=showOptions?Theme.Accent:Theme.Ink;allPaths.Text="All paths";allPaths.ForeColor=firstItemFilter==0?Theme.Muted:Theme.Accent;pathFilter.Text=firstItemFilter==0?"Any first core item":ItemName(firstItemFilter);tips.SetToolTip(pathFilter,pathFilter.Text);tips.SetToolTip(allPaths,firstItemFilter==0?"Options groups listed builds by their first core item.":"First core item: "+ItemName(firstItemFilter)+". Click to show all paths.");}
+ void StyleSort(){common.BackColor=rankByWins?Theme.Panel:Color.FromArgb(30,64,64);winRate.BackColor=rankByWins?Color.FromArgb(30,64,64):Theme.Panel;common.ForeColor=rankByWins?Theme.Ink:Theme.Accent;winRate.ForeColor=rankByWins?Theme.Accent:Theme.Ink;common.FlatAppearance.BorderColor=rankByWins?Theme.Border:Theme.Accent;winRate.FlatAppearance.BorderColor=rankByWins?Theme.Accent:Theme.Border;paths.BackColor=showOptions?Theme.Panel:Color.FromArgb(30,64,64);options.BackColor=showOptions?Color.FromArgb(30,64,64):Theme.Panel;paths.ForeColor=showOptions?Theme.Ink:Theme.Accent;options.ForeColor=showOptions?Theme.Accent:Theme.Ink;paths.FlatAppearance.BorderColor=showOptions?Theme.Border:Theme.Accent;options.FlatAppearance.BorderColor=showOptions?Theme.Accent:Theme.Border;allPaths.Text="All paths";allPaths.ForeColor=firstItemFilter==0?Theme.Muted:Theme.Accent;allPaths.FlatAppearance.BorderColor=firstItemFilter==0?Theme.Border:Theme.Accent;pathFilter.Text=firstItemFilter==0?"Any first core item":ItemName(firstItemFilter);tips.SetToolTip(pathFilter,pathFilter.Text);tips.SetToolTip(allPaths,firstItemFilter==0?"Options groups listed builds by their first core item.":"First core item: "+ItemName(firstItemFilter)+". Click to show all paths.");}
  static int FirstItem(object build){return Convert.ToInt32(J.A(J.Get(J.Get(build,"value"),"coreItems"))[0]);}
  void SortBuilds(){StyleSort();Clear(buildList);var available=builds.Where(b=>firstItemFilter==0||FirstItem(b)==firstItemFilter).ToArray();var ordered=rankByWins?available.OrderByDescending(b=>J.N(b,"wins")/Math.Max(1,J.N(b,"games"))).ThenByDescending(b=>J.N(b,"games")):available.OrderByDescending(b=>J.N(b,"games")).ThenByDescending(b=>J.N(b,"wins"));
   if(showOptions){BuildOptions();if(selected==null&&ordered.Any())SelectBuild(ordered.First());return;}
@@ -127,12 +128,12 @@ public sealed class RecommendationPicker : Form {
  sealed class FirstItemButton:Button{
   public string Title,SummaryText,ShareText;public Image ItemIcon;public bool Chosen;
   public FirstItemButton(){SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);FlatStyle=FlatStyle.Flat;Cursor=Cursors.Hand;}
-  protected override void OnPaint(PaintEventArgs e){var g=e.Graphics;g.Clear(Chosen?Color.FromArgb(29,48,51):Theme.Panel);if(ItemIcon!=null)g.DrawImage(ItemIcon,new Rectangle(12,12,38,38));using(var font=new Font("Segoe UI",10,FontStyle.Bold))TextRenderer.DrawText(g,Title,font,new Rectangle(60,12,178,42),Theme.Ink,TextFormatFlags.WordBreak|TextFormatFlags.EndEllipsis);using(var font=new Font("Segoe UI",8)){TextRenderer.DrawText(g,SummaryText,font,new Rectangle(12,59,228,20),Theme.Accent);TextRenderer.DrawText(g,ShareText,font,new Rectangle(12,81,228,20),Theme.Muted);}if(Focused)ControlPaint.DrawFocusRectangle(g,new Rectangle(4,4,Width-8,Height-8),Theme.Accent,BackColor);}
+  protected override void OnPaint(PaintEventArgs e){var g=e.Graphics;g.Clear(Theme.Background);Theme.Surface(g,new Rectangle(0,0,Width,Height),Chosen?Color.FromArgb(29,48,51):Theme.Panel,Theme.Accent);if(Chosen)using(var marker=new SolidBrush(Theme.Accent))g.FillRectangle(marker,1,10,3,Height-20);if(ItemIcon!=null)g.DrawImage(ItemIcon,new Rectangle(12,12,38,38));using(var font=new Font("Segoe UI",10,FontStyle.Bold))TextRenderer.DrawText(g,Title,font,new Rectangle(60,12,178,42),Theme.Ink,TextFormatFlags.WordBreak|TextFormatFlags.EndEllipsis);using(var font=new Font("Segoe UI",8)){TextRenderer.DrawText(g,SummaryText,font,new Rectangle(12,59,228,20),Theme.Accent);TextRenderer.DrawText(g,ShareText,font,new Rectangle(12,81,228,20),Theme.Muted);}if(Focused)ControlPaint.DrawFocusRectangle(g,new Rectangle(5,5,Width-10,Height-10),Theme.Accent,BackColor);}
  }
  sealed class BundleButton:Button{
   public object Raw;public string Title,Description,SummaryText;public Image[] ItemIcons;public bool Chosen;
   public BundleButton(){SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);FlatStyle=FlatStyle.Flat;Cursor=Cursors.Hand;}
-  protected override void OnPaint(PaintEventArgs e){var g=e.Graphics;g.Clear(Chosen?Color.FromArgb(29,48,51):Theme.Panel);if(Chosen)using(var brush=new SolidBrush(Theme.Accent))g.FillRectangle(brush,0,0,3,Height);using(var titleFont=new Font("Segoe UI",11,FontStyle.Bold))TextRenderer.DrawText(g,Title,titleFont,new Rectangle(13,11,224,25),Theme.Ink,TextFormatFlags.EndEllipsis);using(var textFont=new Font("Segoe UI",8)){TextRenderer.DrawText(g,Description,textFont,new Rectangle(13,40,224,40),Theme.Muted,TextFormatFlags.WordBreak|TextFormatFlags.EndEllipsis);TextRenderer.DrawText(g,SummaryText,textFont,new Rectangle(13,126,228,25),Theme.Accent,TextFormatFlags.EndEllipsis);}for(int i=0;i<ItemIcons.Length;i++){var box=new Rectangle(13+i*49,83,34,34);if(ItemIcons[i]!=null)g.DrawImage(ItemIcons[i],box);using(var pen=new Pen(Theme.Border))g.DrawRectangle(pen,box);if(i<ItemIcons.Length-1)TextRenderer.DrawText(g,"›",Font,new Point(box.Right+4,box.Y+7),Theme.Muted);}if(Focused)ControlPaint.DrawFocusRectangle(g,new Rectangle(5,5,Width-10,Height-10),Theme.Accent,BackColor);}
+  protected override void OnPaint(PaintEventArgs e){var g=e.Graphics;g.Clear(Theme.Background);Theme.Surface(g,new Rectangle(0,0,Width,Height),Chosen?Color.FromArgb(29,48,51):Theme.Panel,Theme.Accent);if(Chosen)using(var brush=new SolidBrush(Theme.Accent))g.FillRectangle(brush,1,10,3,Height-20);using(var titleFont=new Font("Segoe UI",11,FontStyle.Bold))TextRenderer.DrawText(g,Title,titleFont,new Rectangle(13,11,224,25),Theme.Ink,TextFormatFlags.EndEllipsis);using(var textFont=new Font("Segoe UI",8)){TextRenderer.DrawText(g,Description,textFont,new Rectangle(13,40,224,40),Theme.Muted,TextFormatFlags.WordBreak|TextFormatFlags.EndEllipsis);TextRenderer.DrawText(g,SummaryText,textFont,new Rectangle(13,126,228,25),Theme.Accent,TextFormatFlags.EndEllipsis);}for(int i=0;i<ItemIcons.Length;i++){var box=new Rectangle(13+i*49,83,34,34);if(ItemIcons[i]!=null)g.DrawImage(ItemIcons[i],box);using(var pen=new Pen(Chosen?Theme.Accent:Theme.Border))g.DrawRectangle(pen,box);if(i<ItemIcons.Length-1)TextRenderer.DrawText(g,"›",Font,new Point(box.Right+4,box.Y+7),Theme.Muted);}if(Focused)ControlPaint.DrawFocusRectangle(g,new Rectangle(5,5,Width-10,Height-10),Theme.Accent,BackColor);}
  }
  sealed class SkillGrid:Control{
   public int[] Sequence=new int[0];

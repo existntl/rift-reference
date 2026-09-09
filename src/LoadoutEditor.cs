@@ -70,9 +70,9 @@ public sealed class ItemBlock {
 }
 public sealed class ItemEditor:UserControl {
  readonly DataStore data;readonly LoadoutIcons icons;readonly ToolTip tips=new ToolTip();readonly List<ItemBlock> blocks=new List<ItemBlock>();
- readonly FlowLayoutPanel catalog,sectionList;readonly TextBox search;readonly ComboBox filter;readonly Label feedback;int active;public IList<ItemBlock> Blocks{get{return blocks.AsReadOnly();}}
+ readonly FlowLayoutPanel catalog,sectionList;readonly TextBox search;readonly RiftComboBox filter;readonly Label feedback;int active;public IList<ItemBlock> Blocks{get{return blocks.AsReadOnly();}}
  public ItemEditor(DataStore d,LoadoutIcons assets){data=d;icons=assets;BackColor=Theme.Background;Size=new Size(1218,538);
-  AddLabel("ITEM CATALOG",16,12,440,24);search=new TextBox{Location=new Point(16,45),Size=new Size(287,28),AccessibleName="Search items"};Controls.Add(search);filter=new ComboBox{Location=new Point(315,45),Size=new Size(151,28),DropDownStyle=ComboBoxStyle.DropDownList,AccessibleName="Item category"};filter.Items.AddRange(new object[]{"All items","Attack damage","Attack speed","Critical strike","Ability power","Armor","Magic resist","Health","Boots"});filter.SelectedIndex=0;Controls.Add(filter);
+  AddLabel("ITEM CATALOG",16,12,440,24);search=new TextBox{Location=new Point(16,45),Size=new Size(287,28),AccessibleName="Search items"};Controls.Add(search);filter=new RiftComboBox{Location=new Point(315,45),Size=new Size(151,28),AccessibleName="Item category"};filter.Items.AddRange(new object[]{"All items","Attack damage","Attack speed","Critical strike","Ability power","Armor","Magic resist","Health","Boots"});filter.SelectedIndex=0;Controls.Add(filter);
   catalog=new FlowLayoutPanel{Location=new Point(16,87),Size=new Size(458,408),AutoScroll=true,BackColor=Theme.Background};Controls.Add(catalog);
   AddLabel("CUSTOM SHOP SECTIONS",498,12,510,24);Button("+ New section",1060,8,140,()=>AddSection("Custom"));
   sectionList=new FlowLayoutPanel{Location=new Point(498,45),Size=new Size(704,450),AutoScroll=true,FlowDirection=FlowDirection.TopDown,WrapContents=false,BackColor=Theme.Background};Controls.Add(sectionList);

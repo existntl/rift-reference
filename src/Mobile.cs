@@ -110,7 +110,7 @@ public static class MobileSettings {
         connection.Controls.Add(new Label{Text="LOCAL CONNECTION",Left=24,Top=17,Width=680,Height=24,Font=new Font("Segoe UI",11,FontStyle.Bold),ForeColor=Theme.Ink});
         connection.Controls.Add(new Label{Text="Sharing is off whenever Rift Ready starts.",Left=24,Top=40,Width=680,Height=24,ForeColor=Theme.Muted});
         var intro=new Label{Text="Use your phone or tablet as a second screen. Connect both devices to the same trusted home network.",Left=24,Top=70,Width=680,Height=42};
-        var addresses=new ComboBox{Left=24,Top=116,Width=390,DropDownStyle=ComboBoxStyle.DropDownList};
+        var addresses=new RiftComboBox{Left=24,Top=116,Width=390};
         addresses.Items.AddRange(MobileCompanion.Addresses());if(addresses.Items.Count>0)addresses.SelectedIndex=0;
         var toggle=new Button{Text=service.Running?"Stop sharing":"Start sharing",Left=432,Top=114,Width=190,Height=34};
         var status=new Label{Text="Choose the PC address for your Wi-Fi or Ethernet network.",Left=24,Top=153,Width=680,Height=28,ForeColor=Theme.Muted};

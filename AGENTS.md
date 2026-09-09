@@ -1,5 +1,22 @@
 # Rift Ready working instructions
 
+- Local 0.12.17 follows the user's Blitz dashboard and settings references without copying
+  ads, branding or unsupported statistics. Preferences, Updates, stats and scoreboard-alignment
+  settings use compact charcoal/off and Rift Ready teal/on pill toggles with keyboard,
+  accessibility, focus, hover, disabled and high-contrast behavior. All selection dropdowns
+  use a rounded charcoal trigger and a detached dark menu with a neutral selected row, teal
+  check/focus treatment, keyboard navigation, accessible expanded state and a dark long-list
+  scrollbar. Champion select uses
+  ten compact roster cards, preserves enemies-left/allies-right and drag-to-swap, highlights
+  the local player, and shows only Data Dragon Tank/Mage/Support tag counts. The live roster
+  uses separated cards. Builds & runes now uses the slim Rift Ready title chrome, stronger
+  Common/Win rate and Paths/Options states, rounded selected build cards, and dark selectors.
+  Guarded save/apply semantics and complete-bundle identity are unchanged. Do not add the
+  reference's personalized picks, tier/synergy statistics, player mastery/rank/KDA, damage
+  percentages, matchup-conditioned builds, pro identities or click-to-lock-in without a
+  verified compliant data source and fresh scope review. Public remains 0.12.16; website and
+  normal installation are unchanged.
+
 - Public 0.12.16 follows the user's Blitz titlebar references: a slim charcoal header with
   left Rift Ready/version text and small Windows-ordered glyph controls on the right. The
   Preferences window is a fixed, centered close-only modal with rounded corners and a
@@ -175,7 +192,7 @@ Read `handoff.md` before making changes. It records the release state, user pref
 
 - Carry authorized work through implementation and appropriate verification. Give concise progress updates. Do not repeatedly ask for permission already supplied.
 - Do not claim features in the aspirational specification are implemented without checking the code.
-- User explicitly authorized parallel agents on 2026-09-06. For substantial tasks, the lead agent delegates independent, bounded work and owns integration, review and final verification. Use up to the available concurrency limit (currently four including the lead); keep small or dependent tasks local. Assign separate file ownership where practical, coordinate shared interfaces, and serialize conflicting edits, database writes/migrations and releases. Shared project/data access does not authorize concurrent uncoordinated writes. Agents report changes, checks and unresolved issues to the lead; delegation does not expand the user's task scope.
+- The user withdrew the standing permission for sub-agents on 2026-09-08. Keep Rift Ready work single-agent and do not spawn or delegate to sub-agents unless the user explicitly changes this preference again. This supersedes the 2026-09-06 parallel-work authorization.
 - Do not send messages to third parties without explicit authorization. Drafting release notes or a support request does not authorize sending a support message.
 - Verify current Riot rules before introducing new gameplay assistance. Enemy summoner/ability countdown tracking, including manually started timers, was excluded after reviewing current compliance guidance. Do not represent the app as Riot-approved; registration/audit is not verified.
 

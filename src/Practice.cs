@@ -76,7 +76,7 @@ public static class PracticeWindows {
                 answers[i]=new TextBox { Left=290,Top=172+i*139,Width=770,Height=92,Multiline=true,MaxLength=2000,ScrollBars=ScrollBars.Vertical,BackColor=Surface,ForeColor=Ink,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right };
                 form.Controls.Add(answers[i]);
             }
-            var influence = new ComboBox { Left=595,Top=565,Width=250,DropDownStyle=ComboBoxStyle.DropDownList };
+            var influence = new RiftComboBox { Left=595,Top=565,Width=250 };
             influence.Items.AddRange(new object[] { "Not assessed", "Yes", "Partly", "Not yet" });
             var save = new Button { Text="Save reflection",Left=865,Top=625,Width=195,Height=36 };
             var fresh = new Button { Text="New reflection",Left=20,Top=65,Width=245,Height=30 };

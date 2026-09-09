@@ -136,22 +136,32 @@ public class Dashboard : MinimalWindow {
   TextAt(g,"ANALYZE · PLAN · CLIMB",micro,muted,20,ContentHeight-54,145,36);
  }
  void DrawDraft(Graphics g,int w,int y){
-  var self=state.Players.FirstOrDefault(p=>p.Self);int gap=16,half=(w-56-gap)/2;
-  leftHeader=new Rectangle(28,y,half,27);rightHeader=new Rectangle(28+half+gap,y,half,27);
-  for(int side=0;side<2;side++){
-   bool ally=prefs.EnemiesLeft?side==1:side==0;int x=28+side*(half+gap);
-   var roster=self==null?new Player[0]:state.Players.Where(p=>ally?p.Team==self.Team:p.Team!=self.Team&&p.Team!="").Take(5).ToArray();
-   TextAt(g,ally?"ALLIED PICKS · drag to swap":"ENEMY PICKS · drag to swap",bold,ally?accent:Color.FromArgb(242,157,153),x,y,half,27);
-   int cell=half/5;
-   for(int i=0;i<5;i++){var p=i<roster.Length?roster[i]:null;int px=x+i*cell;var portrait=p==null?null:Portrait(p.Champion);if(portrait!=null)g.DrawImage(portrait,px+10,y+38,48,48);TextAt(g,p==null?"Pick pending":data.Name(p.Champion)+(p.Self?" · YOU":""),small,ink,px+8,y+94,cell-12,38);TextAt(g,p==null?"":p.Role,micro,muted,px+8,y+134,cell-12,20);}
-  }
-  y+=174;int right=28+half+gap;
+   var self=state.Players.FirstOrDefault(p=>p.Self);int gap=16,half=(w-56-gap)/2;
+   leftHeader=new Rectangle(28,y,half,27);rightHeader=new Rectangle(28+half+gap,y,half,27);
+   for(int side=0;side<2;side++){
+    bool ally=prefs.EnemiesLeft?side==1:side==0;int x=28+side*(half+gap);
+    var roster=self==null?new Player[0]:state.Players.Where(p=>ally?p.Team==self.Team:p.Team!=self.Team&&p.Team!="").Take(5).ToArray();
+    TextAt(g,ally?"ALLIED PICKS · drag to swap":"ENEMY PICKS · drag to swap",bold,ally?accent:Color.FromArgb(242,157,153),x,y,half-258,27);
+    DrawTeamTags(g,roster,x+half-246,y);
+    int cardGap=8,cell=(half-cardGap*4)/5;
+    for(int i=0;i<5;i++){
+     var p=i<roster.Length?roster[i]:null;int px=x+i*(cell+cardGap);var box=new Rectangle(px,y+34,cell,126);
+     Theme.Surface(g,box,p!=null&&p.Self?Color.FromArgb(24,49,51):panel,accent);
+     using(var marker=new SolidBrush(ally?accent:Color.FromArgb(225,125,141)))g.FillRectangle(marker,box.X+10,box.Y+1,box.Width-20,3);
+     var portrait=p==null?null:Portrait(p.Champion);int portraitSize=48,portraitX=box.X+(box.Width-portraitSize)/2;
+     if(portrait!=null){g.DrawImage(portrait,portraitX,box.Y+14,portraitSize,portraitSize);using(var outline=new Pen(p.Self?accent:Theme.Border,2))g.DrawRectangle(outline,portraitX,box.Y+14,portraitSize,portraitSize);}
+     else {using(var fill=new SolidBrush(Color.FromArgb(18,20,25)))g.FillEllipse(fill,portraitX+7,box.Y+21,34,34);TextAt(g,"?",bold,muted,portraitX+7,box.Y+21,34,34);}
+     TextAt(g,p==null?"Pick pending":data.Name(p.Champion)+(p.Self?" · YOU":""),small,p!=null&&p.Self?accent:ink,box.X+6,box.Y+69,box.Width-12,30);
+     TextAt(g,p==null?"Waiting for client":p.Role,micro,muted,box.X+6,box.Y+98,box.Width-12,19);
+    }
+   }
+   y+=174;int right=28+half+gap;
   Card(g,28,y,half,142,(self==null?"YOUR CHAMPION":data.Name(self.Champion).ToUpperInvariant())+" · STRENGTHS",Pregame.Strength(data,self));
   Card(g,right,y,half,142,"VULNERABILITIES · PLAN AROUND THEM",Pregame.Weakness(data,self));y+=158;
   int tall=Math.Max(275,ContentHeight-y-134);
   Card(g,28,y,half,tall,"MATCHUP CONSIDERATIONS",Pregame.Matchup(data,state));
   Card(g,right,y,half,tall,"TEAM WIN CONDITIONS · OPTIONS",Pregame.Composition(data,state));y+=tall+16;
-  Card(g,28,y,w-56,90,"PREPARE YOUR LOADOUT · RUNES / BUILDS IN THE SIDEBAR","Compare Onetricks.gg or Probuilds in your browser, choose runes and arrange custom shop sections. Preview and apply each separately to your client. Source feeds are not connected; no automatic changes.");
+  Card(g,28,y,w-56,90,"PREPARE YOUR LOADOUT · RUNES / BUILDS IN THE SIDEBAR","Review available Diamond+ aggregate paths or a saved manual plan. Rune pages and item sets have separate previews and explicit confirmation; nothing is applied or locked in automatically.");
  }
  void DrawPostgame(Graphics g,int w,int y){
   if(state.Players.Count==0){Card(g,28,y,w-56,180,"MATCH FINISHED · RESULTS PENDING",state.Notice==""?"Waiting for the League client to provide this match's final scoreboard. No cooldowns or estimated match statistics are shown.":state.Notice);return;}
@@ -178,6 +188,14 @@ public class Dashboard : MinimalWindow {
   Card(g,28,y,w-56,110,"YOUR FINAL ITEMS",Postgame.Items(data,self));y+=126;
   Card(g,28,y,w-56,110,"TAKE ONE LESSON FORWARD","Open Review to pair these results with your own notes. Scoreboard totals describe the match; they do not explain every decision or measure missed opportunities.");
  }
+ void DrawTeamTags(Graphics g,IEnumerable<Player> players,int x,int y){
+  var roster=players.Where(p=>p!=null&&p.Champion!="").ToArray();
+  int tanks=roster.Count(p=>data.Tags(p.Champion).Any(t=>String.Equals(t,"Tank",StringComparison.OrdinalIgnoreCase)));
+  int mages=roster.Count(p=>data.Tags(p.Champion).Any(t=>String.Equals(t,"Mage",StringComparison.OrdinalIgnoreCase)));
+  int supports=roster.Count(p=>data.Tags(p.Champion).Any(t=>String.Equals(t,"Support",StringComparison.OrdinalIgnoreCase)));
+  string[] labels={tanks+" TANK",mages+" MAGE",supports+" SUPPORT"};Color[] colors={accent,Color.FromArgb(182,147,255),Color.FromArgb(255,213,116)};
+  for(int i=0;i<labels.Length;i++){var box=new Rectangle(x+i*82,y+1,76,22);Theme.Surface(g,box,Color.FromArgb(20,22,28),colors[i]);TextRenderer.DrawText(g,labels[i],micro,box,roster.Length==0?muted:colors[i],TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter|TextFormatFlags.NoPadding|TextFormatFlags.NoPrefix);}
+ }
  void DrawMatch(Graphics g,int w){g.Clear(bg);g.TextRenderingHint=System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
   TextAt(g,"LEAGUE OF LEGENDS  /  OVERVIEW",small,muted,28,17,w-440,23);
   using(var heading=new Font("Segoe UI",24,FontStyle.Bold))TextAt(g,Postgame.Active(state.Phase)?"Match summary":state.Players.Count==0?"Player overview":state.Phase=="ChampSelect"?"Champion select":"Match overview",heading,ink,26,42,w-550,47);review.Enabled=CanReview();
@@ -202,7 +220,10 @@ public class Dashboard : MinimalWindow {
   if(pairs>0){
    int allyX=prefs.EnemiesLeft?28+half+gap:28,enemyX=prefs.EnemiesLeft?28:28+half+gap;
    leftHeader=new Rectangle(28,y,half,25);rightHeader=new Rectangle(28+half+gap,y,half,25);
-   TextAt(g,"ALLIES · drag header to swap sides",small,accent,allyX,y,half,21);TextAt(g,"ENEMIES · drag header to swap sides",small,Color.FromArgb(242,157,153),enemyX,y,half,21);y+=25;
+    string ownTeam=(state.Players.FirstOrDefault(p=>p.Self)??state.Players[0]).Team;
+    var fullAllies=state.Players.Where(p=>p.Team==ownTeam).ToArray();var fullEnemies=state.Players.Where(p=>p.Team!=ownTeam&&p.Team!="").ToArray();
+    TextAt(g,"ALLIES · drag header to swap sides",small,accent,allyX,y,half-258,21);DrawTeamTags(g,fullAllies,allyX+half-246,y);
+    TextAt(g,"ENEMIES · drag header to swap sides",small,Color.FromArgb(242,157,153),enemyX,y,half-258,21);DrawTeamTags(g,fullEnemies,enemyX+half-246,y);y+=25;
    for(int i=0;i<pairs;i++){
     if(i<lane.Allies.Count)LaneCard(g,lane.Allies[i],allyX,y,half,130,adjust,true);
     if(i<lane.Enemies.Count)LaneCard(g,lane.Enemies[i],enemyX,y,half,130,adjust,false);
@@ -217,10 +238,10 @@ public class Dashboard : MinimalWindow {
    TextAt(g,headers[0],small,muted,35,y,champ,22);for(int j=1;j<7;j++)TextAt(g,headers[j],bold,j<=4?AbilityColor(j-1):muted,28+champ+(j-1)*cell,y,cell,22);y+=24;
    int row=Math.Max(44,Math.Min(48,(ContentHeight-y-(prefs.ShowCoaching?284:219))/others.Length));
    string own=(state.Players.FirstOrDefault(p=>p.Self)??state.Players[0]).Team;
-   for(int i=0;i<others.Length;i++){
-    var p=others[i];int top=y+i*row;using(var b=new SolidBrush(i%2==0?panel:Color.FromArgb(20,22,27)))g.FillRectangle(b,28,top,w-56,row-3);
-    using(var b=new SolidBrush(p.Team==own?accent:Color.FromArgb(235,137,143)))g.FillRectangle(b,28,top,3,row-3);
-    var image=Portrait(p.Champion);if(image!=null)g.DrawImage(image,38,top+5,row-12,row-12);
+    for(int i=0;i<others.Length;i++){
+     var p=others[i];int top=y+i*row;var rosterCard=new Rectangle(28,top,w-56,row-4);Theme.Surface(g,rosterCard,p.Self?Color.FromArgb(24,49,51):i%2==0?panel:Color.FromArgb(20,22,27),accent);
+     using(var b=new SolidBrush(p.Team==own?accent:Color.FromArgb(235,137,143)))g.FillRectangle(b,29,top+7,3,row-18);
+     var image=Portrait(p.Champion);if(image!=null){g.DrawImage(image,38,top+5,row-12,row-12);using(var outline=new Pen(p.Self?accent:Theme.Border))g.DrawRectangle(outline,38,top+5,row-12,row-12);}
     int tx=38+row-5;TextAt(g,data.Name(p.Champion)+(p.Self?" · YOU":""),bold,ink,tx,top+2,champ-(tx-28),24);
     TextAt(g,(draft?"":("Lv "+p.Level+" · "))+p.Role,small,muted,tx,top+24,champ-(tx-28),18);
     for(int j=0;j<6;j++){
@@ -267,7 +288,7 @@ public class Dashboard : MinimalWindow {
   if(state.Phase=="EndOfGame"||state.Phase=="PreEndOfGame"||state.Phase=="WaitingForStats"){headline="Take one lesson into the next game.";body="Open Review to save your reflection and revisit previous notes.\nWhat decision created your first major disadvantage?\nWhat advantage did you fail to convert?\nWhat will you do differently next game?\n\nSelf-assessment only. Missed opportunities were not measured.";}
   Card(g,28,y,w-56,260,headline,body+"\n\n"+state.Notice);
   Card(g,28,y+278,(w-70)/2,180,"ONE FOCUS · "+prefs.TrainingFocus.ToUpperInvariant(),Coaching.FocusText(prefs.TrainingFocus)+"\n\nChoose your focus in Preferences. Explore wave, recall and conversion lessons in Playbook before queueing.");
-  Card(g,42+(w-70)/2,y+278,(w-70)/2,180,"PRIVATE BY DEFAULT","No cloud AI, game inputs or match uploads. This preview reads local League endpoints. Rune application and build exports are not yet enabled. Updates use GitHub.");
+  Card(g,42+(w-70)/2,y+278,(w-70)/2,180,"PRIVATE BY DEFAULT","No cloud AI, game inputs or match uploads. This preview reads local League endpoints. Build saves and guarded client imports happen only after your explicit review. Updates use GitHub.");
  }
  string[] Advice(bool draft,string own){var self=state.Players.FirstOrDefault(p=>p.Self)??state.Players[0];var enemies=state.Players.Where(p=>p.Team!=own && p.Champion!="").ToList();var allies=state.Players.Where(p=>p.Team==own&&p.Champion!="").ToList();
   var threat=enemies.FirstOrDefault(p=>p.Role==self.Role)??enemies.FirstOrDefault();
@@ -327,9 +348,9 @@ public class Dashboard : MinimalWindow {
    var label=new Label{Text="Dashboard refresh interval (seconds)",Left=20,Top=98,Width=480};
    var poll=new NumericUpDown{Minimum=3,Maximum=30,Value=Math.Max(3,Math.Min(30,prefs.PollSeconds)),Left=20,Top=124};
    var focusLabel=new Label{Text="One training focus",Left=20,Top=157,Width=480};
-   var focus=new ComboBox{Left=20,Top=184,Width=480,DropDownStyle=ComboBoxStyle.DropDownList};focus.Items.AddRange(Coaching.FocusNames.Cast<object>().ToArray());focus.SelectedItem=prefs.TrainingFocus;if(focus.SelectedIndex<0)focus.SelectedIndex=0;
+   var focus=new RiftComboBox{Left=20,Top=184,Width=480};focus.Items.AddRange(Coaching.FocusNames.Cast<object>().ToArray());focus.SelectedItem=prefs.TrainingFocus;if(focus.SelectedIndex<0)focus.SelectedIndex=0;
    var formatLabel=new Label{Text="Cooldown display",Left=20,Top=225,Width=480};
-   var format=new ComboBox{Left=20,Top=252,Width=480,DropDownStyle=ComboBoxStyle.DropDownList};format.Items.AddRange(new object[]{"Minutes + seconds at 1 minute or more (1m 40s)","Seconds only (100s)"});format.SelectedIndex=prefs.MinutesAndSeconds?0:1;
+   var format=new RiftComboBox{Left=20,Top=252,Width=480};format.Items.AddRange(new object[]{"Minutes + seconds at 1 minute or more (1m 40s)","Seconds only (100s)"});format.SelectedIndex=prefs.MinutesAndSeconds?0:1;
    var enemiesLeft=new CheckBox{Text="Enemies on the left (or drag the lane headers)",Checked=prefs.EnemiesLeft,Left=20,Top=300,Width=520};
    var coaching=new CheckBox{Text="Show lane plan, enemy tools and training focus",Checked=prefs.ShowCoaching,Left=20,Top=342,Width=520};
    var coachingNote=new Label{Text="Unchecked: show the original matchup cards.\nFull matchup, teamfight and wave lessons are in Playbook.\nReview saves your own notes locally after a game.\n\nRift Ready is not endorsed by Riot Games.\nMechanic sources and coverage: Playbook > Sources and coverage.",Left=20,Top=386,Width=520,Height=150};

@@ -52,6 +52,8 @@ class RecommendationTests {
   }
   using(var picker=new RecommendationPicker(d,"Vayne",false)){
    picker.Show();Application.DoEvents();var use=picker.Controls.OfType<Button>().Single(b=>b.Text=="Use selected build");
+   Check(picker.FormBorderStyle==FormBorderStyle.None&&picker.Controls.OfType<WindowCaptionButton>().Count()==3,"Build explorer did not use Rift Ready window chrome");
+   Check(picker.Controls.Cast<Control>().Where(c=>!(c is WindowCaptionButton)).All(c=>c.Top>=MinimalWindow.TitleHeight),"Build explorer content overlaps the title strip");
    Check(!use.Enabled,"Unavailable feed enabled use");Render(picker,Path.Combine(home,"recommendation-unavailable.png"));
    picker.LoadFeedForPreview(feed);Check(!use.Enabled,"Independent legacy feed became selectable");
    picker.LoadFeedForPreview(paired);Check(use.Enabled,"Valid bundle not selectable");picker.Text="Rift Ready · SYNTHETIC TEST DATA · Builds & runes";Render(picker,Path.Combine(home,"recommendation-choices.png"));
@@ -65,7 +67,7 @@ class RecommendationTests {
    Render(picker,Path.Combine(home,"recommendation-path-filtered.png"));
    picker.Controls.OfType<Button>().Single(b=>b.Text=="All paths").PerformClick();
    Check(cards.Controls.Count==2,"Clearing first-item filter did not restore paths");
-   var role=picker.Controls.OfType<ComboBox>().Single(c=>c.AccessibleName=="Recommendation role");role.SelectedItem="TOP";Check(!use.Enabled&&cards.Controls.Count==0,"Role change retained stale selection");role.SelectedItem="BOTTOM";
+   var role=picker.Controls.OfType<RiftComboBox>().Single(c=>c.AccessibleName=="Recommendation role");role.SelectedItem="TOP";Check(!use.Enabled&&cards.Controls.Count==0,"Role change retained stale selection");role.SelectedItem="BOTTOM";
    picker.Controls.OfType<Button>().Single(b=>b.Text=="Win rate").PerformClick();Check(cards.Controls[0].AccessibleName.Contains("Fleet Footwork"),"Win-rate sorting did not reorder alternatives");
    ((Button)cards.Controls[0]).PerformClick();Render(picker,Path.Combine(home,"recommendation-alternate.png"));use.PerformClick();var picked=J.Parse(picker.PlanJson);
    Check(Convert.ToInt32(J.A(J.Get(picked,"perks"))[0])==8021,"Selection retained other build runes");
@@ -74,11 +76,12 @@ class RecommendationTests {
   using(var direct=new RecommendationPicker(d,"Vayne",null,()=>true,false)){
    Render(direct,Path.Combine(home,"builds-direct-unavailable.png"));
    var actions=direct.Controls.OfType<Button>().Where(b=>b.Visible&&(b.Text.StartsWith("Save plan")||b.Text.StartsWith("Preview / apply"))).ToArray();
+   Check(actions.All(b=>b.Bottom<=direct.ClientSize.Height),"Direct build actions overflow the window");
    Check(actions.Length==3&&actions.All(b=>!b.Enabled),"Direct build actions must be unavailable without data");
    Check(!direct.Controls.OfType<Button>().Any(b=>b.Visible&&b.Text=="Use selected build"),"Direct screen retained picker-only confirmation");
    direct.LoadFeedForPreview(paired);Check(actions.All(b=>b.Enabled),"Direct selection did not enable save/apply");
    direct.Text="Rift Ready · SYNTHETIC TEST DATA · Builds & runes";Render(direct,Path.Combine(home,"builds-direct.png"));
-   direct.Controls.OfType<ComboBox>().Single(c=>c.AccessibleName=="Recommendation role").SelectedItem="TOP";
+   direct.Controls.OfType<RiftComboBox>().Single(c=>c.AccessibleName=="Recommendation role").SelectedItem="TOP";
    Check(actions.All(b=>!b.Enabled),"Direct actions retained stale role choice");direct.Close();
   }
   Console.WriteLine(checks+" recommendation checks passed");return 0;

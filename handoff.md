@@ -1,5 +1,59 @@
 # Rift Reference handoff
 
+## Single-agent work preference (2026-09-08)
+
+The user withdrew the standing permission for sub-agents. Keep future Rift Ready work
+single-agent and do not spawn or delegate to sub-agents unless the user explicitly changes
+this preference again. This supersedes the historical 2026-09-06 parallel-work preference.
+
+## Local 0.12.17 Blitz-reference UI pass (2026-09-08)
+
+The user supplied three current Blitz dashboard screenshots and requested UI/feature
+adjustments plus Blitz-style settings checkboxes in Rift Ready's palette. The screenshots
+were treated only as visual references. Local source version is now 0.12.17; public 0.12.16,
+the website and the normal installation remain unchanged.
+
+Added reusable `RiftToggle : CheckBox` controls with a compact pill track, charcoal/off and
+Rift Ready teal/on states, round thumb, hover/focus/disabled styling and a SystemColors
+high-contrast branch. Existing `Checked` behavior, Space-key activation and accessibility
+semantics remain. All active General, Game overlay, Audio, Updates, stats-panel and
+scoreboard-alignment checkboxes use the new control. Obsolete/unreachable settings and the
+installer were not redesigned.
+
+A later settings screenshot clarified the requested dropdown treatment. Added reusable
+`RiftComboBox` controls with a rounded charcoal trigger, compact chevron, detached rounded
+dark menu, lighter neutral selected row, Rift Ready teal check/focus treatment and a custom
+dark scrollbar for long champion/item lists. Mouse selection, arrow/Home/End navigation,
+F4/Alt+Down/Enter/Space opening and accessible expanded/collapsed/value semantics remain.
+Preferences, Builds & runes, loadout editing, mobile address selection, reflection review and
+the retained legacy settings paths now use the same control; no saved values or schemas changed.
+
+Champion select now presents the ten known picks as compact cards instead of floating
+portraits, keeps enemy-left/ally-right swapping and persistence, and emphasizes the local
+player. Each team header shows counts of Data Dragon Tank, Mage and Support tags; these are
+explicit tag counts, not damage shares, synergy scores or predicted win rates. Live roster
+rows use separated rounded cards and retain the same reference cooldown semantics. Stale
+draft/empty-state copy now accurately describes the guarded build save/import flow.
+
+Builds & runes now uses the slim Rift Ready title chrome, dark owner-drawn champion/role
+selectors, stronger segmented Common/Win rate and Paths/Options states, and rounded build
+cards with clearer teal selection. It still selects coherent complete rune/core cohorts,
+does not infer situational items, and never applies or locks anything automatically.
+
+Validation passed 769 application checks, the full UI suite including dedicated toggle and
+dropdown keyboard/accessibility/activation/render checks, 39 recommendation checks and 18
+collector tests, 104 overlay checks, 14 home-data checks, 14 rank-history checks, and window
+chrome/all-monitor maximize checks. Fresh 1920x1080 app, draft and build renders, every
+settings page, and an opened long dropdown were inspected. Current dropdown evidence is in
+`build/ui-51f85681b67c4699a9e5c70f868808ae` (including `dropdown-open.png`),
+`build/overlay-09017178942c440f952fd1a7d5835a69`
+and `build/app`; earlier home/rank/chrome evidence remains valid.
+
+Do not add the reference's personalized pick/tier/synergy statistics, player mastery/rank/KDA,
+team damage percentages, matchup-filtered builds, pro/OTP identities or click-to-lock-in from
+the current data. Those features need a verified source, production/API scope and a fresh Riot
+policy review; the current public recommendation feed and RSO profile backend remain unconnected.
+
 ## Published 0.12.16 title chrome, Preferences modal and click level (2026-09-08)
 
 The current source follows the user's Blitz references with a slim charcoal title strip,
@@ -266,4 +320,640 @@ to obtain actual error. Do not claim the prior failure was HTTP403 without evide
 ## Private development-key setup and longer history 0.12.9 (2026-09-07)
 
 User requested private development-key builds/runes plus older matches and LP graph.
-Added local file feed opt-in with 2MB bound and unchanged downstream wž÷ÒÚ$z{-®éÜj×6†W"6–væGW&Rö†6‚÷6—¦RæBF×W"&V¦V7F–öââ—6öÆFVCã’ã2WFFW"F—66÷fW&VBÂF÷væÆöFVBæBfW&–f–VCããv—F†÷WB–ç7FÆÆ–ærâWf–FVæ6R'V–ÆB÷V&Æ–2Óããâ–ç7FÆÆW"4„#Scs3Vc3†VVV&C#ƒvFSc3CCFC–fc#CFSS“##FC†CSf3ƒ“S6CfSc–âæòæ÷&ÖÂ–ç7FÆÆF–öâW&f÷&ÖVBà ¥6÷W&6RV&Æ—6†VBF‡&÷Vv‚6öææV7F÷"v—F‚æöâÖf÷&6Rf7BÖf÷'v&BFòFV6F6VVFS3cC†##“–ff3&VfVS†FfSV3S#6F2ÂG&VS“ƒFcc6666SFfSf&6c6C&Sv#VVVSfc6c“²&VÆV6RFrö–çG2F†W&Râ&—fFRFö72÷&–÷B×&öGV7F–öâÖÆ–6F–öâæÖBW†6ÇVFVBâV&Æ–W"Æö6Â÷VçV&Æ—6†VBæ÷FW2&R†—7F÷&–6Ââ&VÆV6R×7FFRFö7VÖVçFF–öâv2WFFVBgFW"V&Æ–6F–öâÆö6ÆÇ’à ¢22öæUG&–6·2×7G–ÆRF‚'&÷w6–ær†Æö6ÂÂ##bÓ’Ór ¥W6W"6¶VBFò–ç7V7BöæUG&–6·2–â'&fRæB–×ÆVÖVçB—G2'V–ÆB×F‚&ö6‚â'&fRv2æ÷BW‡÷6VB'’'&÷w6W"–çfVçF÷'“²V&Æ–2‡GG3¢ò÷wwræöæWG&–6·2ævrö6†×–öç2ö'V–ÆG2õf–æR–ç7V7FVB–ç7FVBÂF—66Æ÷6VBFòW6W"â&V6öÖÖVæFF–öâF6†&ö&Bæ÷r†2F‡2ò÷F–öç2Âf—'7BÖ6÷&RÖ—FVÒ÷F–öâ6&G2v—F‚vw&VvFRvÖW2÷v–ç2æBW‡Æ–6—FÇ’Æ–Ö—FVB6†&W2öbÆ—7FVB'V–ÆG2ÂæBÆÂF‡2&W6WBâ6Æ–6¶–ærâ÷F–öâf–ÇFW'2v†öÆR'VæFÆW2æB&W6W'fW2fÆ–B6VÆV7F–öâ÷"6VÆV7G2F†Rf—'7BÖF6†–ær'VæFÆRâ6†×–öâ÷&öÆRöfVVB6†ævW2&W6WBF†Rf–ÇFW"âæòöæUG&–6·2FFfVVB÷67&–ærÂW‡W'B–FVçF—F–W2÷"Vç7W÷'FVBÖF6‡W–æfW&Væ6RFFVBà £r6öÆÆV7F÷"FW7G2Ã#’æF—fR&V6öÖÖVæFF–öâ6†V6·2æBÒ×FW7B72âÆVB&Wf–WvVB÷F–öç2öf–ÇFW&VB&VæFW'2C“#ƒƒ–â'V–ÆBö÷&V6öÖÖVæFF–öâ×F‚Ö÷F–öç2çæræB&V6öÖÖVæFF–öâ×F‚Öf–ÇFW&VBçærâ7–çF†WF–2f—‡GW&W2öæÇ’âæò&VÆV6RÂæ÷&ÖÂ–ç7FÆÆF–öâ÷"Æ—fRfVVB7F—fF–öã²V&Æ–2&VÖ–ç3ããà ¢22F&²æF—fRF—FÆR&'2†Æö6ÂÂ##bÓ’Ór ¥W6W"&V¦V7FVBF†RÆ–v‡Bv–æF÷w2F—FÆR7G&—âFFVBF†VÖRåF—FÆT&"Â6ÆÆVBf÷"Ö–âF6†&ö&BÂ&V6öÖÖVæFF–öâF6†&ö&BæBF†VÖRäÇ’F–Æöw2âEtÒF&²g&ÖRv—F‚ÆVv7’GG&–'WFRfÆÆ&6³²W†7B6†&6öÂ6F–öâöÆ–v‡BFW‡B÷7V'FÆR&÷&FW"öâ7W÷'F–ærv–æF÷w2fW'6–öç2âæF—fRv–æF÷r6öçG&öÇ2æBvVöÖWG'’&WF–æVBâ†–v‚6öçG&7BW6W27—7FVÒ6öÆ÷'2BÆ–6F–öââ†æFÆR&V7&VF–öâ&VÆ–W27G–Æ–ærâÖ–7&÷6ögB&VfW&Væ6S¢‡GG3¢òöÆV&âæÖ–7&÷6ögBæ6öÒöVâ×W2÷v–æF÷w2÷v–ã3"ö’öGvÖ’öæRÖGvÖ’ÖGv×v–æF÷vGG&–'WFRà ¥T’7V—FRæBÒ×FW7B76VBâæF—fREtÒ&VF&6²–â—6öÆFVBFW7B&WGW&æVB7V66W72æBF&³Óâ–ç7V7FVC“#ƒCF6†&ö&B&VæFW"f÷"Æ–÷WB&Vw&W76–öç3²G&uFô&—FÖFöW2æ÷B6GW&R6ö×÷6—F÷"F&²6‡&öÖRÂ6ò7GVÂF—FÆRV&æ6R7F–ÆÂæVVG2öç67&VVâ6öæf—&ÖF–öââWf–FVæ6R'V–ÆB÷V’Óf†cfc#f##CCs6c–3vS†S“V33F3sâÆö6Â6÷W&6Rö'V–ÆBöæÇ“²æò–ç7FÆÆF–öâ÷"V&Æ–2&VÆV6Rà ¢226öææV7FVBf—7VÂ'V–ÆBF6†&ö&B†Æö6ÂÂ##bÓ’Ór ¤–×ÆVÖVçFVBF†RW6W"w2&Æ—G¢67&VVç6†÷BF—&V7F–öâv—F‚F‡&VRÖ6öÇVÖâæF—fRF6†&ö&C¢g&WVVæ7’÷v–â×&FR'V–ÆB6&G2ÂgVÆÂ'VæR6†ö–6W2Âö'6W'fVB6¶–ÆÂWw&FR6WVVæ6RÂ7VÖÖöæW"7VÆÇ2æB—FVÒ6V7F–öç2â&V6öÖÖVæFF–öäF6†&ö&Bæ76÷vç2F†R–6¶W#²&V6öÖÖVæFF–öç2æ76fÆ–FFW2c"—&VB'VæRö6÷&Rw&÷W2æBFWF–Â6×ÆR&÷VæG2â÷fW&Æ•6WGF–æw66â÷VâF†R6ÖR6VÆV7F÷"æB6VÆV7BF†Rf—'7B6÷&RF&vWC²Ç––ær'VæW2ö—FV×27F–ÆÂW6W2F†RW†—7F–ær&Wf–WrfÆ÷râ7VÆÂ–6öç2&R66†VBv—F‚FFG&vöâ76WG2à ¤6öÆÆV7F÷"W‡÷'G2&–gBÖF–ÖöæBÓ&Âw&÷W–ær6ö×ÆWFR'VæRvW2v—F‚ö'6W'fVBF‡&VRÖ—FVÒ6÷&W3²FWF–ÂÖöFW2&R–æFWVæFVçFÇ’7W÷'FVBv—F†–âV6‚w&÷WÂæ÷BæV6W76&–Ç’ö'6W'fVBFövWF†W"âçVÆÆ&ÆR5Æ—FRFWF–Ç2Ö–w&F–öâ&W6W'fW2&÷w2æB&VfWF6†W2ÆVv7’FWF–Ç2âæòf'&–6FVB&ò–FVçF—F–W2Â6—GVF–öæÂGf–6R÷"6¶–ÆÂF–Ö–ærâ&VBFö72÷&V6öÖÖVæFF–öç2æÖBâ7–çF†WF–2&Wf–WrFF—2FW7BÖöæÇ’âæòæ÷&ÖÂ–ç7FÆÆF–öâÂ&VÆV6RÂvV'6—FRFWÆ÷–ÖVçB÷"Æ—fR6öÆÆV7F–öâW&f÷&ÖVBf÷"F†—26†ævRà ¥fW&–f–6F–öã¢r6öÆÆV7F÷"FW7G2Â#bæF—fR&V6öÖÖVæFF–öâ6†V6·2Â“‚÷fW&Æ’6†V6·2æBÆ–6F–öâÒ×FW7B76VBâÆVB–ç7V7FVB6×ÆRF6†&ö&BÂVæf–Æ&ÆR7FFRæB÷fW&Æ’6WGF–æw2C“#ƒƒâFW7G26÷fW"6ö†W&VçBÇFW&æF—fR6VÆV7F–öâÂ&öÆR6†ævW2Â–çfÆ–BfVVG2öFWF–Ç2Â6fVB×ÆâG&ç6fW"æB6WGF–æw2—6öÆF–öââÆVv7’Vç&–6†ÖVçB&W6W'fW2¶æ÷vâ6÷&RFF–bF–ÖVÆ–æR—2'6VçC²â66WFVBÖ&–wV÷W2×VæFòF–ÖVÆ–æR7F–ÆÂ–çfÆ–FFW2—BâWf–FVæ6R—2–væ÷&VB'V–ÆBö÷&V6öÖÖVæFF–öâÒ¢çæræB'V–ÆBö÷fW&Æ’Ö&ccFF#c&VSCS&&&ƒcVC#V#ƒFBâ6÷W&6R&VÖ–ç2Æö6Ã²V&Æ–2&VÖ–ç3ããà ¢22v–æF÷w2–6öâ&W—"ƒ##bÓ’Ór ¥W6W"&W÷'FVBvVæW&–2F6¶&"–6öââ–ç7V7F–öâfW&–f–VB6÷'&V7Bv†—FR÷FVÂ%"–6öç2–â–ç7FÆÆVCããW†V7WF&ÆRÂ7W'&VçB'V–ÆBÂæB'Vææ–ærv–æF÷râFW6·F÷æB7F'BÖVçR6†÷'F7WG2†BVç7V6–f–VB–6öäÆö6F–öââ&6¶VBF†VÒWVæFW"–væ÷&VB'V–ÆBö–6öâ×&W—"Ò¢æB6WBF†V—"W‡Æ–6—B–6öâFòF†R66WFVBÆövò6÷–VB2–ç7FÆÆVB&–gB×&VG’æ–6ó²F&vWG2Væ6†ævVBâ&Vg&W6†VBv–æF÷w2–6öâF—7Æ’v—F‚–SGV–æ—B×6†÷rÂv—F†÷WB&W7F'F–ærW‡Æ÷&W"÷"F†RâF6¶&"f—7VÂ&Vg&W6‚Ö’&WV—&R&V÷Væ–ærF†Râ–ç7FÆÆW"æ72æ÷rW‡Æ–6—FÇ’6WG2gWGW&R6†÷'F7WG2FòW†V7WF&ÆR–6öâ–æFWƒ²F&vWFVB6ö×–ÆVB6†÷'F7WB&Vw&W76–öâ76VBâæò&–æ&–W2–ç7FÆÆVB÷&VÆV6VBÂ&VfW&Væ6W2Væ6†ævVBâ6÷W&6R6†ævR&VÖ–ç2Æö6Âf÷"F†RæW‡B&VÆV6Rà ¢22&–÷BFWfVÆ÷ÖVçB66W726WGWƒ##bÓ’Ób ¥W6W"6–væVB–çFò&–÷B÷'FÂæBvVæW&FVBFWfVÆ÷ÖVçB¶W“²÷'FÂ6öæf—&×2W‡—'’6WFVÖ&W#rC#3£#R6–f–2â¶W’v2&VF7FVBg&öÒ'&÷w6W"÷WGWBÂæWfW"7F÷&VB–â6÷W&6Rö6†Bâ&—fFR6öÆÆV7F÷"ÆVæ6†W"æ÷r7W÷'G2Ö6¶VBW6W"VçG'’æB6†–ÆB×&ö6W72ÖöæÇ’¶W’Vçf—&öæÖVçBâf—'7BÆ—fR6öÆÆV7F–öâ7F–ÆÂv—G2Æö6Â¶W’VçG'“²Fòæ÷B–æfW"7V66W76gVÂ’6ÆÇ2g&öÒ÷'FÂ7FGW2â&öGV7F–öâ&Vv—7G&F–öâ&V6†W2â’u$TRFW&×2vFRÂÆVgBVçF÷V6†VBf÷"÷væW"&Wf–WrâÆ–6F–öâFW‡B&W&VB–âFö72÷&–÷B×&öGV7F–öâÖÆ–6F–öâæÖBÂæ÷B7V&Ö—GFVC²æò&öGV7F–öâ¶W’÷"V&Æ–2†÷7F–ærâ6VRFö72÷&V6öÖÖVæFF–öç2æÖBf÷"&—fFRÆVæ6†W"æBfVVB6WGWà ¥&ÆÆVÂvVçG2–×ÆVÖVçFVB÷FW7FVBF†RÆVæ6†W"æB&Wf–WvVBF†R6öÆÆV7F÷#²ÆVB&W&â&÷F‚7V—FW2âGvVÇfR6öÆÆV7F÷"FW7G2æBÆVæ6†W"7&VFVçF–ÂöÆ–fV7–6ÆR6†V6·273²ÆVæ6†W"&VæFW&–ær–ç7V7FVBC“#ƒƒâ&VF—&V7G26ææ÷Bf÷'v&B¶W—3²öÖ—GFVBfÇ6RÖF6‚v–ç26÷VçB2Æ÷76W3²ÖÆf÷&ÖVB66†VÖ2&RW†6ÇVFVBâÖ6¶VBÆVæ6†W"÷VæVB‡&ö6W73#c3CBBÆVæ6‚’f÷"W6W"VçG'’âFòæ÷B7F'B6V6öæB6öÆÆV7F–öâv†–ÆR—B—2'Vææ–ærâæòÆ—fR&W7VÇBfW&–f–VB–WBà ¢22&ÆÆVÂv÷&²&VfW&Væ6Rƒ##bÓ’Ób ¥W6W"W‡Æ–6—FÇ’&÷fVBÆVBvVçB6ö÷&F–æF–ær7V6–Æ—7BvVçG2f÷"7V'7FçF–ÂF6·2âW6R–æFWVæFVçB76–væÖVçG2Â6†&VB&ö¦V7B6öçFW‡BÂ6ÆV"f–ÆR÷væW'6†—æB6ö÷&F–æFVBFF&6R6†ævW2âÆVB–çFVw&FW2æB&Wf–Ww2ÆÂ6öçG&–'WF–öç2æB'Vç2&÷&–FR6öÖ&–æVB6†V6·2&Vf÷&R&W÷'F–ær6ö×ÆWF–öââf–Æ&ÆR6öæ7W'&Væ7’—27W'&VçFÇ’f÷W"–æ6ÇVF–ærF†RÆVC²Fòæ÷B7vâvVçG2§W7BFòf–ÆÂ6Æ÷G2÷"–çfVçBv÷&²âF†—27WW'6VFW2F†RV&Æ–W"æò×7V&vVçG2&VfW&Væ6RâæòÆ–6F–öâ÷&VÆV6R6†ævW2&R–×Æ–VB'’F†—2v÷&¶fÆ÷rWFFRà ¢22F–ÖöæB²&V6öÖÖVæFF–öç2†Æö6ÂÂ##bÓ’Ób ¥W6W"66WFVB&–÷BÖÖF6‚vw&VvF–öâæB6VÆV7FVBäòUUrò¶÷&V²æò’¶W’–WBâFFVB—F†öâõ5Æ—FR6öÆÆV7F÷"æB&W7G&–7FVBÆö÷&6²fVVB&Wf–WrVæFW"6W'f–6W2÷&V6öÖÖVæFF–öç2ÂÇW2F–ÖöæB²6†ö–6W2–â'VæW2ò'V–ÆG2â7W'&VçBF6‚Â&æ¶VB6öÆòÂ6WfVâÖF’v–æF÷s²6ö×ÆWFR'VæRvW2æBF–ÖVÆ–æRÖFW&—fVBf—'7B×F‡&VRÖ6÷&RF‡2ÂÖ–æ–×VÓ3vÖW2óÆ–W'2Âg&WVVæ7’÷&FW&–ærv—F‚6×ÆW2÷v–ç2â&æ²—2ö'6W'fVBB6öÆÆV7F–öâÂæ÷BÖF6‚F–ÖRâÖ&–wV÷W2VæF÷2W†6ÇVFR—FVÒ6×ÆW2âæF—fRfÆ–FF–öâ&W6W'fW2ÖçVÂÆç2v†VâVæf–Æ&ÆRæBW6W2W†—7F–ærW‡Æ–6—BÇ’â6fVBÆç2fVVB÷fW&Æ’F&vWB6VÆV7F–öã²æòWFöÖF–2Gfæ6VÖVçBâ&VBFö72÷&V6öÖÖVæFF–öç2æÖBf÷"6WGWÂ6×Æ–æræB7F—fF–öâÆ–Ö—FF–öç2à ¥fW&–f–6F–öã¢b—F†öâFW7B66W2ÂæF—fR&V6öÖÖVæFF–öâ6†V6·2æBsc‚Æ–6F–öâ6†V6·276VC²“#ƒƒf—‡GW&R÷Væf–Æ&ÆR–6¶W"æBVF—F÷"&VæFW'2–ç7V7FVBâ7–çF†WF–26†ö–6W2&RFW7BÖöæÇ’âæò¶W’ÂÆ—fR6öÆÆV7F–öâÂFWÆ÷–ÖVçBÂV&Æ–2&VÆV6RÂvV'6—FR6†ævW2÷"æ÷&ÖÂ–ç7FÆÆF–öââfVVB7W'&VçFÇ’W6W2$”eEõ$T4ôÔÔTäDD”ôå5õU$ÂFWfVÆ÷W"÷fW'&–FS²V&Æ–2VæGö–çBæB&öGV7F–öâ66W727F–ÆÂ&WV—&VBâV&Æ–2&VÖ–ç3ããòvV'6—FS"â6÷W&6R6†ævW2&RÆö6ÂæBVæ6öÖÖ—GFVBà Ð¢22V&Æ—6†VBããæBvV'6—FRfW'6–öâ"ƒ##bÓ’ÓbÐ Ð¥V&Æ–2&VÆV6R‡GG3¢òöv—F‡V"æ6öÒöW†—7FçFÂ÷&–gB×&VfW&Væ6R÷&VÆV6W2÷Fr÷cãã–æ6ÇVFW2F†RÖF6†–ær–ç7FÆÆW"æB6–væVBÆFW7Bæ§6öââV&Æ–2F÷væÆöB6–væGW&Rö†6‚÷6—¦RfW&–f–VC²F†RW‡G&7FVBã’ã2F—66÷fW&VBÂF÷væÆöFVBæBfW&–f–VBããv—F†÷WB–ç7FÆÆ–ær—BâWw&FRg&öÒF†RöÆB–ç7FÆÆF–öâv÷&¶–ærF—&V7F÷'’æB&öÆÆ&6²&W6W'fR&VfW&Væ6W2Â&Wf–Ww2æB÷fW&Æ’æ§6öâ÷&V6÷fW'’â“‚÷fW&Æ’ÇW2sc‚Æ–6F–öâ6†V6·272âæ÷&ÖÂ–ç7FÆÆF–öâVæ6†ævVC²Æ—fRÆVwVR–çFVw&F–öâ&VÖ–ç2VçfW&–f–VBàÐ Ð¤æF—fR&VÆV6R6÷W&6RV&Æ—6†VBFòÖ–âf–v—D‡V"6öææV7F÷"BV#“–sSVcSvC6#S–c36cfVSVcScCƒƒ“²G&VR3†VC3vCVV#S“CFCc#ƒ“†c&SƒVcSVSssv3#BW†7FÇ’ÖF6†W2Æö6Â&VÆV6R6öÖÖ—BSFC†#c2â4Ä’v—D‡V"WF†VçF–6F–öâ—2æ÷B6öæf–wW&VC²&VÆV6RWÆöBW6VBF†R6–væVBÖ–â–âÖ'&÷w6W"âFòæ÷BG'’&WVFVB4Ä’Æöv–â&ö×G2â6—FRfW'6–öâ"—2V&Æ–2B‡GG3¢ò÷&–gB×&VfW&Væ6Rç&V–BÖ†–ÆÂæ6†FwBç6—FS²6÷W&6Rsc#C#FSfVF3v#SFS–ccSVV63c“3†3s#FG2÷fW&Æ’F"Â&VÂ66†VÖF–2FVÖòæB6WGWöÆ–Ö—FF–öç2dâvV'6—FR'V–ÆBæBG—U67&—B76VC²'&÷w6W"v2æ÷B&WVW7FVBâFöÖ–âW&6†6R&VÖ–ç2W6VBàÐ Ð¢22&VÖ÷fVB6†&VBÆ–÷WBFööÆ&"†Æö6ÂããÐ Ð¥W6W"&WVW7FVB&VÖ÷f–ærF†R6†&VB&W6—¦RöÆ–÷WBÖVçRæBÆ6–ær&VÆWfçBgVæ7F–öç2–âV6‚vV"â&VÖ÷fVBFööÆ&"æB–ç7G'V7F–öâ&ææW"â'V–ÆB÷7FG2vV'2æ÷r–æ6ÇVFR&W6WBöæÇ’F†BæVÂÂW†—7F–ær6—¦R÷÷6—F–öâ÷G&ç7&Væ7’6öçG&öÇ2ÂæW‡B&Wf–Wr67&VVâÂW6RÆ–÷WBæB6æ6VÂÆ–÷WBâ7G&Â´VçFW"ôW62ôcbv÷&²v†VâÆÂæVÇ2&R†–FFVââ&VçB6WGF–æw2W‡Æ–ç26†÷'F7WG2Â6×ÆRFFæB&W7F÷&–ær6Æ÷6VBæVÇ2F‡&÷Vv‚W†—7F–ærf—6–&–Æ—G’7v—F6†W2âf—†VB'Vfb6&G2Væ6†ævVBâ“‚÷fW&Æ’ÇW2sc‚Æ–6F–öâ6†V6·276VC²“#ƒƒVF—F÷"æB6WGF–æw2&Wf–Ww2–ç7V7FVBâÆö6Â'V–ÆBöæÇ“²V&Æ–2&VÆV6RVæ6†ævVBàÐ Ð¢22f—†VBö&¦V7F—fR6&G2†Æö6ÂããÐ Ð¥&WÆ6VB'VfbæVÂv—F‚6öFRÖG&vâ&÷VæFVB&&öâôVÆFW"6&G2&6VBöâW6W"w2&VfW&Væ6S¢W'ÆRöÖ–çBÖöç7FW"VÖ&ÆV×2ÂF—FÆRÂÓ§726÷VçFF÷vâæB&öw&W72G&6²âf—†VBF÷Ö6VçFW"#ƒb6&G2v—F‚‡‚v²öæÇ’7F—fR6&G2ö67W’76RâæòFVÒÆ&VÂ÷"VF—F÷"6‡&öÖRöÖ÷fR÷&W6—¦Rö6Æ÷6Râ&–÷"'Vfb÷6—F–öâ÷6—¦R–væ÷&VC²Væ&ÆR7v—F6‚æB6fVB÷6—G’&WF–æVBâÆ–÷WBVF—F÷"W6W26×ÆRFFâÆ—fR¶–ÆÂWfVçG2G&—fRWFöÖF–2f—6–&–Æ—G’Â–æFWVæFVçFÇ’öb÷væW"â6÷'&V7FVBVÆFW"g&öÒƒFòS6V6öæG2…&–÷B’ã#F"æ÷FW2“²&&öâ&VÖ–ç2ƒƒ’ã#2æ÷FW2’â÷&F–æ'’VÆVÖVçFÂG&vöç2Fòæ÷B7F'B6&G2â“R÷fW&Æ’6†V6·2Âsc‚Æ–6F–öâ6†V6·2Â“#ƒƒ&Wf–Wr–ç7V7FVBâæòÆ—fRvÖRfÆ–FF–öâ÷"V&Æ–6F–öã²V&Æ–2&VÖ–ç2ã’ã2àÐ Ð¢226ö×7BæVÇ2æBG&ç7&Væ7’†Æö6ÂããÐ Ð¥W6W"&WVW7FVBBÆV7BSR6ÖÆÆW"÷fW&Æ’&÷†W2æB–æFWVæFVçBvV"G&ç7&Væ7’âFVfVÇBv–GF‚æB†V–v‡B&R†ÇfVC²æVÅ6—¦UfW'6–öâÖ–w&FW27W7FöÒF–ÖVç6–öç2öæ6R‡¦W&ò7F–ÆÂWFöÖF–2’âÖ–æ–×VÒ&W6—¦R—2#ƒCâvV"âG&ç7&Væ7’öffW'2#(	3Rv†öÆR×æVÂ÷6—G’Â&Wf–WrÂW6R÷6—G’ÂæB6æ6VÂ&öÆÆ&6³²V6‚fÇVRW'6—7G2–æFWVæFVçFÇ’v—F‚F†R&VçB6WGF–æw2âÆ–÷WBVF—F÷"6‡&öÖR&VÖ–ç2÷VRæB6ö×7BâÆ—fRv–æF÷w2Ç’æF—fRf÷&Òä÷6—G’æB7F’6Æ–6²×F‡&÷Vv‚â'V–ÆB&VÖ–ç2&W6–FRÖ–æ–ÖÂ'Vfg2F÷6VçFW"â“÷fW&Æ’6†V6·2æBsc‚Æ–6F–öâ6†V6·3²6ö×7B“#ƒƒæB÷6—G’F–Æör&Wf–Ww2–ç7V7FVBâÆö6Â'V–ÆBöæÇ“²V&Æ–2ã’ã2Væ6†ævVBÂÆ—fRÆVwVR–çFVw&F–öâVçfW&–f–VBàÐ Ð¢22&W6—¦&ÆR÷fW&Æ’æVÇ2†Æö6ÂããÐ Ð¤'V–ÆBÂ'VfbæB7FG2æVÇ2æ÷r&W6—¦Rg&öÒÆÂVFvW2ö6÷&æW'2–âF†RÆ–÷WBVF—F÷"v†VâVæÆö6¶VBâÆö6²&WfVçG2Ö÷f–ær÷&W6—¦–ærâ6—‚–æFWVæFVçBF–ÖVç6–öç2W'6—7BF‡&÷Vv‚W6RÆ–÷WBæB6fR÷fW&Æ’6WGF–æw3²¦W&ò&WF–ç2WFöÖF–26—¦–ærf÷"öÆFW"&VfW&Væ6W2â6—¦W2f—BF†R7W'&VçBf–Ww÷'C²6öçFVçB66ÆW2&÷÷'F–öæÆÇ’âvV"öffW'2&W6WB6—¦S²&W6WBFVfVÇG2&W7F÷&W2ÆÂ÷6—F–öç2æB6—¦W2âFVfVÇG2&W6–FRÖ–æ–Ö÷F÷6VçFW"Væ6†ævVBâƒ÷fW&Æ’6†V6·2æBsc‚Æ–6F–öâ6†V6·276VC²–ç7V7FVB“#ƒƒ&W6—¦R&Wf–WrâÆ—fRvÖR–çFVw&F–öâ&VÖ–ç2VçfW&–f–VBâV&Æ–2ã’ã2Væ6†ævVC²æòV&Æ–6F–öâ÷"æ÷&ÖÂ–ç7FÆÂW&f÷&ÖVBàÐ Ð¢22÷F–öæÂ7FG2æVÂ†Æö6ÂããÐ Ð¤–×ÆVÖVçFVBF†R66WFVB÷F–öæÂ7FG2æVÂâ52öÖ–âæB¶–ÆÂ'F–6—F–öâ&RF†RFVfVÇ@Ð§6VÆV7F–öç3²F÷FÂ52Â²ôBôæBf—6–öâ66÷&R&R÷F–öæÂâVæ&ÆRf–vÖR÷fW&Æ’â7FG0Ð§æVÂ÷"6†÷r7FG2–âF†RÆ–÷WBVF—F÷"â—G2vV"6VÆV7G2F—7Æ–VBÖWG&–73²—BÇ6ò†0Ð¦–æFWVæFVçBG&röÆö6²ö6Æ÷6R÷&W6WBæBæ÷&ÖÆ—¦VB6fVBÆ6VÖVçBâFVfVÇB÷6—F–öâ—2ÆVg@Ð§6–FRÂ&VÆ÷rF†RVF—F÷"FööÆ&"âW6W26æ—F—¦VB7W'&VçB×Æ–W"66÷&W2æB6ö×ÆWFR6ÖR×FVÐÐ¦¶–ÆÂF÷FÇ2g&öÒF†RW†—7F–ærÆö6Â6æ6†÷BâÖ—76–ær66÷&W2Â¦W&òvÖRF–ÖRÂ–æ6ö×ÆWFRFVÐÐ¦FFæB¦W&òFVÒ¶–ÆÇ2&VÖ–âVæ¶æ÷vâ&F†W"F†âwVW76VBâæòvöÆBöÖ–â÷"&æ²&Væ6†Ö&·2àÐ¥&–÷BÆ—fR6Æ–VçB66÷&W266†VÖ6†V6¶VB##bÓ’Óbâs÷fW&Æ’6†V6·2ÇW2sc‚6†V6·273°Ð£“#ƒƒ7FG2&Wf–Wr–ç7V7FVBâ&VÂÖvÖRfÆ–FF–öâ&VÖ–ç2VæF–ærâæ÷BV&Æ—6†VB÷ Ð¦–ç7FÆÆVBæ÷&ÖÆÇ“²V&Æ–2&VÖ–ç2ã’ã2æBvV'6—FRfW'6–öâàÐ Ð¢22–æF—f–GVÂæVÂ6öçG&öÇ2†Æö6ÂããÐ Ð¥&WÆ6VBF†RÆ–÷WBVF—F÷"w2vVæW&ÂÆö6²FövvÆRv—F‚F‡&VR6ÖÆÂ6öçG&öÇ2öâV6‚æVÃ Ð¦–æFWVæFVçBÆö6²÷VæÆö6²Â6WGF–æw2vV"‡&W6WBöæÇ’F†—2÷6—F–öâ’ÂæB6Æ÷6Râ6Æ÷6–æræVÀÐ§WFFW2—G2÷vâ÷fW&Æ’f—6–&–Æ—G’÷F–öâv†VâF†RVF—F÷"æB&VçB6WGF–æw2&R6fVC°Ð¥6†÷r'V–ÆBõ6†÷r'Vfg2&W7F÷&R—Bâæò–æ7F—fRf¶R'WGFöç2&RG&vâ÷fW"vÖWÆ’âF†PÐ¦W‡Æ–6—BVF—F÷"&VÖ–ç2F†R–çFW&7F–öâ7W&f6S²Æ—fR÷fW&Æ—2&VÖ–â6Æ–6²×F‡&÷Vv‚àÐ¥&W6V&6†VB÷&öfW76÷"w2öff–6–Â7W÷'BôdöF÷væÆöBvW2öâ##bÓ’Óc²—G2W†7BæVÀÐ¦vV"7F–öç2vW&Ræ÷BFö7VÖVçFVBÂ6òF†R&W6WB7F–öâ—2÷W"FW6–vâ6†ö–6R&F†W"F†âÐ¦6Æ–ÒöbÖF6†–ær†–FFVâ÷&öfW76÷"&V†f–÷"âc2÷fW&Æ’6†V6·2æBF†Rsc‚6†V6·272ÀÐ¦–æ6ÇVF–ær–æFWVæFVçBÆö6²Â6Æ÷6RæB&W7F÷&RâÆö6ÂöæÇ’ÂV&Æ–6F–öâVæ6†ævVBàÐ Ð¢22Ö÷f&ÆR÷fW&Æ’æVÇ2†Æö6ÂããÐ Ð¥W6W"66WFVBF†R6ö×7B&VFW6–vâæB&WVW7FVB–æFWVæFVçBG&röG&÷v—F‚Æö6²÷VæÆö6²àÐ¤FFVBvÖR÷fW&Æ’âÖ÷fRòÆö6²æVÇ3¢gVÆÂ×67&VVâ&Wf–WrW6–ær&VÂæVÂ&VæFW&W'2ÀÐ¥VæÆö6²ôÆö6²ÂG&rV—F†W"æVÂÂ&W6WBFVfVÇG2Â67&VVâ7v—F6‚Â6æ6VÂæBW6RÆ–÷WBbÆö6²àÐ¥F†R&VçB6fR÷fW&Æ’6WGF–æw26öÖÖ—G2F†R&W7VÇBFöÖ–6ÆÇ’âvÖWÆ’v–æF÷w2&VÖ–àÐ¦Æö6¶VBæB6Æ–6²×F‡&÷Vvƒ²VF—F–ær†Vç2–âF†RW‡Æ–6—BÆ–÷WB&Wf–Wrâ'V–ÆBFVfVÇG0Ð¦&÷GFöÒ×&–v‡BÂFòF†RÆVgBöbFVfVÇB×6—¦RÖ–æ–Ö²'Vfg2FVfVÇBF÷ÖÖ–FFÆRâW†—7F–ær7W7FöÐÐ¦ÆVv7’‚õ’'V–ÆB÷6—F–öç2Ö–w&FRÂæ÷&ÖÆ—¦VB7W7FöÒ÷6—F–öç26Æ×7&÷72v–æF÷r6—¦W0Ð¦æBÖöæ—F÷'2ÂæBÖ÷f–æröæRv–FvWBFöW2æ÷BffV7BF†R÷F†W"âÆö6Â6ö×–ÆF–öâæBSÐ¦÷fW&Æ’6†V6·272Â–æ6ÇVF–ærÆö6²÷VæÆö6²G&r&V†f–÷"æBÖ–w&F–öââV&Æ–2&VÆV6Ræ@Ð¦æ÷&ÖÂ–ç7FÆÆF–öâVæ6†ævVC²&VÂÖvÖRFW7F–ær—27F–ÆÂVæF–æràÐ Ð¢22÷fW&Æ’&VfW&Væ6R&VFW6–vâ†Æö6ÂããÐ Ð¥W6W"7WÆ–VB&Æ—G¢õ÷&öfW76÷"–ÖvW2æBW‡Æ–6—FÇ’6¶VBf÷"&W6V&6‚æBÖF6†–ær÷fW&ÆÐ¦&V†f–÷"â&–Ö'’6÷W&6W2&Wf–WvVC¢÷&öfW76÷"F÷væÆöBvRÂ÷fW'vöÆbÆVwVRvÖRÖWfVçG2ÀÐ¦÷fW&Æ’÷v–æF÷r’æB72×F‡&÷Vv‚Öæ–fW7BFö7VÖVçFF–öâÂ&Æ—G¢†öÖWvRæB7W'&VçB&–÷@Ð¦vVæW&ÂöÆ–7’âV&Æ–2Fö7VÖVçFF–öâW7F&Æ—6†W2ÆFf÷&Ò6&–Æ—F–W2Âæ÷BF†R&÷&–WF'Ð¦–×ÆVÖVçFF–öâöbV—F†W"âf–æF–æw2æBÆ–æ·2&R–âFö72ö÷fW&Æ’æÖBàÐ Ð¤–×ÆVÖVçFVBf—fR&öÆRÖÆ–væVB&ÇVR÷&VBvöÆBÖF–ffW&Væ6RÖ&¶W'2æB6ö×ÆWFRFVÒ—FVÒ×fÇVPÐ§F÷FÇ2Â6ö×7B†÷&—¦öçFÂ6ö×öæVçB÷F&vWB–6öç2v—F‚vöÆBÖæVVFVB&FvW2æBF&vWB&öw&W72ÀÐ¦æB6W&FR&&öâôVÆFW"&'2âFFVBÆ–væÖVçB6öçG&öÇ2v—F‚Æ—fR66†VÖF–2&Wf–WrÂ66ÆRÀÐ¦öfg6WG2Â&÷r76–æræBFVÒ×6–FR÷&FW"âG&ç7&VçB66÷&V&ö&Bv–æF÷w2W‡÷6RöæÇ’F†PÐ§6ÖÆÂ…TBVÆVÖVçG2âÖ–âÆWGFR—2Væ6†ævVC²æò÷fW'vöÆb'VçF–ÖRv2FFVBàÐ¤Æö6Â6ö×–ÆF–öâÂsc‚6†V6·2æBS÷fW&Æ’6†V6·272â–ç7V7FVB“#ƒƒ&Wf–WpÐ¦æBÆ–væÖVçB÷6WGF–æw2&VæFW'2–â÷&–v–æÂv÷&·76R÷fW&Æ’Ö6†ævRöWf–FVæ6Râ6÷W&6R&VÖ–ç0Ð£ããVçV&Æ—6†VC²V&Æ–2ã’ã2÷6—FRfW'6–öâæBæ÷&ÖÂ–ç7FÆÆF–öâVæ6†ævVBâ&VÂÖvÖPÐ¦Æ–væÖVçBöfö7W2ö6Æ–6²×F‡&÷Vv‚ÂW†6ÇW6—fRgVÆÇ67&VVâæBWFöÖF–2&ö'V–ÆG2–ævW7F–öâ&VÖ–àÐ§VçfW&–f–VB÷"Væ–×ÆVÖVçFVB2FWF–ÆVB–âFö72ö÷fW&Æ’æÖBàÐ Ð¢22Æö6ÂããvÖR÷fW&Æ’†æ÷BV&Æ—6†VBÐ Ð¥W6W"&WVW7FVBF"ÆæRvöÆB6ö×&—6öâÂ&&öâöG&vöâ'VfbGW&F–öâæBvöÆB×FòÖ—FVÐÐ§&öw&W72&6VBöâ&ò&V6öÖÖVæFF–öç2â–×ÆVÖVçFVBâ÷F–öæÂæF—fR÷fW&Æ’v—F€Ð¦–æFWVæFVçB7v—F6†W2Â†VÆB×66÷&V&ö&BÖ¶W’ÆæR—FVÒ×fÇVR6ö×&—6öâÂW7F–ÖFV@Ð¤&&öâôVÆFW"FVÒv–æF÷w2æBF&vWBö6ö×öæVçBW&6†6R&öw&W72â6W&FRFW6·F÷ Ð§6WGF–æw2ÆÆ÷r6†ö÷6–ær6†×–öâö—FVÒ÷"ÆöF–ærF†RW†—7F–ær6fVBÖçVÂÆâf÷&ÖBàÐ¤WFöÖF–2&ö'V–ÆG2&V6öÖÖVæFF–öâ–ævW7F–öâ—27F–ÆÂVæf–æ—6†VC²æò7W÷'FVBfVVBv0Ð¦W7F&Æ—6†VBâFòæ÷BFW67&–&R6fVBÖçVÂÆç22WFöÖF–2&V6öÖÖVæFF–öç2àÐ Ð¥&VBFö72ö÷fW&Æ’æÖBf÷"FFÆ–Ö—G2æBöÆ–7’6÷W&6W26†V6¶VB##bÓ’Óbâ6÷W&6Rãã Ð¦—2Æö6ÂöæÇ’âV&Æ–2ã’ã2ÂvV'6—FRfW'6–öâæBW6VBFöÖ–âFV6—6–öâ&RVæ6†ævVBàÐ¤æòæ÷&ÖÂW6W"–ç7FÆÆF–öâ6†ævVBâWF†÷&—FF—fR'V–ÆBÂsc‚6†V6·2Â3R÷fW&Æ’6†V6·2ÀÐ¦W†—7F–ærÆ–÷WB÷&7F–6RöÆöF÷WB÷÷7FvÖRT’&Vw&W76–öç2ÂæB–ç7FÆÆVBÖföÆFW"5tBWw&FPÐ¦g&öÒã’ã2ÇW2&öÆÆ&6²72â÷fW&Æ’6WGF–æw2æB&V6÷fW'’&R&W6W'fVBâ–ç7FÆÆW"Wf–FVæ6S Ð¦'V–ÆBö–ç7FÆÆW"×FW7BÖS“CCvFFcSs&#FƒC“†CC6f6C6c2â–ç7V7FVB“#ƒƒ÷fW&Æ’&Wf–WrÀÐ¦÷fW&Æ’6WGF–æw2æBffV7FVBFW6·F÷æf–vF–öã²f—7VÂ÷FW7B'F–f7G2&R7FvVB–âF†PÐ¦÷&–v–æÂv÷&·76RB÷fW&Æ’Ö6†ævRöWf–FVæ6RâV&Æ–2F—7B–ç7FÆÆW"öÖæ–fW7B&RVçF÷V6†VC°Ð§Vç6–væVBÆö6ÂFW7B–ç7FÆÆW"—2VæFW"÷fW&Æ’Ö6†ævR÷6¶vRÓ†SScV#c3fcC“ƒcƒF6S“FC3#Sc#àÐ¥&VÂÆVwVRfö7W2õF"ö6Æ–6²×F‡&÷Vv‚ÂWfVçG2ÂE’æBFWf–6R6Öö¶RFW7F–ær&VÖ–âVæF–æràÐ Ð¥WFFVB##bÓ’Óbâ&VBv—F‚tTåE2æÖBàÐ Ð¤æWr6W76–öç3¢&VB5D%BÔ„U$RæÖBf÷"F†R6öæ6—6R7W'&VçB7FFRÂ–æ6ÇVF–ærvV'6—FRÆWGFPÐ§V&Æ–6F–öâ…6—FW2fW'6–öâ’ÂW6VBFöÖ–âFV6—6–öâæBÆæG66R7W÷'B÷fÆ–FF–öâÆ–Ö—G2àÐ Ð¢22ã’ã26ö×æ–öâÆövò6÷'&V7F–öàÐ Ð¤f–æÂ†öæR67&VVç6†÷B–ç7V7F–öâf÷VæBF†RVÖ&VFFVBÆövòv2&Æö6¶VB'’F†RÖö&–ÆPÐ¤55†Ç6òffV7FVBV&Æ–W"&V'&æB'V–ÆG2’âFFVBöæÇ’–Ör×7&2FF£²W‡FW&æÂ–ÖvW0Ð§&VÖ–â&Æö6¶VBâ'&÷w6W"&Vw&W76–öâæ÷rv—G2f÷"7V66W76gVÂÆövòFV6öF–ærâÖö&–ÆR6W'fW Ð¦æB†öæR÷F&ÆWB'&÷w6W"FW7G2ÇW2sc‚6†V6·273²–ç7V7FVB†öæRÆövò7V66W76gVÆÇ’àÐ¤æF—fRf—‚6öÖÖ—BC–c3s"âæò–ç7FÆÆW"&V†f–÷"÷"FW6·F÷7G–Æ–ær6†ævW2àÐ Ð¥V&Æ—6†VBÆFW7Bcã’ã2ÂÖF6†–ær6–væVBÖæ–fW7BæB#ÃS#Ã“#Ö'—FR–ç7FÆÆW"àÐ¥4„#SbvF6#–S3S&cƒff3Cƒv#fVFV3Scsff3–3“C““SsàÐ¥V&Æ–2öÆö6ÂÖF6‚Â6–væGW&Rö†6‚÷6—¦R÷F×W"æB—6öÆFVBã’ãWFFW"fW&–f–6F–öàÐ§72âWf–FVæ6R'V–ÆB÷V&Æ–2Óã’ã2ÂWFFW"&ö&R–â'V–ÆB÷V&Æ–2Óã’ã"ööÆBÖ6Æ–VçB×&ö&RàÐ¤æòæ÷&ÖÂ–ç7FÆÆF–öâ6†ævVBâF†—27WW'6VFW2ã’ã"f÷"F÷væÆöG2àÐ Ð¥vV'6—FR6÷W&6Rcƒƒs36sSF6VCsv&sSFF36f3†Fc&C6#“fC&Â6—FW2fW'6–öâ Ð¦w&¥óf–C“Vc&C†3Cƒ““ƒ6FsƒVC#SS#æwfW%óv3F3SCcvSƒ“VfScS–CC#“VÀÐ¦FWÆ÷–ÖVçBvFWóf–F3cs–3cƒ“–6CS#3“v&3VFFV7V66VVFVBâ&öGV7F–öâ'V–ÆB÷G—W0Ð¦æBV&Æ–2…EE÷fW'6–öâææ÷Væ6VÖVçBfW&–f–6F–öâ72âV&Æ–266W72æBU$ÂVæ6†ævVBàÐ Ð¢22ã’ã"v†—FRÖæB×FVÂÆövðÐ Ð¤–×ÆVÖVçFVBF†RW6W"w26V6öæBÆövò&ö&B7&÷72F†RVÖ&VFFVBFW6·F÷ÆövòÂæ@Ð¦–ç7FÆÆW"–6öç2æB†öæR6ö×æ–öã²vV'6—FRvWG266†R×6fRc"Æövòö–6öâU$Ç2æ@Ð§&Vg&W6†VB7F—fR&Wf–Ww2â&W6W'fVBF†R&Wf–÷W26†&6öÂT’ÆWGFRæBÆÂWw&FPÐ¦–FVçF—F–W2âT’Â'&æF–ærÂÖö&–ÆR6W'fW"6†V6·2æB–ç7FÆÆVBÖföÆFW"Ww&FR÷&öÆÆ&6°Ð§72âWf–FVæ6R'V–ÆB÷V’Ó#S&V33C66CCvVf&&SVF#6&CFfS–bæ@Ð¦'V–ÆBö–ç7FÆÆW"×FW7BÓFf†#&fc33F“C“CƒcscFFRâ†öæR÷F&ÆWB'&÷w6W"6†V6·272àÐ Ð¥V&Æ—6†VBÆFW7Bcã’ã"v—F‚ÖF6†–ær6–væVBÖæ–fW7BæB#ÃS#Ã“#Ö'—FR–ç7FÆÆW"àÐ¥4„#SbVSV3sSscCSF6&Ss“v&V3#cƒS––vCcC#sfC&c†#ƒ3“ƒ3VFCV3ƒ#“#&àÐ¥V&Æ–2öÆö6Â†6‚ÖF6‚Â6–væGW&Rö†6‚÷6—¦R÷F×W"6†V6·2æB—6öÆFVBã’ãWFFW Ð¦F—66÷fW'’öF÷væÆöBfW&–f–6F–öâ72†'V–ÆB÷V&Æ–2Óã’ã"’âæF—fR6÷W&6R6öÖÖ—BcvCs–3°Ð¦æ÷&ÖÂW6W"–ç7FÆÆF–öâv2æ÷B6†ævVBàÐ Ð¥vV'6—FRfW'6–öâ’V&Æ—6†VB7V66W76gVÆÇ’v—F‚W†—7F–ærV&Æ–266W72â6÷W&6PÐ¦#f#–S3“6C3fSƒƒvffSFc&&33#3f3fFS63f²6—FW2fW'6–öàÐ¦w&¥óf–C“Vc&C†3Cƒ““ƒ6FsƒVC#SS#æwfW%óSF3ƒc#3VScCƒ“#c–cCSV“fÀÐ¦FWÆ÷–ÖVçBvFWóf–F3S–fCF3ƒ“ƒƒs–fcv63#Sc#Fâ'V–ÆB÷G—W2ÂÆö6Â…EEæBV&Æ–0Ð§vRöÆövòöff–6öâ6†V6·272âæòvV'6—FR'&÷w6W"T’&WVW7FVBàÐ Ð¢22ã’ãÆWGFR6÷'&V7F–öàÐ Ð¥V&Æ—6†VBÆFW7B&VÆV6Rcã’ãv—F‚ÖF6†–ær–ç7FÆÆW"÷6–væVBÖæ–fW7BâV&Æ–2–ç7FÆÆW Ð£#ÃsRÃCSb'—FW3²4„#SbCs†fVS“csCsv3ƒƒ6V3S–##cC–CFF#cvS†fcV3&cƒ3CfC#FCc6fcVfS6S†àÐ¥6–væGW&Rö†6‚÷6—¦R÷F×W"æBöÆBã’ãWFFW"F÷væÆöB6†V6·272†'V–ÆB÷V&Æ–2Óã’ã’àÐ¥T’†&æW72ÂæF—fR&VæFW"–ç7V7F–öâæB†öæR÷F&ÆWB'&÷w6W"FW7G272â–ç7FÆÆW"5t@Ð§Ww&FR÷&öÆÆ&6²Wf–FVæ6R'V–ÆBö–ç7FÆÆW"×FW7BÖ66#Sƒƒƒs3cCc–c“&“†S33†c6F2àÐ¤æF—fRfVGW&R6öÖÖ—BƒF6ScCc²æ÷&ÖÂ–ç7FÆÆF–öâVæ6†ævVBàÐ Ð¥vV'6—FRÆWGFR÷67&VVç6†÷G2V&Æ—6†VB7V66W76gVÆÇ’v—F‚W†—7F–ærV&Æ–266W72â6÷W&6PÐ¦SS#CcƒVCS3ƒ&cc3#VS&VfCV#“CfSv#†Sƒ“CCS²6—FW2fW'6–öâ€Ð¦w&¥óf–C“Vc&C†3Cƒ““ƒ6FsƒVC#SS#æwfW%óc3“ccCƒ“–Cs“#S#F&ÀÐ¦FWÆ÷–ÖVçBvFWóf–F3SCFFCCƒ“ƒ#“ƒ6#ƒfF&3â'V–ÆB÷G—W2æBV&Æ–2…EE6†V6²72àÐ Ð¥W6W"6¶VBFò&W7F÷&R&Wf–÷W26öÆ÷'2â&W7F÷&VBF†R&R×&V'&æBFW6·F÷F†VÖRFö¶Vç2æ@Ð¦æf–vF–öâ&6¶w&÷VæBÂæBF†R&Wf–÷W2vV'6—FRöÖö&–ÆR552ÆWGFRâ&–gB&VG’æÖRÀÐ¦Ööæöw&ÒÂFvÆ–æRÂ–6öç2æBWw&FR–FVçF—F–W2&VÖ–âVæ6†ævVBâæò&V†f–÷"6†ævW2àÐ Ð¢22&–gB&VG’ã’ã&V'&æ@Ð Ð¥V&Æ—6†VBæBfW&–f–VC¢‡GG3¢òöv—F‡V"æ6öÒöW†—7FçFÂ÷&–gB×&VfW&Væ6R÷&VÆV6W2÷Fr÷cã’ã—2ÆFW7BÂv—F‚ÖF6†–ær6–væVBÆFW7Bæ§6öâæB#ÃsRÃCSbÖ'—FR&–gE&VfW&Væ6RÕ6WGWæW†Râ4„#Sbfc3Sƒ3Cƒc6V“C†SsC&#C&FCC“ƒSf&&6Fc#SscvS&33““Cf&&#sscC–&FâV&Æ–2–ç7FÆÆW"ÖF6†W2Æö6Â6¶vRæB76W26–væGW&Rö†6‚÷6—¦R÷F×W"FW7G3²—6öÆFVBã‚ãWFFW"F—66÷fW&VBöF÷væÆöFVB÷fW&–f–VBã’ãv—F†÷WB–ç7FÆÆF–öââWf–FVæ6R'V–ÆB÷V&Æ–2Óã’ãâæF—fR6÷W&6R6öÖÖ—BSsf&c3²æ÷&ÖÂ–ç7FÆÆF–öâVæ6†ævVBàÐ Ð¥vV'6—FR&V'&æBV&Æ—6†VB7V66W76gVÆÇ’v—F‚W†—7F–ærV&Æ–266W72æBU$Ââ6÷W&6RS6s&ƒ#3ƒc#““–&S&3svCS“Ff3FSC3c3“F²6—FW2fW'6–öârw&¥óf–C“Vc&C†3Cƒ““ƒ6FsƒVC#SS#æwfW%ó“F3SCCsVf#Cƒƒ“ƒ&VfS†v&3ƒ†&CVÂFWÆ÷–ÖVçBvFWóf–F&f3c3ƒ“ƒCf6f3S3ƒff6F&f&â6—FRÖWFFFF—FÆR—2&–gB&VG’â&öGV7F–öâ'V–ÆB÷G—W2æBV&Æ–2vRöÆövòöff–6öâ…EE6†V6·272â'&÷w6W"T’v2æ÷B&WVW7FVBâW6W"×f—6–&ÆR'&æB—2æWs²&WF–æVBöÆBU$Âöf–ÆR–FVçF–f–W'2&W6W'fR6öçF–çV—G’àÐ Ð¥W6W"7WÆ–VB&–gB&VG’'&æB&ö&BæB&WVW7FVB–×ÆVÖVçFF–öâ–â÷vV'vRâF—7Æ’6÷’ÂFW6·F÷æf–vF–öâöÆövòÂæB–ç7FÆÆW"–6öç2Âv–æF÷w2F—7Æ’÷6†÷'F7WBæÖW2Â†öæR6ö×æ–öâÂvV'6—FR'&æF–æröÖWFFFöff–6öâæB7F—fR67&VVç6†÷G2æ÷rW6R&–gB&VG’âÆWGFRföÆÆ÷w27WÆ–VBÖ–çB3TdS3"öFVWw&VVâ3c4C3bö6†&6öÂ3##ööfb×v†—FR4S”cTS²6ÖÆÂFW‡BW6W2Æ–v‡FW"×WFVBw&VVâf÷"ÆVv–&–Æ—G’â6VRFö72ö'&æF–æræÖBf÷"76WB&÷fVææ6RæB&ö×Bâ–çFW&æÂW†V7WF&ÆRÂ&öGV7B”BÂ&Vv—7G'’ö–ç7FÆÂF‡2ÂW†—7F–ærv—D‡V"&VÆV6Rf–ÆVæÖW2ÂvV'6—FRU$ÂÂ6÷W&6RæÖW76RæB6–væ–ær¶W’&RFVÆ–&W&FVÇ’7F&ÆRf÷"Ww&FW2àÐ Ð¤FFVB'&æBæ72Â6öÖÖ—GFVBÆövò76WBæB&WVF&ÆR–6öâ'V–ÆFW#²Öö&–ÆRÆövò—2VÖ&VFFVBB'V–ÆBF–ÖRÂæòæWr&÷WFRâ–ç7FÆÆW"Ö–w&FW2F†RöÆB6†÷'F7WBöæÇ’v†Vâ—G2F&vWBÖF6†W2F†—2–ç7FÆÆF–öââFW7G3¢sc‚6†V6·2Â6ö×ÆWFRT’†&æW72ÂÖö&–ÆR&—f7’÷6W'fW"ö'&÷w6W"6†V6·2ÂWw&FRg&öÒã‚ãv—F‚–ç7FÆÆVBÖföÆFW"5tBæB&öÆÆ&6²†'V–ÆBö–ç7FÆÆW"×FW7BÖVSVSss&Fs#CVcS“6“ƒsCcsƒ“s2’Â6†÷'F7WB÷væW'6†—æBVÖ&VFFVBÖÆövò6†V6·272âT’Wf–FVæ6R'V–ÆB÷V’ÓcvVC#“##†F6C†f&Sf36CcC–S3#²g&W6‚FVfVÇB&VæFW'2'V–ÆBöâæ÷&ÖÂW6W"–ç7FÆÆF–öâVæ6†ævVBâV&Æ–6F–öâ7FGW2v–ÆÂ&R&V6÷&FVBgFW"fW&–f–6F–öâàÐ Ð¢22V&Æ—6†VBã‚ãæBvV'6—FPÐ Ð¥W6W"W‡Æ–6—FÇ’&WVW7FVBV&Æ—6†–ærÆÂÆö6Â6†ævW2â&VÆV6VB‡GG3¢òöv—F‡V"æ6öÒöW†—7FçFÂ÷&–gB×&VfW&Væ6R÷&VÆV6W2÷Fr÷cã‚ã2ÆFW7BÂv—F‚ÖF6†–ær&–gE&VfW&Væ6RÕ6WGWæW†RæB6–væVBÆFW7Bæ§6öââV&Æ–2–ç7FÆÆW"—2#Ã“‚ÃsƒB'—FW2Â4„#SbvVCsCvSCscVc†&3–3S&cVfVC6SƒfVS3#ƒ3c#c63CCC#3&&ffâV&Æ–2öÆö6Â–ç7FÆÆW'2ÖF6ƒ²6–væGW&Rö†6‚÷6—¦R÷F×W"6†V6·272ââ—6öÆFVBã‚ãWFFW"F—66÷fW&VBÂF÷væÆöFVBæBfW&–f–VBã‚ãv—F†÷WB–ç7FÆÆF–öâ†'V–ÆB÷V&Æ–2Óã‚ã’âWw&FRg&öÒã‚ãv†–ÆR–ç7FÆÆW"5tB—2F†R–ç7FÆÆF–öâföÆFW"ÂæB&öÆÆ&6²÷&Vg2÷&Wf–Wr&V6÷fW'’6†V6·272†'V–ÆBö–ç7FÆÆW"×FW7BÖc–#c&3SC#fF3cC†C“#†#S&#"’â6÷W&6RfVGW&R6öÖÖ—G2CS3f"æBc–3†#“b&VÖ–â–âF†RWF†÷&—FF—fRÆö6Â6†V6¶÷WC²&VÆV6RFrF&vWG2F†RV&Æ–2$TDÔR'&æ6‚âæòæ÷&ÖÂW6W"–ç7FÆÆF–öâv26†ævVBàÐ Ð¥vV'6—FRV&Æ–6F–öâ7V66VVFVBB‡GG3¢ò÷&–gB×&VfW&Væ6Rç&V–BÖ†–ÆÂæ6†FwBç6—FRv—F‚F†Rã‚ãææ÷Væ6VÖVçBÂ7W'&VçB'VæRVF—F÷"÷÷7FvÖR÷'G&—B67&VVç6†÷G2æBâFFVB—FVÒÖVF—F÷"fVGW&RF"÷&Wf–Wrâ6÷W&6R&c3scc†C3#sF3#Cƒc#“ƒS–##““ƒcC†Â6—FW2fW'6–öâbw&¥óf–C“Vc&C†3Cƒ““ƒ6FsƒVC#SS#æwfW%ö&##ƒf33cCƒ“–S“VFF#C33Cs“S&ÂFWÆ÷–ÖVçBvFWóf–F&3fc3cƒƒ“##C“ss#s6Sf3F7V66VVFVBv—F‚W†—7F–ærV&Æ–266W72â&öGV7F–öâ'V–ÆB÷G—W2æBV&Æ–2vRö76WG2…EE6†V6·272âæò'&÷w6W"T’v2&WVW7FVBâF—7Bæ÷r6öçF–ç2F†RV&Æ—6†VBã‚ã–ç7FÆÆW"öÖæ–fW7C²&—fFR¶W’7F–VBW‡FW&æÂâW†—7F–ær&÷f–FW"fVVBæB&VÂÖ6Æ–VçBfÆ–FF–öâÆ–Ö—G2&VÖ–âàÐ Ð¢22ã‚ã–×ÆVÖVçFF–öâ†—7F÷'’†æ÷rV&Æ—6†VBÐ Ð¤föÆÆ÷r×W¢FFVB'VæFÆVB6†×–öâ÷'G&—G2&W6–FRÆÂFVâæÖW2–âF†RFW6·F÷÷7FvÖR66÷&V&ö&BÂv—F‚Æ6V†öÆFW"f÷"Væf–Æ&ÆR'Gv÷&²â6†×–öâ6öÇVÖç2&W6W'fR76Rf÷"÷'G&—G3²&öÆRÆ&VÇ2f—B6ö×7B&÷w2â–ç7V7FVB“#ƒCæB#ƒƒ“S&VæFW'3²W†—7F–ær÷7FvÖUFW7G276W2†Ç6ò&VæFW'2s#’âWf–FVæ6R'V–ÆBööFVÖò×÷7FvÖRçæræB÷7FvÖRÓ#ƒçærâ7F–ÆÂÆö6Âã‚ãÂæ÷BV&Æ—6†VC²Öö&–ÆR7VÖÖ'’Væ6†ævVBàÐ Ð¥W6W"&WVW7FVB'VæRvW2ö—FV×2F†BÆöö²fÖ–Æ–"g&öÒF†RÆVwVR6Æ–VçBâ–ç7V7FVB7GVÂ'VæRæB—FVÒ×6WB&VfW&Væ6R67&VVç6†÷G2‡6÷W&6W2–âFö72÷&VvÖRæÖB’â&WÆ6VBF†R'VæRG&÷F÷vç2æB—FVÒ7&VG6†VWBv—F‚&–Ö'’÷6V6öæF'’G&VRæB'VæR–6öâ&÷w2Â7FB6†&B–6öç2Â6VÆV7F–öâ†–v†Æ–v‡G2öFW67&—F–öç2Â6V&6†&ÆRö6FVv÷'’Öf–ÇFW&VB—FVÒ–6öç2v—F‚&–6W2ÂæBæÖVB6†÷6V7F–öç2v—F‚FB÷&V÷&FW"÷&VÖ÷fR7F–öç2â&W6W'fVB&–gB&VfW&Væ6R'&æF–ærö6†&6öÂ÷FVÂ7G–Æ–ærÂW‡Æ–6—B&Wf–Ww2æBwV&FVBVæBÖöæÇ’–×÷'G2âæò&÷f–FW"fVVG2÷"æWrvÖWÆ’76—7Fæ6RFFVBàÐ Ð¤æWr7&2ôÆöF÷WDVF—F÷"æ726W&FW26VÆV7F–öâÖöFVÇ2æBf—7VÂ6öçG&öÇ2g&öÒ'V–ÆEÆææW"W'6—7FVæ6Rö–×÷'BfÆ÷râW†—7F–ær&–gBÖÆöF÷WBÓÆç2&VÖ–â6ö×F–&ÆRÂ–æ6ÇVF–ær—FVÒæÖW3²–çfÆ–B6fVB—FVÒ6V7F–öç26ææ÷B'F–ÆÇ’&WÆ6RF†R7W'&VçBÆââæWr67&—G2ö66†RÖÆöF÷WBÖ–6öç2ç’66†W23#‚öff–6–ÂFFG&vöâäw2f÷"'VæFÆVBbãrãâ76WG27F’–væ÷&VB–â66†RöFFöÆöF÷WBÖ–6öç2æB&R6÷–VB'’æ÷&ÖÂ'V–ÆG2Âv—F‚æò'VçF–ÖRæWGv÷&²&WVW7G2â6÷W&6R–×÷'G2'V–ÆEÆææW"²ÆöF÷WDVF—F÷#²æòæWr'VçF–ÖRFWVæFVæ7’àÐ Ð¥fW'6–öâ6÷W&6R—2Æö6Âã‚ãâV&Æ–2÷6—FR&VÖ–âã‚ã²F—7B7F–ÆÂ6öçF–ç2F†RfW&–f–VBã‚ãV&Æ—6†VB–ç7FÆÆW"öÖæ–fW7Bâæò6–væ–ærÂ&VÆV6RV&Æ–6F–öâÂvV'6—FR6†ævW2÷"æ÷&ÖÂ–ç7FÆÆF–öâ–âF†—2F6²âfÆ–FF–öã¢sc‚6†V6·2ÂT’†&æW72–æ6ÇVF–ær7GVÂ–6öâ6Æ–6·2÷6V&6‚Â'VæR&÷r÷G&VR'VÆW2Â6fRöÆöBÂ–çfÆ–B×Æâ&W6W'fF–öâÂGWÆ–6FR—FV×2æB÷&FW&–ær÷&VÖ÷fÃ²f÷W"G&ç7÷'BFW7G2â–ç7V7FVB'VæRö—FVÒ&VæFW'2–â'V–ÆB÷V’Ó&C6S3#FSF6C6#†&3C3v#ƒfCƒ†2B#“gƒƒ“’†f—G2“#ƒƒ’âW†—7F–ærÆ—fRÖ6Æ–VçBfÆ–FF–öâÆ–Ö—G27F–ÆÂÇ’àÐ Ð¢22V&Æ—6†VBã‚ãæBvV'6—FRWFFPÐ Ð¥W6W"W‡Æ–6—FÇ’&WVW7FVBV&Æ–6F–öâgFW"F†R÷7FvÖRv÷&²â&VÆV6VB‡GG3¢òöv—F‡V"æ6öÒöW†—7FçFÂ÷&–gB×&VfW&Væ6R÷&VÆV6W2÷Fr÷cã‚ãv—F‚&–gE&VfW&Væ6RÕ6WGWæW†RæBÖF6†–ær6–væVBÆFW7Bæ§6öâÂÖ&¶VBÆFW7BâV&Æ–2–ç7FÆÆW#¢bÃ““"Ã#Sb'—FW3²4„#Sb6&fSVF6†#&V36VFf6V#6#ƒ“6V&##“ƒƒCSc&f66F33cFcFCsCC&Sc&F6âV&Æ–26–væGW&Rö†6‚÷6—¦R÷F×W"6†V6·272ââ—6öÆFVBãrãWFFW"F—66÷fW&VBÂF÷væÆöFVBæBfW&–f–VBã‚ãv—F†÷WB–ç7FÆÆF–öã²Wf–FVæ6R'V–ÆB÷V&Æ–2Óã‚ãâWw&FR÷&öÆÆ&6²&Vw&W76–öâÇ6ò76VB†'V–ÆBö–ç7FÆÆW"×FW7BÓ#&c&FC3s33Fc3“–f&SF6cssf#B’âæF—fRfVGW&R6÷W&6R—2Æö6Â6öÖÖ—B#CV6SS²v—D‡V"&VÆV6RFrF&vWG2F†RV&Æ–2$TDÔR'&æ6‚Âæ÷BF†RÖ–çF–æVB6÷W&6R6†V6¶÷WBâæ÷&ÖÂW6W"–ç7FÆÆF–öâv2æ÷BÖöF–f–VBàÐ Ð¥vV'6—FR‡GG3¢ò÷&–gB×&VfW&Væ6Rç&V–BÖ†–ÆÂæ6†FwBç6—FRv2WFFVBv—F‚F†Rã‚ãææ÷Væ6VÖVçBÂ7W'&VçBF6†&ö&BÇW2&VvÖR÷÷7FvÖRöÆöF÷WB67&VVç6†÷G2Â†6RÖ&6VBfVGW&RF'2æB†öæW7B–çFVw&F–öâÆ–Ö—G2âvV'6—FR6÷W&6Rcf#3&3#““Sf&S“†FF63cf6†VVCCƒvC–C²6—FW2fW'6–öâR†w&¥óf–C“Vc&C†3Cƒ““ƒ6FsƒVC#SS#æwfW%öC–cv##fSCƒ“†F3ƒs“C3CV&CvV’ÂFWÆ÷–ÖVçBvFWóf–F#fC““cCƒ“–6&c†cs3sC&Â7V66VVFVBv—F‚W†—7F–ærV&Æ–266W72â&öGV7F–öâ'V–ÆBæBG—W273²V&Æ–2vRæBæWr÷7FvÖR76WB&WGW&â…EE#âæòvV'6—FR'&÷w6W"T’&WVW7FVB÷"W&f÷&ÖVBâ&VÖ–æ–ær&÷f–FW"ÖfVVBæB&VÂÖ6Æ–VçBfÆ–FF–öâÆ–Ö—FF–öç2&VÆ÷r7F–ÆÂÇ’àÐ Ð¢22÷7FvÖR7FF—7F–72ƒã‚ãÐ Ð¥W6W"&WVW7FVB7FG2–ç7FVBöb6ööÆF÷vç2gFW"vÖRâ–×ÆVÖVçFVBFW6·F÷æBÖö&–ÆRÖF6‚7VÖÖ&–W2f÷"&TVæDödvÖRÂv—F–ætf÷%7FG2æBVæDödvÖRâÆ—fRvÖTVæBWfVçG2Ç6ò7v—F6‚÷WBöbF†R6ööÆF÷vâ67&VVââ&VG2öÆöÂÖVæBÖöbÖvÖR÷cöVör×7FG2Ö&Æö6¶öæÇ’f÷"÷7FvÖS²6†V6·2—G2vÖT–Bv–ç7BöÆöÂÖvÖVfÆ÷r÷c÷6W76–öævÖTFFævÖT–B&Vf÷&RF—7Æ––ær—Bâæò&&—G&'’ÆFW7BÖ†—7F÷'’fÆÆ&6²÷"7FÆRÆ—fR×6×ÆRF÷FÇ2âÖ—76–ær÷Vç&VG’&W7VÇG2F—7Æ’v—F–ær7FFRæB&WG'’v—F‚÷&F–æ'’öÆÆ–æràÐ Ð¥6†÷w2÷WF6öÖRÂGW&F–öâÂW'6öæÂ²ôBôæB&F–òÂ52–æ6ÇVF–æræWWG&ÂÖ–æ–öç2Â52öÖ–âÂ6†×–öâFÖvRæBFÖvRöÖ–âÂvöÆBÂf—6–öâÂf–æÂ—FV×2ÂæBGvò×FVÒ66÷&V&ö&G2âVæ¶æ÷vâf–VÆG2&VæFW"2F6†W2Âæ÷B¦W&òâÖ—76–ærV—F†W"Ö–æ–öâ6ö×öæVçBÖ¶W2F÷FÂ52Væ¶æ÷vââ&r&W7VÇB66÷VçBö6†Bf–VÆG2&RF—66&FVC²Öö&–ÆR&V6V—fW2öæÇ’6æ—F—¦VB7VÖÖ'’7G&–æw2æB6†×–öâ7FG2â&Wf–Wr&VÖ–ç2f÷"ÖçVÂæ÷FW2âæòW'6—7FVçBÖF6‚†—7F÷'’FFVBàÐ Ð¦7&2õ÷7FvÖRæ76÷vç2'6–æröf÷&ÖGF–æræBF†R6æ—F—¦VBÖö&–ÆR&ö¦V7F–öââÒ×&VæFW&æ÷rVÖ—G2FVÖò×÷7FvÖRçæs²FVÖò&W7VÇG2—2f–Æ&ÆR–âF†R†VFW"âFW7G2õ÷7FvÖUFW7G2æ76FW7G2'6–ærÂ7FÆR÷w&öær×†6R&V¦V7F–öâÂVæ¶æ÷vâæB¦W&ò†æFÆ–ærÂ&—f7’æB“#ós#ó#ƒFW6·F÷&VæFW'2âW†—7F–ærsc‚6†V6·2ÂT’†&æW72Âf÷W"G&ç7÷'BFW7G2æBÖö&–ÆR6†V6·273²'&÷w6W"FW7G26÷fW"&W7VÇBöÆ—fRG&ç6—F–öç2â6VRFö72÷÷7FvÖRæÖBâ6ö×ÆWFVBÖvÖRFW7F–ærv–ç7Bâ7GVÂÆVwVR6Æ–VçB&VÖ–ç2VæF–ærâæBvV'6—FR&Ræ÷rV&Æ—6†VB2ã‚ã²æ÷&ÖÂ–ç7FÆÆF–öâv2æ÷BÖöF–f–VBàÐ Ð¢22&VvÖRæBÆöF÷WBFööÇ2ƒã‚ãÐ Ð¤æWrW6W"&WVW7C¢&WÆ6RG&gB6ööÆF÷vâF&ÆW2v—F‚7G&VæwF‡2÷vV¶æW76W2Â6÷VçFW'2æB6ö×Æç3²FB6÷W&6R&V6öÖÖVæFF–öç2æB6Æ–VçB'VæRö7W7FöÒ×6†÷–×÷'G2â–×ÆVÖVçFVBFVF–6FVBG&gB'&–Vb†FW6·F÷²Öö&–ÆR’Â¶—BÖ&6VBÖF6‡W6öç6–FW&F–öç2ÂVÆ—FF—fRFVÒÆç2ÂæF—fR'VæRö—FVÒVF—F÷"Â6fRöÆöBÆç2ÂF—&V7B6÷W&6R6†×–öâ×vRÆ–æ·2æBW‡Æ–6—BwV&FVBVæBÖöæÇ’6Æ–VçB–×÷'G2âæWrf–ÆW3¢7&2õ&VvÖRæ72Â7&2ô'V–ÆEÆææW"æ72ÂFW7G2ôÆöF÷WEFW7G2æ72ÂFW7G2÷G&ç7÷'E÷FW7Bç’â6VRFö72÷&VvÖRæÖBf÷"&V†f–÷"æB6÷W&6R&W6V&6‚àÐ Ð¤WFöÖF–2&ö'V–ÆG2ôöæWG&–6·2&V6öÖÖVæFF–öâfVVG2&R¢§Væf–æ—6†VB¢£¢æòFö7VÖVçFVB–çFVw&F–öâf÷VæBÂæBöæWG&–6·2÷&F–æ'’WFöÖFVB&WVW7B†—B6V7W&—G’6†V6·ö–çBâæò'—72GFV×FVBâ7W'&VçBT’†öæW7FÇ’&÷f–FW2'&÷w6W"Æ–æ·2æBÖçVÂ6†ö–6W2Âæ÷B–×÷'FVB6÷W&6R&V6öÖÖVæFF–öç2÷"7FF—7F–6Â6÷VçFW"&æ¶–æw2âf–æ—6‚F‡&÷Vv‚7W÷'FVB&÷f–FW"fVVBöW‡÷'BÖV6†æ—6Ó²Fòæ÷B6–ÆVçFÇ’6ÆÂF†—26ö×ÆWFRàÐ Ð¥fÆ–FF–öã¢sc‚W†—7F–ær6†V6·273²T’†&æW7276W2–æ6ÇVF–æræWrÆöF÷WBfÆ–FF–öâæBG&gB†VFW"W'6—7FVæ6RâF‡&VRG&ç7÷'BÖö6²FW7G2æBF‡&VRÖö&–ÆR6W'fW"FW7G272â†öæR÷F&ÆWB'&÷w6W"6†V6·2–æ6ÇVFRG&gBöÆ—fR7v—F6†–ærâ–ç7FÆÆW"Ww&FRg&öÒV&Æ–2ãrãv—F‚–ç7FÆÆF–öâföÆFW"2v÷&¶–ærF—&V7F÷'’æB&öÆÆ&6²72†'V–ÆBö–ç7FÆÆW"×FW7BÓƒcƒs#3CƒCfScsF6Ss633“f2’âT’VF—F÷"Wf–FVæ6S¢'V–ÆB÷V’ÖS6fF“&VC63F#Sƒƒ#–c†&3V&cc#²G&gB&VæFW#¢'V–ÆBööFVÖòÖG&gBçærâF†W6R6†V6·2Fòæ÷B7V'7F—GWFRf÷"F†RVæF–ær&VÂÆVwVR6Öö¶RFW7BàÐ Ð¤6ö×–ÆW"ÂV&Æ—6†VBæBvV'6—FRæ÷rFW67&–&Rã‚ãâ6–væVBF—7BöÆFW7Bæ§6öâÖF6†W2F†RV&Æ—6†VBã‚ã–ç7FÆÆW"âæòæ÷&ÖÂ–ç7FÆÆF–öâv2W&f÷&ÖVBâÖö6²G&ç6fW"÷G&ç7÷'BFW7G26ææ÷BW7F&Æ—6‚&VÂÆVwVRvR6VÆV7F–öâ÷"–âÖvÖR—FVÒ×6WBf—6–&–Æ—G’â&VÂÖ6Æ–VçB6Öö¶RfÆ–FF–öâ&VÖ–ç2VæF–ærâæòÆö6ÂW6W"'V–ÆBf–ÆW2&RWFöÖF–6ÆÇ’7F÷&VB–âF†R–ç7FÆÆF–öâföÆFW#²6fVBÆç2W6RW6W"Ö6†÷6VâF‡2àÐ Ð¢226öç6öÆ–FF–öàÐ Ð¥F†—26†V6¶÷WB—2Ö–çF–æVBÂ6ÆöæVBg&öÒ‡GG3¢òöv—F‡V"æ6öÒöW†—7FçFÂ÷&–gB×&VfW&Væ6Ræv—@Ð¦öâ'&æ6‚6öç6öÆ–FFRÖÆö6Â×6÷W&6VÂ&W6W'f–ærF†R–æ—F–Â$TDÔR6öÖÖ—BæB&VÆV6RFw2àÐ¥F†R6÷W&6RÖF6†VBF†R÷&–v–æÂF—7G&–'WF&ÆRÖ—'&÷"'—FRf÷"'—FRâ7FæFÆöæR†&æW76W0Ð§vW&R6÷–VBg&öÒF†RÖ–çF–æVB6÷W&6S²ö'6öÆWFR6WGWæ72v2öÖ—GFVBâ÷&–v–æÂv÷&·76RÀÐ¦–ç7FÆÆW'2Â&VfW&Væ6W2Â&6·W2æB&—fFR6–væ–ær¶W’&VÖ–â–çF7BâFòæ÷B–æFWVæFVçFÇÐ¦Ö–çF–âF†RöÆBv÷&²÷7&2÷"6÷W&6RÖ—'&÷"àÐ Ð¥7G'V7GW&S¢7&2„22’Â†VÇW'2…—F†öâ’ÂFW7G2‡7FæFÆöæR†&æW76W2’Â67&—G2†'V–ÆB÷fÆ–FF–öâ’ÀÐ¦Fö72†'V–ÆBæB7—&F–öæÂ7V6–f–6F–öâ’Â6öæf–r‡WFFRfVVB’ÂV&Æ—6†W"‡V&Æ–2¶W’öæÇ’’àÐ¤–væ÷&VB66†R6öçF–ç2â–æFWVæFVçB6÷’öbF†RfW&–f–VBFF÷'VçF–ÖR&ö÷G7G&àÐ¤æò&—fFR¶W’ÂÆö6Â&VfW&Væ6W2÷"vVæW&FVB6¶vR&VÆöæw2–âv—BàÐ Ð¤'V–ÆC¢÷vW'6†VÆÂÔW†V7WF–öåöÆ–7’'—72Ôf–ÆR67&—G2ö'V–ÆBç3Ô–ç7FÆÆW&àÐ¥6VRFö72ö'V–ÆBæÖBf÷"g&W6‚Ö6†V6¶÷WB&ö÷G7G&g&öÒF†R6–væVBãRã&VÆV6RàÐ¤Ö–w&F–öâ&6VÆ–æS¢sCR6†V6·273²–ç7FÆÆW"–æ†W&—FVB×v÷&¶–ærÖF—&V7F÷'’Ww&FPÐ¦æB&öÆÆ&6²&W6W'fR&VfW&Væ6W2æBW†V7WF&ÆRâ÷WGWC¢'V–ÆBöæBF—7BàÐ Ð¢22&öGV7BæB6öçF–çV—GÐ Ð¥v–æF÷w2æF—fR6V6öæBÖÖöæ—F÷"ÆVwVR6ö×æ–öâÂ&–Ö&–Ç’f–æRD2–âVÖW&ÆB6öÆòVWVRàÐ¥V&Æ—6†VBfW'6–öâ—2ã‚ãâ&VÖ÷FR7W'&VçFÇ’†÷7G2&VÆV6W2Âæ÷BÖ–çF–æVB6÷W&6RàÐ¥&W÷'BÆö6Âv÷&²6W&FVÇ’g&öÒV&Æ–2V&Æ—6†–æràÐ¤fVVC¢‡GG3¢òöv—F‡V"æ6öÒöW†—7FçFÂ÷&–gB×&VfW&Væ6R÷&VÆV6W2öÆFW7BöF÷væÆöBöÆFW7Bæ§6öàÐ Ð¤¶VWVæV×’ÖÆVgBöÆÆ–W2×&–v‡BFVfVÇG2ÂG&r×Fò×7vW'6—7FVæ6RÂv†öÆR×6V6öæB6ööÆF÷vç2ÀÐ¦Ö–çWFW2ÖæB×6V6öæG2f÷&ÖGF–ærÂ6öÆ÷&VB7VÆÂÆ&VÇ2æBæÖW2ÂÆÂÖVæV×’&W7vâæ÷F–6W2ÀÐ¦æB'&–Vb$§VævÆR6†V6²â"7VV6‚âf—'7B§VævÆR7VR7F—2#6V6öæG2ÂWfW'’“F‡&÷Vv‚CƒàÐ¤öæR×6V6öæB6Æ–6²7F—2öfb'’FVfVÇC²V6‚VF–ò–çFW'fÂ—2–æFWVæFVçFÇ’6VÆV7F&ÆRàÐ Ð£ãRãf—†W2WFF–ærv†Vâ–ç7FÆÆW"v÷&¶–ærF—&V7F÷'’—2F†R–ç7FÆÆF–öâföÆFW"â&W6W'fPÐ§F†B&Vw&W76–öâæB&V6÷fW'’föÆFW'2âæWfW"f÷&6RÖ¶–ÆÂÆVwVR÷"Vç&VÆFVB&ö6W76W2àÐ¥W6W"6öæf—&ÖF–öâF†BF†V—"÷&–v–æÂf–ÆVBWFFW"&WG'’7V66VVFVB—27F–ÆÂVæf–Æ&ÆRàÐ Ð¥&—fFR&VÆV6R¶W’7F—2÷WG6–FR6†V6¶÷WB–âF†R÷&–v–æÂv÷&·76Râ¶VWF†RVÖ&VFFV@Ð§V&Æ–2¶W’6ö×F–&ÆS²fW&–g’6–væVBÖWFFFæB–ç7FÆÆW"†6‚÷6—¦Rv†Vâ&VÆV6–æràÐ¥V&Æ—6†W"6–væGW&W2&R6W&FRg&öÒWF†VçF–6öFS²–ç7FÆÆW"—2æ÷BWF†VçF–6öFR×6–væVBàÐ Ð¢22V&Æ—6†VBãbãfVGW&R'V–Æ@Ð Ð¤–×ÆVÖVçFVBöâfVGW&RöFV6—6–öâ×&7F–6VÂ&6VBöâÖ–w&F–öâ6öÖÖ—BS“vSc Ð¢ÒF6†&ö&BÆæRÆâÂf—fRÖVæV×’¶—B&VfW&Væ6RæBW'6—7FVçBöæRÖfö7W26VçFVæ6RàÐ¢Ò7V6–f–6ÆÇ’WF†÷&VBf–æRôÇVÇRfW'7W26—FÇ–âôæWF–ÇW2Æââ÷F†W"V'FWG26öÖ&–æPÐ¢WF†÷&VBD2GFW&ç2æB'FæW"öVæV×’FööÇ3²æ÷BÆÂ—&–æw2†fR&W6V&6†VBÆç2àÐ¢Ò#‚6†×–öâF‡&VB7VÖÖ&–W3²Væ¶æ÷vâ¶—G2&R6†÷vâ2Vç&Wf–WvVBâÖ—76–ær÷"Ö&–wV÷W0Ð¢&÷B&öÆW2&öGV6Râ–æ6ö×ÆWFR7FFRâVæ&Ææ6VBÆæRFFW6W2&÷7FW"Æ–÷WBàÐ¢ÒÆ–&öö³¢ÖF6‡W&VfW&Væ6W2ÂFVÖf–v‡BÆâv—F‚ÆÇ’&÷FV7F–öâÂvfR÷&V6ÆÂ66Væ&–÷2ÀÐ¢GfçFvR6öçfW'6–öâÂG&–æ–ær–ç7G'V7F–öç2Â6÷W&6W2æB6÷fW&vRàÐ¢Ò&Wf–Ws¢Æö6Â6VÆbÖ76W76ÖVçBÂ&Wf–÷W2Öæ÷FR6VÆV7F–öâæBVF—F–ærÂFöÖ–26fRv—F‚Ð¢&V6÷fW'’6÷’âf–Æ&ÆRgFW"ÖF6†W2†æB–âFVÖò’ÂæòWFöÖF–2÷W÷"F–væ÷6—2àÐ¢Ò&VfW&Væ6W2c"Ö2öÆBfö7W2÷F–öç2æB&W6W'fW2&Wf–÷W6Ç’Ö–w&FVB6WGF–æw2âW6W'0Ð¢6â&W7F÷&RF†R÷&–v–æÂÖF6‡W6&G2âW†—7F–ærVF–ò÷F–öç2æBF–Ö–ær&VÖ–â–çF7BàÐ¢Ò–ç7FÆÆW"&W6W'fW2&VfW&Væ6W2æ§6öâÂ&Wf–Ww2æ§6öâæB&Wf–Ww2æ§6öâæ&²7&÷72Ww&FW2àÐ Ð¤æWr6÷W&6S¢7&2ô6ö6†–æræ72æB7&2õ&7F–6Ræ72âFW7G3¢FW7G2ô6ö6†–æuFW7G2æ72†–æ6ÇVFVB–àÐ¢Ò×FW7B’ÂFW7G2õ&7F–6UV•FW7G2æ72æB67&—G2÷fW&–g’×V’ç3â–ç7FÆÆW"6¶vRW6W2–çFVçF–öæÀÐ¦–çWG2ÂW†6ÇVF–æræ÷FW2Â&VfW&Væ6W2æBFW7B'F–f7G2âfW'6–öâãbãv2V&Æ—6†VBöàÐ£##bÓ’Ób2F†RÆFW7B&VwVÆ"&VÆV6RÂv—F‚&–gE&VfW&Væ6RÕ6WGWæW†RæB6–væVBÆFW7Bæ§6öâàÐ¤—Bv2æ÷B–ç7FÆÆVB–çFòF†RW6W"w2æ÷&ÖÂ–ç7FÆÆF–öââ6÷W&6R&VÖ–ç2Æö6ÂBfVGW&PÐ¦6öÖÖ—BcSC#cC²F†RV&Æ–2&VÆV6RFrö–çG2FòF†RW†—7F–ær&VÆV6RÖ6†ææVÂ$TDÔR6öÖÖ—BàÐ Ð¥&VÆV6S¢‡GG3¢òöv—F‡V"æ6öÒöW†—7FçFÂ÷&–gB×&VfW&Væ6R÷&VÆV6W2÷Fr÷cãbã Ð¤–ç7FÆÆW"4„Ó#Sc¢&FF#C3c“vSSVS“3sVF&ccv3C#Cs3F#&63v#Vs–3#Scƒcc“3C“†Ð¥V&Æ—6†W"f–ÆW2&R–â–væ÷&VBF—7BâV&Æ–2fW&–f–6F–öâWf–FVæ6R—2–â'V–ÆB÷V&Æ–2ÓãbãàÐ¥F†RÆFW7BÖfVVBÖæ–fW7BæBV&Æ–2–ç7FÆÆW"76VB6–væGW&RÂ†6‚÷6—¦RæBF×W"6†V6·2àÐ¤6÷–VBãRãWFFW"F—66÷fW&VBÂF÷væÆöFVBæBfW&–f–VBãbãv—F†÷WBÇ––ær—BàÐ¥6–væ–ærW6VBF†RW†—7F–ærW‡FW&æÂ&—fFR¶W’v—F†÷WB6÷––ær—B–çFòF†R6†V6¶÷WBàÐ Ð¥fÆ–FF–öã¢sc‚6†V6·3²T’†&æW72fW&–f–W2&VfW&Væ6W26fR÷&V÷VâÂG&rW'6—7FVæ6RÀÐ¦÷&–v–æÂÖ6&B÷F–öâÂÇFW&æFR÷'F–Â÷6öÆòÆ–÷WG2ÂÆÂÆ–&öö²vW2æB&Wf–Wr6fRöVF—BàÐ¤–ç7V7FVB“#ƒCv–æF÷w2f÷"“#ƒƒÖöæ—F÷"v—F‚F6¶&"âWw&FR÷&öÆÆ&6²6†V6·0Ð§&W6W'fRæ÷FW2æBF†V—"&V6÷fW'’6÷’âV&Æ–26–væ–ær¶W’6öçF–çV—G’—2Væ6†ævVBàÐ¤Æ—fRvÖWÆ’æBæ÷&ÖÂ–ç7FÆÆW"&Vv—7G&F–öâ÷6†÷'F7WB6†V6·2&VÖ–âVçfW&–f–VBàÐ Ð¢22V&Æ—6†VBãrã†öæR÷F&ÆWBæBf—7VÂ&Vg&W6€Ð Ð¥W6W"WF†÷&—¦VB†öæR÷F&ÆWB2âÇFW&æF—fRFò6V6öæBÖöæ—F÷"ÂF†Vâ&WVW7FVBÐ¤&Æ—G¢Ö–ç7—&VBFW6·F÷f—7VÂ&Vg&W6‚â&÷F‚vW&RV&Æ—6†VB2ãrãöâ##bÓ’ÓbàÐ¥F†Ræ÷&ÖÂ–ç7FÆÆF–öâv2æ÷BÖöF–f–VBGW&–ærfÆ–FF–öâàÐ Ð¥&VfW&Væ6W2â†öæRòF&ÆWB6VÆV7G2&—fFR•cB–çFW&f6RæB7F'G2'VæFÆVB—F†öàÐ¤…EE†VÇW"âÆö6Â"æB6÷–&ÆRÆ–æ²6öçF–âW"×6W76–öâ#SbÖ&—B6V7&WBâW‡Æ–6—B7F÷ Ð¦æB6‡WFF÷vâFW&Ö–æFRF†R÷væVB†VÇW"â6†&–ær—2öfböâWfW'’ÆVæ6ƒ²æò&VfW&Væ6PÐ¦WFòÖVæ&ÆW2—BæBæòf—&WvÆÂ÷"&÷WFW"6WGF–æw2&R6†ævVBâg&W6‚6W76–öç2&Wfö¶RöÆ@Ð¦6öFW2â6VRFö72öÖö&–ÆRæÖBf÷"—&–ærÂ&—fFRf—&WvÆÂwV–Fæ6RæBG'W7FVBÔÄâÆ–Ö—G2àÐ Ð¤Öö&–ÆRæ726W&–Æ—¦W2v†—FVÆ—7Böb6†×–öç2Â&öÆW2ÂÆWfVÇ2Â&VfW&Væ6R7VÆÇ2Â¶—B7VÖÖ&–W2ÀÐ¦fö7W2æBÆæRÆââæò66÷VçBæÖW2Â&Wf–Wræ÷FW2Â6Æ–VçB7&VFVçF–Ç2Â&rVæGö–çG2÷ Ð¦vÖR–çWG2&R6W'fVBâöæR6VÆV7FVB$d3“‚•cBÆ—7FVæW"ÂW†7B†÷7Bô÷&–v–âfÆ–FF–öâÀÐ¤&V&W"ÖWF†VçF–6FVB7FFRÂæò4õ%2ö66†RÂf—†VB&÷WFW2Â&÷VæFVBv÷&¶W'2÷6ö6¶WBF–ÖV÷WG2àÐ¤Æö6Â…EE—2VæVæ7'—FVBâUDbÓ‚—F†öâÖöFR—2&WV—&VBf÷"6÷'&V7B&VfW&Væ6RFW‡BàÐ¤Öö&–ÆR&Vg&W6‚—2WfW'’'2÷fW"F†RW†—7F–ærFW6·F÷>(	332FFöÆÆ–ærÂFVfVÇBW2àÐ¥7FÆRöÆ÷7BFF—2†–FFVâæB&V6öææV7G2WFöÖF–6ÆÇ’âVF–ò&VÖ–ç2öâ2âæ÷&ÖÂÄàÐ¤…EE6ææ÷BW7VÆÇ’W6R67&VVâv¶RÆö6³²WFòÖÆö6²wV–Fæ6R—26†÷vâ–ç7FVBàÐ Ð¥F†VÖRæ72FG2Ö–çB66VçG2Âw&F–VçB†VFW"Â÷WFÆ–æVB&÷VæFVB6&G2æBF&²&VfW&Væ6W2ÀÐ¥Æ–&öö²æB&Wf–Wr6öçG&öÇ2âW†—7F–ær6–FR÷&FW"ÂG&rW'6—7FVæ6RÂGW&F–öâf÷&ÖGF–ærÀÐ¦VF–òF–Ö–ærÂ6ö6†–ær6÷fW&vRæB6fVB&Wf–Ww2&R&W6W'fVBâ&VfW&Væ6W26â67&öÆÀÐ¦öâ67&VVç26†÷'FW"F†â—G2W7VÂ†V–v‡BàÐ Ð¤föÆÆ÷r×WFW6·F÷&VFW6–vã¢W6W"W‡Æ–6—FÇ’6¶VBFò&VfW&Væ6RF†R7GVÂ&Æ—G¢àÐ¤–ç7V7FVB‡GG3¢ò÷v–æF÷w2Ö6Fâç6ögGVF–æ6öÒ÷67&VVç6†÷G2ô&Æ—G¥ó2æ§r†FW6·F÷Æ—fRÖvÖRT’ÀÐ§f–‡GG3¢ò÷wwrç6ögGVF–æ6öÒövWBôvÖ–ærÕ&VÆFVBô&Æ—G¢ç6‡FÖÂ’â&VfW&Væ6R—2öæÇ’–â–væ÷&V@Ð¦'V–ÆBöFW6–vâ×&VfW&Væ6RÂæWfW"â76WBâöff–6–ÂvVÆ6öÖR×vR&VfW&Væ6Rv2Væf–Æ&ÆRàÐ¥&WÆ6VBF†R–æ—F–ÂÖ–çBÖw&F–VçB7G–Æ–ærv—F‚æWWG&Â6†&6öÂæVÇ2ÂfÆB7V'FÆR&÷&FW'2ÀÐ§FVÂ6VÆV7F–öâ7FFW2Â6ö×7B6öçFW‡GVÂ†VFW"ÂæBW'6—7FVçBƒ‚Æ&VÆVBÆVgB&–ÂàÐ¤÷fW'f–WrÂÆ–&öö²Â&Wf–WrÂ†öæRòF&ÆWBæB&VfW&Væ6W2W6R¶W–&ö&BÖfö7W6&ÆRæF—fPÐ¦'WGFöç2v—F‚7W7FöÒfV7F÷"–6öç2â†öæRæf–vF–öâ÷Vç2—G2&VfW&Væ6W2F"F—&V7FÇ’àÐ¤F6†&ö&B6öçFVçBG&w2–â6W&FR7W&f6S²G&r&V7FævÆW2&V6V—fRF†R6–FV&"öfg6WBàÐ¤ÆæR7VÆÂÆ&VÇ2f—Bæ'&÷vW"6öÇVÖç3²ÆÂ6†×–öâö6Æ7VÆF–öâ6VÖçF–72&VÖ–â–çF7BàÐ¤–ç7V7FVB“#ƒCæBFVfVÇBs#ƒ“ƒ&VæFW'2âWFFVBT’&Vw&W76–öâfW&–f–W27GVÀÐ¦†VFW"&÷VæG2Âæò7v–ærg&öÒ6–FV&"G&w2ÂæBF—&V7BÖö&–ÆRæf–vF–öââsc‚6†V6·0Ð¦æBW†—7F–ær&VfW&Væ6W2÷&Wf–WröÆ–÷WB&Vw&W76–öç272â–ç7FÆÆW"V&Æ—6†VBv—F‚ÖF6†–æpÐ§6–væVBÆFW7Bæ§6öâ76WG2VæFW"cãrãÂÖ&¶VBÆFW7B–âv—D‡V"àÐ Ð¥&VÆV6S¢‡GG3¢òöv—F‡V"æ6öÒöW†—7FçFÂ÷&–gB×&VfW&Væ6R÷&VÆV6W2÷Fr÷cãrã Ð¤–ç7FÆÆW"4„Ó#Sc¢VFSC&S#ƒV3ƒ3#c†V6Cff3–Sƒ6&&ƒS&V3s3V&fV#s“VF6cSCCÐ¥V&Æ–26—¦S¢c“cƒ“"'—FW2âV&Æ–2WFFW"Öæ–fW7BæB–ç7FÆÆW"76VB6–væGW&RÂ†6‚ÀÐ§6—¦RæBF×W"6†V6·2ââ—6öÆFVBãbãF—66÷fW&VBÂF÷væÆöFVBæBfW&–f–VBãrã Ð§v—F†÷WB–ç7FÆÆ–ærâWf–FVæ6S¢'V–ÆB÷V&Æ–2Óãrãâ6÷W&6R6öÖÖ—B3ƒ“R&VÖ–ç2Æö6Ã°Ð§V&Æ–2&VÆV6RFrF&vWG2&VÆV6RÖ6†ææVÂ$TDÔR6öÖÖ—Bc&6VSRâæò6–væ–ær¶W—2WÆöFVBàÐ¤v—D‡V"V&Æ–6F–öâW6W2F†RWF†VçF–6FVB–âÖ'&÷w6W#²æòv—B4Ä’7&VFVçF–Â—26fVBàÐ¥F†R6öÖ&–æVB6–væ–ær6öÖÖæBv2&Æö6¶VB'’WFöÖF–2&Wf–Ws²6ö×–Æ–ærF†RVF—FV@Ð§V&Æ—6†W"f—'7BæB'Vææ–ær6–væ–ærÆöæR7V66VVFVBv—F‚F†R÷&–v–æÂW‡FW&æÂ¶W’àÐ Ð¥fÆ–FF–öã¢sc‚W†—7F–ær6†V6·3²FW6·F÷T’†&æW72B“#ƒC²6WGF–æw2÷&Wf–WröG&pÐ§&Vw&W76–öç3²Öö&–ÆUFW7G26æ6†÷B&—f7’Â&VfW&Væ6R&—G’ÂVæ¶æ÷vâFV×2Â6ÆV&–ærÂ&VÀÐ¦†VÇW"7F'GW÷—R÷7F÷÷Fö¶Vâ&÷FF–öã²—F†öâ…EEWF‚ö÷&–v–â÷&÷WFR÷6‡WFF÷vâ6†V6·3°Ð¥Æ—w&–v‡BVFvRB3“ƒƒCBæB#Gƒsc‚6÷fW'2—&–ærÂVæ–6öFRÂ…52×6fRFW‡BÂ7FÆRFFÀÐ¦6ÆV&–ærÂ&V6öææV7BæBF—66öææV7BâWw&FRg&öÒãbãæB&öÆÆ&6²&W6W'fR&VfW&Væ6W2ÀÐ§&Wf–Ww2æB&V6÷fW'’6÷–W2â&VæFW&VBT’–ç7V7FVBâ‡—6–6Â†öæRö6ÖW&Âv’Ôf’f—&WvÆÀÐ¦fÆ÷rÂ&VÂÆVwVRÖF6‚æBæ÷&ÖÂ–ç7FÆÆW"6†÷'F7WB&Vv—7G&F–öâ&VÖ–âVçfW&–f–VBàÐ Ð¢22W†—7F–ærvÖWÆ’Æ–Ö—FF–öç0Ð Ð¤FFG&vöâbãrã—2æ÷BWFöÖF–6ÆÇ’ÖF6†VBFòF†R'Vææ–ærF6‚â÷öæVçB&æ·2&PÐ¦–æFWVæFVçB‡—÷F†WF–6ÂÖ†–×VÒÖVÆ–v–&ÆR&æ·2Âæ÷B¦ö–çFÇ’ÆÆö6FVB6¶–ÆÂ÷&FW"àÐ¤æò67B†—7F÷'’ÂVæV×’6÷VçFF÷vâG&6¶–ærÂf—6–öâ÷vfRö'6W'fF–öâÂvæ²&VF–7F–öâÂf–v‡@Ð§6–×VÆF–öâÂ6ö×&V†Vç6—fR7V6–ÂÖV6†æ–72Â&ò'V–ÆG2÷"ÖV7W&VB6ö6†–ærW†—7G2àÐ¤6Æ–VçBG&ç6—F–öç2Âv–æF÷w2VF–òÂ–ç7FÆÆW"6†÷'F7WG2æB&Vv—7G'’–çFVw&F–öâ&Ræ÷@Ð¦gVÆÇ’fÆ–FFVB–âæ÷&ÖÂvÖWÆ’âsCR6†V6·2Fòæ÷BW7F&Æ—6‚F†BàÐ Ð¥&–÷B&Vv—7G&F–öâöVF—B&VÖ–ç2VçfW&–f–VBâöÆ–6–W2&W&VBöâ##bÓ’Óc Ð¦‡GG3¢òöFWfVÆ÷W"ç&–÷FvÖW2æ6öÒ÷öÆ–6–W2övVæW&ÂæB‡GG3¢òöFWfVÆ÷W"ç&–÷FvÖW2æ6öÒöFö72öÆöÀÐ¤†–v†Æ–v‡BVGV6F–öæÂ÷F–öç2v—F†÷WBF–7FF–ær7F–öç2÷"W‡÷6–ær†–FFVâ–æf÷&ÖF–öâàÐ¤VæV×’&–Æ—G’÷7VÖÖöæW"G&6¶–ærÂ–æ6ÇVF–ærÖçVÂF–ÖW'2Â&VÖ–ç2W†6ÇVFVBàÐ Ð¢22V&Æ–2F÷væÆöBvV'6—FRƒ##bÓ’ÓbÐ Ð¥V&Æ—6†VB‡GG3¢ò÷&–gB×&VfW&Væ6Rç&V–BÖ†–ÆÂæ6†FwBç6—FRf÷"V&Æ–2v–æF÷w2F÷væÆöG2àÐ¤Ö–çF–æVB6W&FVÇ’B3¢õW6W'2ögV6²ôFö7VÖVçG2ô6öFW‚÷&–gB×&VfW&Væ6R×6—FRàÐ¥W6W26—FW2õf–æW‡BÂ&VÂFVÖò67&VVç6†÷G2ÂæBF†Rv—D‡V"ÆFW7B–ç7FÆÆW"U$ÂàÐ¥&öGV7F–öâ'V–ÆBæBG—U67&—B6†V6·276VC²V&Æ–2…EE#fW&–f–VBàÐ Ð¥vV'6—FRãrã6†ævW2V&Æ—6†VB7V66W76gVÆÇ“¢7W'&VçBFW6·F÷õÆ–&öö²öV×G’&Wf–WpÐ§67&VVç6†÷G2ÂÖö&–ÆRFVÖò&Wf–WrÂ†öæR÷F&ÆWB6WGW7FW2æBG'W7FVBÔÄâ&WV—&VÖVçG2àÐ¥6—FR6÷W&6R6öÖÖ—BS–6S3F2—2W6†VBFò—G26—FW26÷W&6R&W÷6—F÷'’âV&Æ–2vR&WGW&æV@Ð¤…EE#gFW"V&Æ—6†–ærâF÷væÆöG26öçF–çVRFòW6RF†RfW&–f–VBv—D‡V"ÆFW7B76WG2àÐ Ð ¢22##bÓ’Ór÷fW'vöÆb&÷÷6Â7V&Ö—GFV@ ¥W6W"W‡Æ–6—FÇ’WF†÷&—¦VB7V&Ö—76–öâæB66WFæ6RöbFWfVÆ÷W"ôÖöæWF—¦F–öâFW&×2à¥7V&Ö—GFVBF†R&–gB&VG’–FVF‡&÷Vv‚F†R6–væVBÖ–â÷fW'vöÆb66÷VçBW6–æp¦‡GG3¢ò÷&–gG&VG’ævrÂ÷rÖVÆV7G&öâÂ'W6–æW72ÖöFVÂæöæRÂ6FVv÷&–W27FG2æBwV–FW2bG&–æW'2À¦æBÆVwVRöbÆVvVæG2öæÇ’â&÷÷6Â–æ6ÇVFW2gVÆÇ67&VVâõ&7F–6RFööÂ–çFVw&F–öâæ@¦67W&FRÆö6ÂÔ’öW7F–ÖFR66÷Râ7V66W72vRfW&–f–VC ¦‡GG3¢òöFWbæ÷fW'vöÆbæ6öÒöÖ–FVÖf÷&Ò÷7V66W72ò…vRv÷B–÷Rò7V66W72’à¥&÷f–FW"6—2—Bv–ÆÂ6öçF7BF†R66÷VçB'’VÖ–Ã²6†V6²7Ò–bæòVÖ–Âv—F†–âGvòF—2à¥7V&Ö—76–öâ—2æ÷B&÷fÂ÷"FWfVÆ÷W"7&VFVçF–Ç2âgVÆÇ67&VVâ–çFVw&F–öâ&VÖ–ç2VæF–æràÐ
+Added local file feed opt-in with 2MB bound and unchanged downstream validation.
+scripts/start-private-builds.ps1 starts installed app with RIFT_RECOMMENDATIONS_FILE
+and opens separate existing masked collector (1500-request budget). Key stays with
+collector only; no public feed/server or RSO service. First run may lack enough
+qualifying matches; minimum 30 games/10 players unchanged. Actual collection awaits
+user key entry; do not claim builds are populated or live API integration succeeded.
+
+Local League history requests 0..99 with 0..19 fallback; parser/display/scroll cap
+100. Existing server availability may limit actual records. LP graph removes 30-point
+display cap, showing retained current-window snapshots; no inferred historical LP.
+14 home,14 rank,36 recommendation,17 collector,5 transport and window/app checks pass.
+Masked launcher secret-handling tests pass. Installed exe plus updated transport.py,
+backed up both 0.12.8 files, preserved user data. Started private launcher. Public
+release remains 0.12.0. Evidence build/home-55c1f03e757944ae9770afb0740d5ede and build/app.
+
+## Windows button order 0.12.8 (2026-09-07)
+
+Reordered top-right circles to minimize, maximize/restore, close (yellow/green/red).
+Build and existing home/rank/app/window checks passed; compact render inspected.
+Installed hash-verified executable after graceful close, no game active, with 0.12.7
+backup and user data preserved. Evidence: build/home-9177f25a612f443b8b639602db01c64f.
+Public release remains 0.12.0.
+
+## Right-side window buttons 0.12.7 (2026-09-07)
+
+Moved traffic-light group to top right with 8px outer margin and right anchoring;
+updated title drag region to exclude right buttons. Existing home/rank/app/window
+checks passed; added resize alignment and left title drag coverage. Inspected compact
+render. Installed hash-verified executable after graceful close, no game active;
+0.12.6 backup retained, data preserved. Evidence:
+build/home-34e1900f0ee9474f91d5150490df4a65. Public remains 0.12.0.
+
+## Minimal main-window title bar 0.12.6 (2026-09-07)
+
+User requested Apple-like window buttons and minimal title bar. Main Dashboard now
+inherits MinimalWindow: 32px charcoal title region without title text, three left
+12px red/yellow/green dots in 24px hit targets, hover glyphs, accessible names/focus.
+Red closes, yellow minimizes, green maximizes/restores. WM_NCHITTEST supports dragging
+and edge/corner resizing; maximize uses screen working area. Other dialogs unchanged.
+ContentHeight and TitleHeight account for custom title area in drawings, controls,
+scrollbar and lane hit tests. Draw navigation into bitmap so GDI text offsets correctly.
+WindowChromeTests verifies controls and drag/resize hit tests. Existing home/rank/app,
+scrollbar and UI tests passed; 1920 and 1280 renders inspected. Evidence:
+build/home-fd14315b24754232b2f3b01cad7b3a84 and build/ui-79fe593020d24a71bf7a4b7e1aeac235.
+Installed hash-verified executable after graceful close without active League game;
+0.12.5 backup and all data preserved. Public remains 0.12.0. Full Windows snap/multiple
+monitor interaction is not exhaustively verified.
+
+## Scrollbar border removed 0.12.5 (2026-09-07)
+
+Removed scrollbar DrawFocusRectangle; retained focused thumb highlight and keyboard
+navigation. Existing home/rank/app/scroll interaction checks passed and focused 1920
+render confirmed border absent. Installed hash-verified executable after graceful
+close with no active game; previous 0.12.4 backed up, data preserved. Evidence:
+build/home-76cce25e788145c4aa358604e736abae. Public remains 0.12.0.
+
+## Theme color correction 0.12.4 (2026-09-07)
+
+User requested scrollbar match app colors. Uses Theme.Accent teal with lightly
+brightened hover/focus and translucent Theme.Background bands. Geometry and behavior
+unchanged. Build, home/rank/app and existing scrollbar checks passed; 1920 render
+inspected. Installed hash-verified executable after graceful close, no active game;
+0.12.3 backup retained and user data preserved. Evidence:
+build/home-c4ddb83538a34b06a20ce4bcf7ede54c. Public release remains 0.12.0.
+
+## Reference scrollbar 0.12.3 (2026-09-07)
+
+User supplied image and selected far-right green scrollbar. Updated thumb to green
+with subtle horizontal bands and near-black track, retaining slim rounded geometry,
+hover/focus feedback and existing interaction/accessibility. Build, home/rank/app and
+scrollbar interaction checks passed; inspected 1920 sample. Evidence:
+build/home-ee2eb6d9fc4f4f0d90d6652562eb0a26. Installed verified 0.12.3 executable after
+graceful close with no game active; backed up 0.12.2, preserved data. Public still 0.12.0.
+
+## Themed history scrollbar 0.12.2 (2026-09-07)
+
+Replaced native light scrollbar with HistoryScrollBar in Theme.cs: slim rounded muted
+teal thumb, charcoal track, teal hover/focus/drag, wider hit target, keyboard focus,
+accessible scrollbar role/value and high contrast system colors. Track ends at match
+rows above footer. Wheel, drag, page clicks, arrows/Home/End/Page keys retain bounded
+row navigation. HomeRender tests keyboard, wheel, drag end clamping and layout.
+Home/rank/app checks passed; inspected 1920 and 1280 sample layouts. Evidence:
+build/home-37669a9faa8c4e7b8f2a4a4c632c1edf. Installed verified executable after graceful
+close with no active League game; previous 0.12.1 executable backed up, data untouched.
+Public remains 0.12.0; this is a local installed update, not a published release.
+
+## Local scrollbar update 0.12.1 (2026-09-07)
+
+Added a native vertical scrollbar beside match history, including draggable thumb,
+arrow/page/keyboard navigation and synchronized wheel scrolling with bounded offsets.
+Hidden outside the profile history view; disabled when all matches fit. Verified home
+and rank checks, app checks, scrollbar end range, and sample render at 1920 and 1280.
+Installed the verified executable into the user's existing installation after graceful
+app close (no League game process active). Preserved all data and saved the previous
+executable as RiftReference.exe.previous-0.12.0. Public release remains 0.12.0;
+0.12.1 is local only. Source changes: App.cs, HomeDashboard.cs, ReleaseSecurity.cs,
+tests/HomeRender.cs. Evidence: build/home-c9a93a0ab5454e93a8ef3510ce5b40d8.
+
+Riot Chrome retry also failed. Developer support ticket 138375537 was successfully
+submitted and is Open: https://support-developer.riotgames.com/hc/en-us/requests/138375537.
+
+## Fresh-login retry also failed (2026-09-07)
+
+Signed out of Riot portal; user completed fresh authentication and confirmed done. Retried
+production registration with the saved full description, Default Group, League of Legends,
+tournaments No and published website/policy links. Same error: "Failed to create application!
+Selected app type is not available". This third submission attempt used a fresh authenticated
+session, making an old-session timeout less likely. No successful registration/application ID.
+Do not repeat the same flow without new evidence; manual browser retry or Riot support is next.
+
+## Riot submission attempted; portal rejected creation (2026-09-07)
+
+User explicitly confirmed accepting Riot terms and continuing. Accepted the displayed general
+and tournament policy acknowledgments, selected production registration, filled Rift Ready,
+Default Group, League of Legends, tournaments No, https://riftready.gg/ and the reviewed full
+scope/contact/policy links. Submit returned: "Failed to create application! Selected app type
+is not available". Repeated once through a fresh production-selection/agreement/form flow;
+same error. No application ID, successful creation, review status or verification token was
+issued. Do not claim submitted. Public policies/site remain published. No keys accessed.
+Terms acceptance confirmation is no longer pending; the portal error is the current blocker.
+Application text remains in continuation outputs/riot-submission-text.md; portal tab retained.
+
+## Public policies and pending Riot agreement (2026-09-07)
+
+User requested publish and submit. Published https://riftready.gg/terms and /privacy through
+the separate website checkout; current homepage announcement now0.12.0. Sites version13
+deployment succeeded, public pages HTTPS200. Public policies omit private application/editorial
+notes and do not present proposed backend retention controls as deployed. Native unchanged.
+
+Riot production registration reached I AGREE gate on /app-type. Browser rules require
+action-time confirmation for legal acceptance; asked user, awaiting response. No submission.
+Private portal-ready text: continuation outputs/riot-submission-text.md. Keep private draft
+ignored; next step is accept only after confirmation, fill actual portal fields, submit and
+verify outcome/website ownership requirements. Signed-in account MRSPOOKY; development-key
+page exists but keys were not revealed or regenerated.
+
+## Province confirmed (2026-09-07)
+
+User confirmed Vancouver, BC. Private application and review outputs updated; Terms propose
+BC/applicable federal law while preserving mandatory user rights, and Privacy adds BC OIPC
+complaint guidance. No street address inferred. Earlier province-unknown notes are historical.
+Policies remain drafts; nothing published or submitted.
+
+## Operator/audience draft update (2026-09-07)
+
+User supplied operator/contact details in the private application and policy drafts and
+delegated audience/age selection. Draft initial market: Canadian League players of all ranks,
+18+ and local age of majority (19 where applicable), no upper limit. No minor onboarding or
+international expansion initially. This is not a current enforced download restriction;
+do not assume collector participants are adults. Province, required address, effective date,
+providers, retention and eligibility implementation remain unresolved. Review output copies
+updated; no publication, email, submission or app change.
+
+## Private application and policy review (2026-09-07)
+
+User approved correcting the private application and preparing Terms/Privacy drafts, not
+submission/publication. Updated docs/riot-production-application.md to 0.12.0, verified apex
+website status, full local endpoint/mobile disclosures, pseudonymous collector storage,
+unverified live flows and separate production/RSO approval. Added explicit .gitignore rule.
+
+Accepted scope: own linked all-rank Solo/Duo API profile; proposed RSO verification; official
+LP snapshots remain local initially; separate NA/EUW/KR Diamond+ aggregate feed. No public
+profile lookup or cloud LP archive in proposed v1. Backend/RSO are not implemented. Profile
+regions remain unresolved (NA1 suggested for first validation only). Retention targets in
+Privacy draft are proposals, not approved commitments or deployed controls.
+
+Review deliverables are in C:/Users/fuck/Documents/Codex/2026-09-07/continue-rift-ready-development-from-the/outputs:
+riot-production-application-review.md (private copy), terms-of-service-draft.md,
+privacy-policy-draft.md and policy-review-decisions.md. Resolve operator/contact, effective
+date, markets/age eligibility, providers, retention and request handling before finalizing.
+Website still lacks Terms/Privacy pages and advertises 0.10.0; no site change in this task.
+No app code, release, install, credentials, portal submission or acceptance changed.
+
+## Published0.12.0 (2026-09-07)
+
+Published all pending implemented native changes to Latest release https://github.com/existntl/rift-reference/releases/tag/v0.12.0. Includes direct recommendation screen, Blitz-style idle player overview, actual rank badge/LP bar and locally recorded rank progression. Riot API-backed profile and live Diamond+ feed remain pending; private application draft excluded.
+
+All application checks,13 home parsing,14 rank-history,33 recommendation,17 collector and5 transport checks passed; installer upgrade/rollback from0.11.0 preserved preferences and rank history. Downloaded public manifest/installer verified signature/hash/size and tamper rejection; isolated older updater discovered/downloaded/verified0.12.0 without installing. No normal installation performed. Existing latest download URL follows this release. Evidence build/public-0.12.0. Installer SHA256 b19f973ba7b3fd5ff3c8505df82c3feb229476f55610e231c90620dd6940dc05. Exact83-file public source snapshot verified at commit d74c297d75bff74f706677da06f4add3545d9e74 (release tag), tree99c11761c369ca8e417311ef9a357cefcc821713. Release-state docs updated locally after publication.
+
+## API application scope extension (2026-09-07)
+
+User wants rank badge/LP/progression powered by Riot API and added to the started request. Updated private docs/riot-production-application.md with ACCOUNT-V1, LEAGUE-V4 and MATCH-V5 personal-profile scope, official rank snapshots, no invented historical/per-match LP, server-side key and separate profile access/retention requirements. All-rank personal profiles remain separate from Diamond+ recommendations. Draft only; no portal submission, API backend or release performed. Existing local-client implementation remains in place.
+
+## Rank badge and progression (local, 2026-09-07)
+
+Added actual Riot tier badges, divisional LP progress bar and recorded ranked ladder graph to idle home. See docs/rank-history.md for asset bootstrap and local persistence. Graph starts from observed rank snapshots, with no invented earlier history. Preserves rank-history.json and .bak on upgrade/rollback; excludes them from packages/source.13 home parsing and14 rank history checks plus app --test passed.1920x1080 and1280 sample renders inspected; installer upgrade/rollback passed. Live-client integration remains unverified. Local only; public remains0.11.0.
+
+## Blitz-style home polish (local, 2026-09-07)
+
+User requested closer match to Blitz UI. HomeDashboard now uses flat charcoal continuous match rows with dividers, larger portraits, gold KDA text, screenshot-order metrics, wider rank/performance column with RR logo ring, and compact Last10 champion summary. Unknown data/result semantics preserved; footer keeps scroll hint even with notices. Idle heading is Player overview. No synthetic LP history, grades or copied rank emblems.
+
+13 home parsing checks and application tests pass. Full1920 preview inspected (build/home-7d9f9b5b019d441491464aadc1eb89d5/home-1920-sample.png); compact1280x950 content verified via updated offline harness build/home-3dc6ea92d76d48f79831c9e6c5c1b64d. Harness avoids second-monitor Shown maximization when testing small widths. Local only, public remains0.11.0.
+
+## Profile home screen (local, 2026-09-07)
+
+User supplied Blitz-style idle dashboard reference. Added HomeDashboard with Solo rank/LP/season record left, recent champion records, recent10 all-queue summary and scrollable match rows with result/KDA/CS/min/vision/min/damage/min/KP/team damage share. Missing values remain unknown; no invented LP trends, grades or placement scores. Main idle view uses it; draft, live-data-loss and postgame retain their existing screens. History uses current-summoner identity and bounded local ranked/history endpoints through restricted read-only transport.60s memory cache per account/session, cleared disconnect and refreshed after live/postgame. No raw history written to disk or added to mobile payloads.
+
+13 parsing checks and5 transport tests passed; application checks pass.1920x1080 sample and1280 empty layouts inspected in ignored build/home-*; placeholders in standalone renders do not replace app's portrait loader. Actual local client history schema/availability still needs live validation. Direct-build-screen change and this home dashboard are local only; public remains0.11.0.
+
+## Direct builds screen (local, 2026-09-07)
+
+User no longer wants original editor. Main Runes / builds opens RecommendationPicker standalone directly; save plan and guarded preview/apply runes/items moved into dashboard. Overlay still uses picker mode. Legacy BuildPlanner retained only as compatibility/test code, not app navigation. Empty feed disables save/apply; no synthetic production data. Applying captures validated plan, reviews, checks demo and client, disables edits while pending and keeps existing phase/champion guards. Feed refresh now consistently updates action availability.
+
+17 collector tests,33 recommendation checks and application --test passed; direct populated synthetic preview inspected at1920x1080 (build/app/builds-direct.png). User installation/public release remains0.11.0; this follow-up has not been published.
+
+## Published0.11.0 (2026-09-07)
+
+User authorized publishing all pending changes. Published https://github.com/existntl/rift-reference/releases/tag/v0.11.0 as Latest with matching installer and signed latest.json. Includes connected dashboard/path browsing, direct overlay build selection, native dark title bars and explicit shortcut icons. Live Diamond+ feed still unavailable; no collector, key, database or private application draft is packaged. Existing website latest-download link automatically follows this release; website content unchanged.
+
+17 collector tests,29 native recommendation checks,98 overlay checks, application tests and installer upgrade/rollback from0.9.3 passed. Downloaded public files passed publisher signature/hash/size and tamper rejection. Isolated0.9.3 updater discovered, downloaded and verified0.11.0 without installing. Evidence build/public-0.11.0. Installer SHA25670c5f38eeebd0287da563040d4d9ff241de501922111dd8d506c80950cd6e69a. No normal installation performed.
+
+Source published through connector with non-force fast-forward to decdceede30f48b2099ffc2eafee8dfa55c523dc, tree984af63cacce14fe6bcf3d2e7b1ea0a5ee6a63f9; release tag points there. Private docs/riot-production-application.md excluded. Earlier local/unpublished notes are historical. Release-state documentation was updated after publication locally.
+
+## OneTricks-style path browsing (local, 2026-09-07)
+
+User asked to inspect OneTricks in Brave and implement its build-path approach. Brave was not exposed by browser inventory; public https://www.onetricks.gg/champions/builds/Vayne inspected instead, disclosed to user. Recommendation dashboard now has Paths / Options, first-core-item option cards with aggregate games/wins and explicitly limited shares of listed builds, and All paths reset. Clicking an option filters whole bundles and preserves valid selection or selects the first matching bundle. Champion/role/feed changes reset the filter. No OneTricks data feed/scraping, expert identities or unsupported matchup inference added.
+
+17 collector tests,29 native recommendation checks and app --test pass. Lead reviewed options/filtered renders at1920x1080 in build/app/recommendation-path-options.png and recommendation-path-filtered.png. Synthetic fixtures only. No release, normal installation or live feed activation; public remains0.10.0.
+
+## Dark native title bars (local, 2026-09-07)
+
+User rejected the light Windows title strip. Added Theme.TitleBar, called for main dashboard, recommendation dashboard and Theme.Apply dialogs. DWM dark frame with legacy attribute fallback; exact charcoal caption/light text/subtle border on supporting Windows versions. Native window controls and geometry retained. High contrast uses system colors at application. Handle recreation reapplies styling. Microsoft reference: https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute.
+
+UI suite and app --test passed. Native DWM readback in isolated test returned success and dark=1. Inspected1920x1040 dashboard render for layout regressions; DrawToBitmap does not capture compositor dark chrome, so actual title appearance still needs onscreen confirmation. Evidence build/ui-6a8f1ff26b24473f9c7e8e95c0c4c070. Local source/build only; no installation or public release.
+
+## Connected visual build dashboard (local, 2026-09-07)
+
+Implemented the user's Blitz screenshot direction with a three-column native dashboard: frequency/win-rate build cards, full rune choices, observed skill upgrade sequence, summoner spells and item sections. `RecommendationDashboard.cs` owns the picker; `Recommendations.cs` validates v2 paired rune/core groups and detail sample bounds. `OverlaySettings` can open the same selector and select the first core target; applying runes/items still uses the existing review flow. Spell icons are cached with Data Dragon assets.
+
+Collector exports `rift-diamond-2`, grouping complete rune pages with observed three-item cores; detail modes are independently supported within each group, not necessarily observed together. Nullable SQLite details migration preserves rows and refetches legacy details. No fabricated pro identities, situational advice or skill timing. Read docs/recommendations.md. Synthetic preview data is test-only. No normal installation, release, website deployment or live collection performed for this change.
+
+Verification: 17 collector tests, 26 native recommendation checks, 98 overlay checks and application --test passed. Lead inspected sample dashboard, unavailable state and overlay settings at1920x1080. Tests cover coherent alternative selection, role changes, invalid feeds/details, saved-plan transfer and settings isolation. Legacy enrichment preserves known core data if a timeline is absent; an accepted ambiguous-undo timeline still invalidates it. Evidence is ignored build/app/recommendation-*.png and build/overlay-bf64adb62ea540e0bbba865d215ab84d. Source remains local; public remains0.10.0.
+
+## Windows icon repair (2026-09-07)
+
+User reported a generic taskbar icon. Inspection verified correct white/teal RR icons in installed0.10.0 executable, current build, and running app window. Desktop and Start Menu shortcuts had unspecified IconLocation. Backed them up under ignored build/icon-repair-* and set their explicit icon to the accepted logo copied as installed rift-ready.ico; targets unchanged. Refreshed Windows icon display with ie4uinit -show, without restarting Explorer or the app. Taskbar visual refresh may require reopening the app. Installer.cs now explicitly sets future shortcuts to executable icon index0; targeted compiled shortcut regression passed. No binaries installed/released, preferences unchanged. Source change remains local for the next release.
+
+## Riot development access setup (2026-09-06)
+
+User signed into Riot portal and generated a development key; portal confirms expiry September7 at23:25 Pacific. Key was redacted from browser output, never stored in source/chat. Private collector launcher now supports masked user entry and child-process-only key environment. First live collection still awaits local key entry; do not infer successful API calls from portal status. Production registration reaches an I AGREE terms gate, left untouched for owner review. Application text prepared in docs/riot-production-application.md, not submitted; no production key or public hosting. See docs/recommendations.md for private launcher and feed setup.
+
+Parallel agents implemented/tested the launcher and reviewed the collector; lead reran both suites. Twelve collector tests and launcher credential/lifecycle checks pass; launcher rendering inspected at1920x1080. Redirects cannot forward keys; omitted false match wins count as losses; malformed schemas are excluded. Masked launcher opened (process26344 at launch) for user entry. Do not start a second collection while it is running. No live result verified yet.
+
+## Historical parallel work preference (2026-09-06; superseded 2026-09-08)
+
+The user previously approved a lead agent coordinating specialist agents for substantial tasks. That authorization was withdrawn on 2026-09-08; follow the current single-agent preference at the top of this handoff. No application or release changes are implied by either workflow update.
+
+## Diamond+ recommendations (local, 2026-09-06)
+
+User accepted Riot-match aggregation and selected NA / EUW / Korea; no API key yet. Added Python/SQLite collector and restricted loopback feed preview under services/recommendations, plus Diamond+ choices in Runes / builds. Current patch, ranked solo, seven-day window; complete rune pages and timeline-derived first-three-core paths, minimum30 games/10 players, frequency ordering with samples/wins. Rank is observed at collection, not match time. Ambiguous undos exclude item samples. Native validation preserves manual plans when unavailable and uses existing explicit apply. Saved plans feed overlay target selection; no automatic advancement. Read docs/recommendations.md for setup, sampling and activation limitations.
+
+Verification: 6 Python test cases, 10 native recommendation checks and 768 application checks passed; 1920x1080 fixture/unavailable picker and editor renders inspected. Synthetic choices are test-only. No key, live collection, deployment, public release, website changes or normal installation. Feed currently uses RIFT_RECOMMENDATIONS_URL developer override; public endpoint and production access still required. Public remains0.10.0 / website12. Source changes are local and uncommitted.
+
+## Published 0.10.0 and website version 12 (2026-09-06)
+
+Public release https://github.com/existntl/rift-reference/releases/tag/v0.10.0 includes the matching installer and signed latest.json. Public download signature/hash/size verified; the extracted 0.9.3 app discovered, downloaded and verified 0.10.0 without installing it. Upgrade from the old installation working directory and rollback preserve preferences, reviews and overlay.json/recovery. 98 overlay plus 768 application checks pass. Normal installation unchanged; live League integration remains unverified.
+
+Native release source published to main via GitHub connector at ea211099a755f57d013b59f33f6ea1e5f5648890; tree c8ed137d5eb5900d4d62898f1be85f55e777c214 exactly matches local release commit 54d8b63. CLI GitHub authentication is not configured; release upload used the signed-in in-app browser. Do not try repeated CLI login prompts. Site version 12 is public at https://rift-reference.reid-hill.chatgpt.site; source 760b400124e6aedc07b1e4e9f655a5cc6938c721 adds overlay tab, real schematic demo and setup/limitations FAQ. Website build and TypeScript passed; browser QA was not requested. Domain purchase remains paused.
+
+## Removed shared layout toolbar (local 0.10.0)
+
+User requested removing the shared resize/layout menu and placing relevant functions in each gear. Removed toolbar and instruction banner. Build/stats gears now include reset only that panel, existing size/position/transparency controls, next preview screen, Use layout and Cancel layout. Ctrl+Enter/Esc/F6 work when all panels are hidden. Parent settings explains shortcuts, sample data and restoring closed panels through existing visibility switches. Fixed buff cards unchanged. 98 overlay plus 768 application checks passed; 1920x1080 editor and settings previews inspected. Local build only; public release unchanged.
+
+## Fixed objective cards (local 0.10.0)
+
+Replaced buff panel with code-drawn rounded Baron/Elder cards based on user's reference: purple/mint monster emblems, title, m:ss countdown and progress track. Fixed top-center 200x106 cards with 8px gap; only active cards occupy space. No team label or editor chrome/move/resize/close. Prior buff position/size ignored; enable switch and saved opacity retained. Layout editor uses sample data. Live kill events drive automatic visibility, independently of owner. Corrected Elder from 180 to 150 seconds (Riot 9.24b notes); Baron remains 180 (9.23 notes). Ordinary elemental dragons do not start cards. 95 overlay checks, 768 application checks, 1920x1080 preview inspected. No live game validation or publication; public remains 0.9.3.
+
+## Compact panels and transparency (local 0.10.0)
+
+User requested at least 50% smaller overlay boxes and independent gear transparency. Default width and height are halved; PanelSizeVersion migrates custom dimensions once (zero still automatic). Minimum resize is 120x40. Gear > Transparency offers 20â€“100% whole-panel opacity, preview, Use opacity, and Cancel rollback; each value persists independently with the parent settings. Layout editor chrome remains opaque and compact. Live windows apply native Form.Opacity and stay click-through. Build remains beside minimap, buffs top center. 90 overlay checks and 768 application checks; compact 1920x1080 and opacity dialog previews inspected. Local build only; public 0.9.3 unchanged, live League integration unverified.
+
+## Resizable overlay panels (local 0.10.0)
+
+Build, buff and stats panels now resize from all edges/corners in the layout editor when unlocked. Lock prevents moving/resizing. Six independent dimensions persist through Use layout and Save overlay settings; zero retains automatic sizing for older preferences. Sizes fit the current viewport; content scales proportionally. Gear offers Reset size; Reset defaults restores all positions and sizes. Defaults beside minimap/top center unchanged. 81 overlay checks and 768 application checks passed; inspected 1920x1080 resize preview. Live game integration remains unverified. Public 0.9.3 unchanged; no publication or normal install performed.
+
+## Optional stats panel (local 0.10.0)
+
+Implemented the accepted optional stats panel. CS/min and kill participation are the default
+selections; total CS, K/D/A and vision score are optional. Enable via Game overlay > Stats
+panel or Show stats in the layout editor. Its gear selects displayed metrics; it also has
+independent drag/lock/close/reset and normalized saved placement. Default position is left
+side, below the editor toolbar. Uses sanitized current-player scores and complete same-team
+kill totals from the existing local snapshot. Missing scores, zero game time, incomplete team
+data and zero team kills remain unknown rather than guessed. No gold/min or rank benchmarks.
+Riot Live Client scores schema checked 2026-09-06. 71 overlay checks plus 768 app checks pass;
+1920x1080 stats preview inspected. Real-game validation remains pending. Not published or
+installed normally; public app remains 0.9.3 and website version 11.
+
+## Individual panel controls (local 0.10.0)
+
+Replaced the layout editor's general lock toggle with three small controls on each panel:
+independent lock/unlock, settings gear (reset only this position), and close. Closing a panel
+updates its own overlay visibility option when the editor and parent settings are saved;
+Show build/Show buffs restore it. No inactive fake buttons are drawn over gameplay. The
+explicit editor remains the interaction surface; live overlays remain click-through.
+Researched Porofessor's official support/FAQ/download pages on 2026-09-06; its exact panel
+gear actions were not documented, so the reset action is our design choice rather than a
+claim of matching hidden Porofessor behavior. 63 overlay checks and the 768 app checks pass,
+including independent lock, close and restore. Local only, publication unchanged.
+
+## Movable overlay panels (local 0.10.0)
+
+User accepted the compact redesign and requested independent drag/drop with lock/unlock.
+Added Game overlay > Move / lock panels: full-screen preview using real panel renderers,
+Unlock/Lock, drag either panel, Reset defaults, screen switch, cancel and Use layout & lock.
+The parent Save overlay settings commits the result atomically. Gameplay windows remain
+locked and click-through; editing happens in the explicit layout preview. Build defaults
+bottom-right, to the left of a default-size minimap; buffs default top-middle. Existing custom
+legacy X/Y build positions migrate, normalized custom positions clamp across window sizes
+and monitors, and moving one widget does not affect the other. Local compilation and 59
+overlay checks pass, including lock/unlock drag behavior and migration. Public release and
+normal installation unchanged; real-game testing is still pending.
+
+## Overlay reference redesign (local 0.10.0)
+
+User supplied Blitz/Porofessor images and explicitly asked for research and matching overlay
+behavior. Primary sources reviewed: Porofessor download page, Overwolf League game-events,
+overlay/window API and pass-through manifest documentation, Blitz homepage and current Riot
+general policy. Public documentation establishes platform capabilities, not the proprietary
+implementation of either app. Findings and links are in docs/overlay.md.
+
+Implemented five role-aligned blue/red gold-difference markers and complete team item-value
+totals, compact horizontal component/target icons with gold-needed badges and target progress,
+and separate Baron/Elder bars. Added alignment controls with live schematic preview, scale,
+offsets, row spacing and team-side order. Transparent scoreboard windows expose only the
+small HUD elements. Main app palette is unchanged; no Overwolf runtime was added.
+Local compilation, 768 app checks and 50 overlay checks pass. Inspected 1920x1080 preview
+and alignment/settings renders in original workspace overlay-change/evidence. Source remains
+0.10.0 unpublished; public 0.9.3/site version 11 and normal installation unchanged. Real-game
+alignment/focus/click-through, exclusive fullscreen and automatic Probuilds ingestion remain
+unverified or unimplemented as detailed in docs/overlay.md.
+
+## Local 0.10.0 game overlay (not published)
+
+User requested Tab lane gold comparison, Baron/dragon buff duration and gold-to-item
+progress based on pro recommendations. Implemented an optional native overlay with
+independent switches, a held-scoreboard-key lane item-value comparison, estimated
+Baron/Elder team windows and target/component purchase progress. Separate desktop
+settings allow choosing a champion/item or loading the existing saved manual plan format.
+Automatic Probuilds recommendation ingestion is still unfinished; no supported feed was
+established. Do not describe saved manual plans as automatic recommendations.
+
+Read docs/overlay.md for data limits and policy sources checked 2026-09-06. Source 0.10.0
+is local only. Public app 0.9.3, website version 11 and paused domain decision are unchanged.
+No normal user installation changed. Authoritative build, 768 app checks, 35 overlay checks,
+existing layout/practice/loadout/postgame UI regressions, and installed-folder CWD upgrade
+from 0.9.3 plus rollback pass. Overlay settings and recovery are preserved. Installer evidence:
+build/installer-test-e9447ddf572b4a8498a1d413fcd3f013. Inspected 1920x1080 overlay preview,
+overlay settings and affected desktop navigation; visual/test artifacts are staged in the
+original workspace at overlay-change/evidence. Public dist installer/manifest are untouched;
+unsigned local test installer is under overlay-change/package-8e5600eb636f498684ce094d32051620.
+Real League focus/Tab/click-through, events, DPI and device smoke testing remain pending.
+
+Updated 2026-09-06. Read with AGENTS.md.
+
+New sessions: read START-HERE.md for the concise current state, including website palette
+publication (Sites version 11), paused domain decision and landscape support/validation limits.
+
+## 0.9.3 companion logo correction
+
+Final phone screenshot inspection found the embedded logo was blocked by the mobile
+CSP (also affected earlier rebrand builds). Added only img-src data:; external images
+remain blocked. Browser regression now waits for successful logo decoding. Mobile server
+and phone/tablet browser tests plus 768 app checks pass; inspected phone logo successfully.
+Native fix commit 149f372. No installer behavior or desktop styling changes.
+
+Published latest v0.9.3, matching signed manifest and 21,521,920-byte installer.
+SHA256 `7a4cb9e131a52f8000a0a6a101fc1487a26edeac0050a6716a6c9ac949915711`.
+Public/local match, signature/hash/size/tamper and isolated 0.9.1 updater verification
+pass. Evidence build/public-0.9.3, updater probe in build/public-0.9.2/old-client-probe.
+No normal installation changed. This supersedes 0.9.2 for downloads.
+
+Website source `688733a754ced77ba710e4dac3afc8df2d3b96d2`, Sites version 10
+`appgprj_6a9d95f2d8c481919181cda785d25520~appgver_17c0dc5467e08191aefae0f59d142915`,
+deployment `appgdep_6a9dc679c1f081919aacd52397bc5dde` succeeded. Production build/types
+and public HTTP/version announcement verification pass. Public access and URL unchanged.
+
+## 0.9.2 white-and-teal logo
+
+Implemented the user's second logo board across the embedded desktop logo, app and
+installer icons and phone companion; website gets cache-safe v2 logo/icon URLs and
+refreshed active previews. Preserved the previous charcoal UI palette and all upgrade
+identities. UI, branding, mobile server checks and installed-folder upgrade/rollback
+pass. Evidence build/ui-0b52ec0343cd47efbbe5a4b3ba44fe9f and
+build/installer-test-4fa18b2ff0334a949408061760a004de. Phone/tablet browser checks pass.
+
+Published latest v0.9.2 with matching signed manifest and 21,521,920-byte installer.
+SHA256 `5e5c7576454a3be797a02ec1b6859a9a7d064276d2f8b8309835dd5c18291b2a`.
+Public/local hash match, signature/hash/size/tamper checks and isolated 0.9.1 updater
+discovery/download verification pass (build/public-0.9.2). Native source commit 617d79c;
+normal user installation was not changed.
+
+Website version 9 published successfully with existing public access. Source
+`b6b9a1e1c9003d36e8807ffe4f2bc3236c6de3c6`; Sites version
+`appgprj_6a9d95f2d8c481919181cda785d25520~appgver_54a386235e648191a26009f4051ea90f`,
+deployment `appgdep_6a9dc59afd4c819188179ff7cc256204`. Build/types, local HTTP and public
+page/logo/favicon checks pass. No website browser UI QA requested.
+
+## 0.9.1 palette correction
+
+Published latest app release v0.9.1 with matching installer/signed manifest. Public installer
+21,715,456 bytes; SHA256 `d78fee90f71d77c883ec59ab2649d0ddb67e8ff15c2f80c46d24d1f3ff5fe3e8`.
+Signature/hash/size/tamper and old 0.9.0 updater download checks pass (build/public-0.9.1).
+UI harness, native render inspection and phone/tablet browser tests pass. Installer CWD
+upgrade/rollback evidence build/installer-test-ccb5880873164619a691ba98e338f3dc.
+Native feature commit 84ce646; normal installation unchanged.
+
+Website palette/screenshots published successfully with existing public access. Source
+`0e524685d5382f6325e2efd5b946e7b8e8914451`; Sites version 8
+`appgprj_6a9d95f2d8c481919181cda785d25520~appgver_0f03191f116481919d71921e012104ab`,
+deployment `appgdep_6a9dc0e44dd4819181b983b8006dbc11`. Build/types and public HTTP check pass.
+
+User asked to restore previous colors. Restored the pre-rebrand desktop Theme tokens and
+navigation background, and the previous website/mobile CSS palette. Rift Ready name,
+monogram, tagline, icons and upgrade identities remain unchanged. No behavior changes.
+
+## Rift Ready 0.9.0 rebrand
+
+Published and verified: https://github.com/existntl/rift-reference/releases/tag/v0.9.0 is latest, with matching signed latest.json and 21,715,456-byte RiftReference-Setup.exe. SHA256 `ff35831d863ea948e742b0d2dad49856bbcdf2571f07e2c39940fbbb77649ba4`. Public installer matches local package and passes signature/hash/size/tamper tests; isolated 0.8.1 updater discovered/downloaded/verified 0.9.0 without installation. Evidence build/public-0.9.0. Native source commit 576bf03; normal installation unchanged.
+
+Website rebrand published successfully with existing public access and URL. Source `e3a72a8213862999a2e2c77d591dafc4e4361c94`; Sites version 7 `appgprj_6a9d95f2d8c481919181cda785d25520~appgver_94c54475fb48819182efe8a7bc88bd0e`, deployment `appgdep_6a9dbfa3600c8191846cfc5386fcdbfb`. Site metadata title is Rift Ready. Production build/types and public page/logo/favicon HTTP checks pass. Browser UI QA was not requested. User-visible brand is new; retained old URL/file identifiers preserve continuity.
+
+User supplied a Rift Ready brand board and requested implementation in app/webpage. Display copy, desktop navigation/logo, app and installer icons, Windows display/shortcut names, phone companion, website branding/metadata/favicon and active screenshots now use Rift Ready. Palette follows supplied mint #5FE1C2/deep green #0F3D36/charcoal #0B1211/off-white #E9F1EE; small text uses a lighter muted green for legibility. See docs/branding.md for asset provenance and prompt. Internal executable, product ID, registry/install paths, existing GitHub release filenames, website URL, source namespace and signing key are deliberately stable for upgrades.
+
+Added Brand.cs, committed logo asset and repeatable icon builder; mobile logo is embedded at build time, no new route. Installer migrates the old shortcut only when its target matches this installation. Tests: 768 checks, complete UI harness, mobile privacy/server/browser checks, upgrade from 0.8.1 with installed-folder CWD and rollback (build/installer-test-ee5e772da72145f5903a198741f78973), shortcut ownership and embedded-logo checks pass. UI evidence build/ui-67ed29228dca408fba51fc03d1649e32; fresh default renders build/app. Normal user installation unchanged. Publication status will be recorded after verification.
+
+## Published 0.8.1 app and website
+
+User explicitly requested publishing all local changes. Released https://github.com/existntl/rift-reference/releases/tag/v0.8.1 as latest, with matching RiftReference-Setup.exe and signed latest.json. Public installer is 20,918,784 bytes, SHA256 `7ed747e47605f8abac9c511bf05fed3e86aee32831621f3a1c1d144232aba16f`. Public/local installers match; signature/hash/size/tamper checks pass. An isolated 0.8.0 updater discovered, downloaded and verified 0.8.1 without installation (build/public-0.8.1). Upgrade from 0.8.0 while installer CWD is the installation folder, and rollback/prefs/review recovery checks pass (build/installer-test-a609aaa262c5426daa3648d928b51bb2). Source feature commits 0d536ab and f9c8b96 remain in the authoritative local checkout; release tag targets the public README branch. No normal user installation was changed.
+
+Website publication succeeded at https://rift-reference.reid-hill.chatgpt.site with the 0.8.1 announcement, current rune editor/postgame portrait screenshots and an added item-editor feature tab/preview. Source `a2a61c76168d32074c1b4862119859b029908648`, Sites version 6 `appgprj_6a9d95f2d8c481919181cda785d25520~appgver_a2a20b86c36481919e95ddb41c347952`, deployment `appgdep_6a9dbc6f13688191ab20d9772703e6c4` succeeded with existing public access. Production build/types and public page/assets HTTP checks pass. No browser UI QA was requested. Dist now contains the published 0.8.1 installer/manifest; private key stayed external. Existing provider feed and real-client validation limits remain.
+
+## 0.8.1 implementation history (now published)
+
+Follow-up: added bundled champion portraits beside all ten names in the desktop postgame scoreboard, with a placeholder for unavailable artwork. Champion columns reserve space for portraits; role labels fit compact rows. Inspected 1920x1040 and 1280x950 renders; existing PostgameTests passes (also renders 1720). Evidence build/app/demo-postgame.png and postgame-1280.png. Still local 0.8.1, not published; mobile summary unchanged.
+
+User requested rune pages/items that look familiar from the League client. Inspected actual rune and item-set reference screenshots (sources in docs/pregame.md). Replaced the rune dropdowns and item spreadsheet with primary/secondary tree and rune icon rows, stat shard icons, selection highlights/descriptions, searchable/category-filtered item icons with prices, and named shop sections with add/reorder/remove actions. Preserved Rift Reference branding/charcoal/teal styling, explicit previews and guarded append-only imports. No provider feeds or new gameplay assistance added.
+
+New src/LoadoutEditor.cs separates selection models and visual controls from BuildPlanner persistence/import flow. Existing rift-loadout-1 plans remain compatible, including item names; invalid saved item sections cannot partially replace the current plan. New scripts/cache-loadout-icons.py caches 328 official Data Dragon PNGs for bundled 16.17.1. Assets stay ignored in cache/data/loadout-icons and are copied by normal builds, with no runtime network requests. Source imports BuildPlanner + LoadoutEditor; no new runtime dependency.
+
+Version source is local 0.8.1. Public app/site remain 0.8.0; dist still contains the verified 0.8.0 published installer/manifest. No signing, release publication, website changes or normal installation in this task. Validation: 768 checks, UI harness including actual icon clicks/search, rune row/tree rules, save/load, invalid-plan preservation, duplicate items and ordering/removal; four transport tests. Inspected rune/item renders in build/ui-2d3e31b4e1a14cd3b8a2c4307b86d88c at 1296x899 (fits 1920x1080). Existing live-client validation limits still apply.
+
+## Published 0.8.0 and website update
+
+User explicitly requested publication after the postgame work. Released https://github.com/existntl/rift-reference/releases/tag/v0.8.0 with RiftReference-Setup.exe and matching signed latest.json, marked latest. Public installer: 16,992,256 bytes; SHA256 `3bfe5dca8b2ec3edfceb03a2893ebb20908840e62fccdc0c64f4d71d402e62dc`. Public signature/hash/size/tamper checks pass. An isolated 0.7.0 updater discovered, downloaded and verified 0.8.0 without installation; evidence build/public-0.8.0. Upgrade/rollback regression also passed (build/installer-test-21bf2dd370c34f3199fbe4ca6776a1b4). Native feature source is local commit b41ece5; GitHub release tag targets the public README branch, not the maintained source checkout. Normal user installation was not modified.
+
+Website https://rift-reference.reid-hill.chatgpt.site was updated with the 0.8.0 announcement, current dashboard plus pregame/postgame/loadout screenshots, phase-based feature tabs and honest integration limits. Website source f6b132c29956be98ddcc66ca108eed0481107d9d; Sites version 5 (`appgprj_6a9d95f2d8c481919181cda785d25520~appgver_d9f7ab1206e481918dac8794340ebd7e`), deployment `appgdep_6a9db6d1996481919cbaf8f1a73740ba`, succeeded with existing public access. Production build and types pass; public page and new postgame asset return HTTP 200. No website browser UI QA requested or performed. Remaining provider-feed and real-client validation limitations below still apply.
+
+## Postgame statistics (0.8.0)
+
+User requested stats instead of cooldowns after a game. Implemented desktop and mobile match summaries for PreEndOfGame, WaitingForStats and EndOfGame. Live GameEnd events also switch out of the cooldown screen. Reads `/lol-end-of-game/v1/eog-stats-block` only for postgame; checks its gameId against `/lol-gameflow/v1/session` gameData.gameId before displaying it. No arbitrary latest-history fallback or stale live-sample totals. Missing/unready results display a waiting state and retry with ordinary polling.
+
+Shows outcome, duration, personal K/D/A and ratio, CS including neutral minions, CS/min, champion damage and damage/min, gold, vision, final items, and two-team scoreboards. Unknown fields render as dashes, not zero. Missing either minion component makes total CS unknown. Raw result account/chat fields are discarded; mobile receives only sanitized summary strings and champion stats. Review remains for manual notes. No persistent match history added.
+
+`src/Postgame.cs` owns parsing/formatting and the sanitized mobile projection. `--render` now emits demo-postgame.png; Demo results is available in the header. `tests/PostgameTests.cs` tests parsing, stale/wrong-phase rejection, unknown and zero handling, privacy and 1920/1720/1280 desktop renders. Existing 768 checks, UI harness, four transport tests and mobile checks pass; browser tests cover result/live transitions. See docs/postgame.md. Completed-game testing against an actual League client remains pending. App and website are now published as 0.8.0; normal installation was not modified.
+
+## Pregame and loadout tools (0.8.0)
+
+New user request: replace draft cooldown tables with strengths/weaknesses, counters and comp plans; add source recommendations and client rune/custom-shop imports. Implemented dedicated draft brief (desktop + mobile), kit-based matchup considerations, qualitative team plans, native rune/item editor, save/load plans, direct source champion-page links and explicit guarded append-only client imports. New files: src/Pregame.cs, src/BuildPlanner.cs, tests/LoadoutTests.cs, tests/transport_test.py. See docs/pregame.md for behavior and source research.
+
+Automatic Probuilds/Onetricks recommendation feeds are **unfinished**: no documented integration found, and Onetricks ordinary automated request hit a security checkpoint. No bypass attempted. Current UI honestly provides browser links and manual choices, not imported source recommendations or statistical counter rankings. Finish through a supported provider feed/export mechanism; do not silently call this complete.
+
+Validation: 768 existing app checks pass; UI harness passes including new loadout validation and draft header persistence. Three transport mock tests and three mobile server tests pass. Phone/tablet browser checks include draft/live switching. Installer upgrade from public 0.7.0 with installation folder as working directory and rollback pass (build/installer-test-0081068701234846a50674ce703c396c). UI editor evidence: build/ui-a53fda92ed3c4b58829f8ba35bf60a20; draft render: build/app/demo-draft.png. These checks do not substitute for the pending real League smoke test.
+
+Compiler, published app and website now describe 0.8.0. Signed dist/latest.json matches the published 0.8.0 installer. No normal installation was performed. Mock transfer/transport tests cannot establish real League page selection or in-game item-set visibility. Real-client smoke validation remains pending. No local user build files are automatically stored in the installation folder; saved plans use user-chosen paths.
+
+## Consolidation
+
+This checkout is maintained, cloned from https://github.com/existntl/rift-reference.git
+on branch `consolidate-local-source`, preserving the initial README commit and release tags.
+The app source matched the original distributable mirror byte for byte. Standalone harnesses
+were copied from the maintained source; obsolete Setup.cs was omitted. Original workspace,
+installers, preferences, backups and private signing key remain intact. Do not independently
+maintain the old work/src or source mirror.
+
+Structure: src (C#), helpers (Python), tests (standalone harnesses), scripts (build/validation),
+docs (build and aspirational specification), config (update feed), publisher (public key only).
+Ignored cache contains an independent copy of the verified data/runtime bootstrap.
+No private key, local preferences or generated package belongs in Git.
+
+Build: `powershell -ExecutionPolicy Bypass -File scripts/build.ps1 -Installer`.
+See docs/build.md for fresh-checkout bootstrap from the signed 0.5.1 release.
+Migration baseline: 745 app checks pass; installer inherited-working-directory upgrade
+and rollback preserve preferences and executable. Output: build/app and dist.
+
+## Product and continuity
+
+Windows 10 native second-monitor League companion, primarily Vayne ADC in Emerald solo queue.
+Published version is 0.8.0. Remote currently hosts releases, not maintained app source.
+Report local work separately from public publishing.
+Feed: https://github.com/existntl/rift-reference/releases/latest/download/latest.json
+
+Keep enemy-left/allies-right defaults, drag-to-swap persistence, whole-second cooldowns,
+minutes-and-seconds formatting, colored spell labels and names, all-enemy respawn notices,
+and brief "Jungle check." speech. First jungle cue stays 120 seconds, every 90 through 480.
+One-second click stays off by default; each audio interval is independently selectable.
+
+0.5.1 fixes updating when installer working directory is the installation folder. Preserve
+that regression and recovery folders. Never force-kill League or unrelated processes.
+User confirmation that their original failed updater retry succeeded is still unavailable.
+
+Private release key stays outside checkout in the original workspace. Keep the embedded
+public key compatible; verify signed metadata and installer hash/size when releasing.
+Publisher signatures are separate from Authenticode; installer is not Authenticode-signed.
+
+## Published 0.6.0 feature build
+
+Implemented on `feature/decision-practice`, based on migration commit `597e600`:
+- Dashboard lane plan, five-enemy kit reference and persistent one-focus sentence.
+- Specifically authored Vayne/Lulu versus Caitlyn/Nautilus plan. Other quartets combine
+  authored ADC patterns and partner/enemy tools; not all pairings have researched plans.
+- 28 champion threat summaries; unknown kits are shown as unreviewed. Missing or ambiguous
+  bot roles produce an incomplete state. Unbalanced lane data uses a roster layout.
+- Playbook: matchup references, teamfight plan with ally protection, wave/recall scenarios,
+  advantage conversion, training instructions, sources and coverage.
+- Review: local self-assessment, previous-note selection and editing, atomic save with a
+  recovery copy. Available after matches (and in demo), no automatic popup or diagnosis.
+- Preferences v2 maps old focus options and preserves previously migrated settings. Users
+  can restore the original matchup cards. Existing audio options and timing remain intact.
+- Installer preserves preferences.json, reviews.json and reviews.json.bak across upgrades.
+
+New source: src/Coaching.cs and src/Practice.cs. Tests: tests/CoachingTests.cs (included in
+--test), tests/PracticeUiTests.cs and scripts/verify-ui.ps1. Installer package uses intentional
+inputs, excluding notes, preferences and test artifacts. Version 0.6.0 was published on
+2026-09-06 as the latest regular release, with RiftReference-Setup.exe and signed latest.json.
+It was not installed into the user's normal installation. Source remains local at feature
+commit f054264; the public release tag points to the existing release-channel README commit.
+
+Release: https://github.com/existntl/rift-reference/releases/tag/v0.6.0
+Installer SHA-256: 2ddb430f97e515e9375dbf0f7c420a47134b1bcc7a25a79c25681f1f9034918a
+Publisher files are in ignored dist. Public verification evidence is in build/public-0.6.0.
+The latest-feed manifest and public installer passed signature, hash/size and tamper checks.
+A copied 0.5.1 updater discovered, downloaded and verified 0.6.0 without applying it.
+Signing used the existing external private key without copying it into the checkout.
+
+Validation: 768 app checks; UI harness verifies preferences save/reopen, drag persistence,
+original-card option, alternate/partial/solo layouts, all playbook pages and review save/edit.
+Inspected 1920x1040 windows for a 1920x1080 monitor with taskbar. Upgrade/rollback checks
+preserve notes and their recovery copy. Public signing key continuity is unchanged.
+Live gameplay and normal installer registration/shortcut checks remain unverified.
+
+## Published 0.7.0 phone/tablet and visual refresh
+
+User authorized phone/tablet as an alternative to a second monitor, then requested a
+Blitz-inspired desktop visual refresh. Both were published as 0.7.0 on 2026-09-06.
+The normal installation was not modified during validation.
+
+Preferences > Phone / tablet selects a private IPv4 interface and starts a bundled Python
+HTTP helper. Local QR and copyable link contain a per-session 256-bit secret. Explicit stop
+and app shutdown terminate the owned helper. Sharing is off on every launch; no preference
+auto-enables it and no firewall or router settings are changed. Fresh sessions revoke old
+codes. See docs/mobile.md for pairing, Private firewall guidance and trusted-LAN limits.
+
+Mobile.cs serializes a whitelist of champions, roles, levels, reference spells, kit summaries,
+focus and lane plan. No account names, review notes, client credentials, raw endpoints or
+game inputs are served. One selected RFC1918 IPv4 listener, exact Host/Origin validation,
+Bearer-authenticated state, no CORS/cache, fixed routes, bounded workers/socket timeouts.
+Local HTTP is unencrypted. UTF-8 Python mode is required for correct reference text.
+Mobile refresh is every 2s over the existing desktop 3â€“30s data polling, default 5s.
+Stale/lost data is hidden and reconnects automatically. Audio remains on PC. Normal LAN
+HTTP cannot usually use screen Wake Lock; auto-lock guidance is shown instead.
+
+Theme.cs adds mint accents, gradient header, outlined rounded cards and dark preferences,
+Playbook and Review controls. Existing side order, drag persistence, duration formatting,
+audio timing, coaching coverage and saved reviews are preserved. Preferences can scroll
+on screens shorter than its usual height.
+
+Follow-up desktop redesign: user explicitly asked to reference the actual Blitz app.
+Inspected https://windows-cdn.softpedia.com/screenshots/Blitz_3.jpg (desktop live-game UI,
+via https://www.softpedia.com/get/Gaming-Related/Blitz.shtml). Reference is only in ignored
+build/design-reference, never an app asset. Official welcome-page reference was unavailable.
+Replaced the initial mint-gradient styling with neutral charcoal panels, flat subtle borders,
+teal selection states, a compact contextual header, and a persistent 180px labeled left rail.
+Overview, Playbook, Review, Phone / tablet and Preferences use keyboard-focusable native
+buttons with custom vector icons. Phone navigation opens its preferences tab directly.
+Dashboard content draws in a separate surface; drag rectangles receive the sidebar offset.
+Lane spell labels fit narrower columns; all champion/calculation semantics remain intact.
+Inspected 1920x1040 and default 1720x980 renders. Updated UI regression verifies actual
+header bounds, no swapping from sidebar drags, and direct mobile navigation. 768 checks
+and existing preferences/review/layout regressions pass. Installer published with matching
+signed latest.json assets under v0.7.0, marked latest in GitHub.
+
+Release: https://github.com/existntl/rift-reference/releases/tag/v0.7.0
+Installer SHA-256: 5a4ae42e285c81c12168ecd0fa6c19e83a2ba8152aec7035bfeb795daa3f5441
+Public size: 16968192 bytes. Public updater manifest and installer passed signature, hash,
+size and tamper checks. An isolated 0.6.0 app discovered, downloaded and verified 0.7.0
+without installing. Evidence: build/public-0.7.0. Source commit c100895 remains local;
+public release tag targets release-channel README commit 62caee5. No signing keys uploaded.
+GitHub publication uses the authenticated in-app browser; no Git CLI credential is saved.
+The combined signing command was blocked by automatic review; compiling the audited
+publisher first and running signing alone succeeded with the original external key.
+
+Validation: 768 existing app checks; desktop UI harness at 1920x1040; settings/review/drag
+regressions; MobileTests snapshot privacy, reference parity, unknown teams, clearing, real
+helper startup/pipe/stop/token rotation; Python HTTP auth/origin/route/shutdown checks;
+Playwright Edge at 390x844 and 1024x768 covers pairing, Unicode, XSS-safe text, stale data,
+clearing, reconnect and disconnect. Upgrade from 0.6.0 and rollback preserve preferences,
+reviews and recovery copies. Rendered UI inspected. Physical phone/camera, Wi-Fi firewall
+flow, real League match and normal installer shortcut registration remain unverified.
+
+## Existing gameplay limitations
+
+Data Dragon 16.17.1 is not automatically matched to the running patch. Opponent ranks are
+independent hypothetical maximum-eligible ranks, not a jointly allocated skill order.
+No cast history, enemy countdown tracking, vision/wave observation, gank prediction, fight
+simulation, comprehensive special mechanics, pro builds or measured coaching exists.
+Client transitions, Windows audio, installer shortcuts and registry integration are not
+fully validated in normal gameplay. 745 checks do not establish that.
+
+Riot registration/audit remains unverified. Policies reread on 2026-09-06:
+https://developer.riotgames.com/policies/general and https://developer.riotgames.com/docs/lol
+Highlight educational options without dictating actions or exposing hidden information.
+Enemy ability/summoner tracking, including manual timers, remains excluded.
+
+## Public download website (2026-09-06)
+
+Published https://rift-reference.reid-hill.chatgpt.site for public Windows downloads.
+Maintained separately at C:/Users/fuck/Documents/Codex/rift-reference-site.
+Uses Sites/Vinext, real demo screenshots, and the GitHub latest installer URL.
+Production build and TypeScript checks passed; public HTTP 200 verified.
+
+Website 0.7.0 changes published successfully: current desktop/Playbook/empty Review
+screenshots, mobile demo preview, phone/tablet setup steps and trusted-LAN requirements.
+Site source commit e9ce34c is pushed to its Sites source repository. Public page returned
+HTTP 200 after publishing. App downloads continue to use the verified GitHub latest assets.
+
+
+## 2026-09-07 Overwolf proposal submitted
+
+User explicitly authorized submission and acceptance of Developer/Monetization Terms.
+Submitted the Rift Ready app idea through the signed-in Overwolf account using
+https://riftready.gg, ow-electron, business model None, categories Stats and Guides & Trainers,
+and League of Legends only. Proposal includes fullscreen/Practice Tool integration and
+accurate local-API/estimate scope. Success page verified:
+https://dev.overwolf.com/app-idea-form/success/ (We got you! / Success!).
+Provider says it will contact the account by email; check spam if no email within two days.
+Submission is not approval or developer credentials. Fullscreen integration remains pending.

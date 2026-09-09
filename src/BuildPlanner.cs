@@ -60,13 +60,13 @@ public static class Loadouts {
 
 public sealed class BuildPlanner:Form {
  readonly DataStore data;readonly LeagueClient client;readonly Func<bool> demo;readonly LoadoutIcons icons;
- ComboBox champion;RuneEditor runeEditor;ItemEditor itemEditor;
+ RiftComboBox champion;RuneEditor runeEditor;ItemEditor itemEditor;
  Label status;TextBox source;Button applyRunes,applyItems;bool applying;
  public BuildPlanner(DataStore d,LeagueClient c,string selected,Func<bool> isDemo){
   data=d;client=c;demo=isDemo;icons=new LoadoutIcons(d);Text="Rift Ready · Runes and builds";ClientSize=new Size(1280,860);MinimumSize=Size;MaximumSize=Size;StartPosition=FormStartPosition.CenterParent;Font=new Font("Segoe UI",10);AutoScaleMode=AutoScaleMode.None;
   LabelAt("RIFT READY  /  LOADOUTS",24,16,1100,32,16);
   LabelAt("Your rune page and custom shop path · data "+d.Version,24,53,1100,26,10);
-  champion=new ComboBox{Location=new Point(24,91),Size=new Size(230,30),DropDownStyle=ComboBoxStyle.DropDownList,AccessibleName="Champion"};Controls.Add(champion);
+  champion=new RiftComboBox{Location=new Point(24,91),Size=new Size(230,30),AccessibleName="Champion"};Controls.Add(champion);
   foreach(var entry in d.Champions.OrderBy(x=>d.Name(x.Key)))champion.Items.Add(new BuildChoice(Int32.Parse(J.S(entry.Value,"key")),d.Name(entry.Key)));
   SelectChampion(selected);
   AddButton("Onetricks.gg",270,88,145,()=>OpenSource("https://www.onetricks.gg/champions/builds/"));

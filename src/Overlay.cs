@@ -159,7 +159,7 @@ public sealed class GameOverlay:IDisposable {
 }
 
 public sealed class OverlaySettings:Form {
- readonly DataStore data;readonly OverlayOptions draft;readonly ComboBox champions=new ComboBox(),items=new ComboBox(),keys=new ComboBox();readonly Label status=new Label();readonly TextBox search=new TextBox();
+ readonly DataStore data;readonly OverlayOptions draft;readonly RiftComboBox champions=new RiftComboBox(),items=new RiftComboBox(),keys=new RiftComboBox();readonly Label status=new Label();readonly TextBox search=new TextBox();
  readonly CheckBox enabled=new CheckBox(),gold=new CheckBox(),buffs=new CheckBox(),purchase=new CheckBox();readonly NumericUpDown x=new NumericUpDown(),y=new NumericUpDown();HashSet<int> planIds;
  public OverlayOptions Result;
  public OverlaySettings(DataStore d,OverlayOptions original){data=d;draft=original.Copy();Text="Rift Ready · Game overlay";ClientSize=new Size(680,705);FormBorderStyle=FormBorderStyle.FixedDialog;MaximizeBox=false;MinimizeBox=false;StartPosition=FormStartPosition.CenterParent;Font=new Font("Segoe UI",10);AutoScaleMode=AutoScaleMode.None;
