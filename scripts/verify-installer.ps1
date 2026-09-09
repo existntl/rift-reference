@@ -16,6 +16,7 @@ if ($BaselineInstallerPath) { Invoke-Installer '--extract-test' $testRoot ([IO.P
 else { Invoke-Installer '--extract-test' $testRoot }
 $settings = '{"SettingsVersion":1,"AudioVolume":37,"EnemiesLeft":false}'
 [IO.File]::WriteAllText((Join-Path $target 'preferences.json'),$settings,[Text.Encoding]::UTF8)
+[IO.File]::WriteAllText((Join-Path $target 'preferences.json.bak'),$settings,[Text.Encoding]::UTF8)
 $reviews = '[{"Id":"upgrade-check","NextGame":"Keep an exit"}]'
 [IO.File]::WriteAllText((Join-Path $target 'reviews.json'),$reviews,[Text.Encoding]::UTF8)
 [IO.File]::WriteAllText((Join-Path $target 'reviews.json.bak'),$reviews,[Text.Encoding]::UTF8)
@@ -29,11 +30,13 @@ foreach ($name in @('rank-history.json','rank-history.json.bak')) { if ([IO.File
 if ($original -ne (Get-FileHash -LiteralPath (Join-Path $projectRoot 'build/app/RiftReference.exe')).Hash) { throw 'Upgrade did not install the current app' }
 foreach ($name in @('overlay.json','overlay.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $overlay) { throw "Upgrade lost $name" } }
 if ([IO.File]::ReadAllText((Join-Path $target 'preferences.json')) -ne $settings) { throw 'Upgrade lost preferences' }
+if ([IO.File]::ReadAllText((Join-Path $target 'preferences.json.bak')) -ne $settings) { throw 'Upgrade lost preferences recovery copy' }
 foreach ($name in @('reviews.json','reviews.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $reviews) { throw "Upgrade lost $name" } }
 Invoke-Installer '--rollback-test' $target
 foreach ($name in @('rank-history.json','rank-history.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $rankHistory) { throw "Rollback lost $name" } }
 foreach ($name in @('overlay.json','overlay.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $overlay) { throw "Rollback lost $name" } }
 if ([IO.File]::ReadAllText((Join-Path $target 'preferences.json')) -ne $settings) { throw 'Rollback lost preferences' }
+if ([IO.File]::ReadAllText((Join-Path $target 'preferences.json.bak')) -ne $settings) { throw 'Rollback lost preferences recovery copy' }
 foreach ($name in @('reviews.json','reviews.json.bak')) { if ([IO.File]::ReadAllText((Join-Path $target $name)) -ne $reviews) { throw "Rollback lost $name" } }
 if ((Get-FileHash -LiteralPath (Join-Path $target 'RiftReference.exe')).Hash -ne $original) { throw 'Rollback changed app' }
 Write-Output "PASS: upgrade from installation working directory; preferences, reviews, recovery copy and executable preserved on rollback. Backups retained in $testRoot"

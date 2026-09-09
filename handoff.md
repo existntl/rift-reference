@@ -1,5 +1,56 @@
 # Rift Reference handoff
 
+## Local 0.12.21 audit and Updates popup (2026-09-08)
+
+User requested a fresh-eye code review with necessary fixes plus inefficiency/redundancy
+checks, and clarified that Updates should remain a popup like Preferences. Work stayed
+single-agent. Local source/version is 0.12.21; public release remains 0.12.20. Nothing
+was published, signed, committed, installed over the normal app or deployed to the site.
+The private signing key was not accessed. Published dist installer/latest.json are intact.
+
+See docs/code-audit-2026-09-08.md for findings, evidence and limits. Fixed destructive
+startup preference migration using atomic PreferencesStore with unreadable-file refusal
+and .bak retention; installer preserves that copy. Reuse match-detail routes, cap history
+at 64 entries and dispose unreachable dynamic pages. Refresh stale champion/review/
+matchup context and clear account-bound last-match state. Prevent client/mobile helper
+restart after disposal, disable idle mobile sender wakeups, reuse rank art/backing bitmap,
+avoid redundant invalidation and summoner parsing, and skip retired overlay payloads in
+the active client. Archived LivePublisher explicitly opts into its old payload only.
+Updater snapshots its signed release across download/check races and verifies that exact
+bundle again on launch. Shared match-time gates now include GameStart.
+
+Updates uses the same fixed close-only rounded popup/dimmed-owner behavior as Preferences,
+with Escape to close. Opening it preserves current page/history/review draft; unsaved
+reviews and active matches prevent installation. Removed unused HostedPage wrapper.
+Other navigation stays in the main window. New build.ps1 -InstallerOutputDirectory keeps
+test installers separate from the published dist/signed manifest pair.
+
+Verification passed: 769 app; 26 home-data; 14 rank-history; 132 dashboard; 39 navigation/
+retirement; 15 audit regressions; signed-update race; complete Preferences/UI/review/
+loadout/postgame and all-monitor chrome; mobile privacy/lifecycle; 39 recommendations;
+104 archived-overlay; 5 transport, 3 HTTP and 18 collector tests. Existing published
+signature/hash/size/tamper/HTTPS checks passed using the current verifier. Six initial
+regressions and the update race reproduced on the pre-change binary before fixes.
+Upgrade from public 0.12.20 from the installation working directory and rollback retained
+preferences, .bak, reviews, rank history and archived overlay settings. No normal install.
+Visual inspection covered 1920x1040 overview/reference, 1280 Review, Updates and all three
+Preferences sections. Native Save/Cancel hit-target checks remain passing.
+
+Repeated-match workload improved from 20 retained pages / 779 additional USER objects
+to 1 page / 37–38 objects. Sixty overview renders took 19,031ms baseline vs 18,982–19,048ms
+revised: effectively unchanged, not an FPS claim. Active resource allocation was reduced.
+No fresh live-game validation or new policy/approval claims. Legacy/experimental code is
+retained, inactive; this is not an exhaustive third-party dependency or mechanics audit.
+
+Evidence: build/audit-aefe4e2a1f1c4c31911047e9ea6a7c22,
+build/home-418cfa7bceab4c699551d0610a738c23,
+build/ui-7ab4da753b044186a202079cc95ed33e,
+build/installer-test-2e14187406ed483f95047668624ecff0.
+Local installer: build/audit-package-0.12.21/RiftReference-Setup.exe,
+SHA-256 B816D620900864B7B9828601FB7E75638A6A6704B202FE1D0B08586E9E998E2A.
+Publish only if the user asks; increment again if changed binaries have already been
+released by then. Preserve historical entries below rather than treating them as current.
+
 ## Published 0.12.20 page navigation and feature retirement (2026-09-08)
 
 Analyzed both supplied Blitz videos at one-second intervals with selected detailed

@@ -10,6 +10,7 @@ public class HomeProfile {
  public List<HomeMatch> Matches=new List<HomeMatch>();
 }
 public class HomeMatch {
+ public long GameId;
  public string Champion="",Role="",Result="";public int Queue;public double Duration;public DateTime? Played;
  public int? Kills,Deaths,Assists,CS,Vision,Damage;public double? KillParticipation,DamageShare;
  public int?[] Items=new int?[7];
@@ -36,6 +37,7 @@ public static class HomeData {
    if(identities.Length==1){var id=Number(identities[0],"participantId");if(id.HasValue&&id>0){var found=participants.Where(p=>Number(p,"participantId")==id).ToArray();if(found.Length==1)me=found[0];}}
    if(me==null){var found=participants.Where(p=>Self(p,summoner)).ToArray();if(found.Length==1)me=found[0];}if(me==null)continue;
    var stats=J.Get(me,"stats");var m=new HomeMatch{Champion=data.Resolve(J.S(me,"championId")),Queue=Number(game,"queueId")??0,Duration=Number(game,"gameDuration")??0,Role=Role(me),Kills=Number(stats,"kills"),Deaths=Number(stats,"deaths"),Assists=Number(stats,"assists"),Vision=Number(stats,"visionScore"),Damage=Number(stats,"totalDamageDealtToChampions")};
+   long gameId;if(Int64.TryParse(J.S(game,"gameId"),NumberStyles.None,CultureInfo.InvariantCulture,out gameId)&&gameId>0)m.GameId=gameId;
    for(int slot=0;slot<m.Items.Length;slot++)m.Items[slot]=Number(stats,"item"+slot);
    var cs=Number(stats,"totalMinionsKilled");var jungle=Number(stats,"neutralMinionsKilled");if(cs.HasValue&&jungle.HasValue&&(long)cs+jungle<=int.MaxValue)m.CS=cs+jungle;
    object win=J.Get(stats,"win");m.Result=win is bool?((bool)win?"Victory":"Defeat"):"Unknown";

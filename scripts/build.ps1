@@ -1,4 +1,4 @@
-param([string]$OutputDirectory, [switch]$Installer)
+param([string]$OutputDirectory, [switch]$Installer, [string]$InstallerOutputDirectory)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 if (!$OutputDirectory) { $OutputDirectory = Join-Path $projectRoot 'build/app' }
@@ -24,7 +24,7 @@ Copy-Item -LiteralPath (Join-Path $projectRoot 'helpers/transport.py'),(Join-Pat
 $mobileTemplate = [IO.File]::ReadAllText((Join-Path $projectRoot 'helpers/mobile.html'),[Text.Encoding]::UTF8)
 $mobileLogo = [Convert]::ToBase64String([IO.File]::ReadAllBytes([IO.Path]::ChangeExtension($brandIcon,'.png')))
 [IO.File]::WriteAllText((Join-Path $appRoot 'mobile.html'),$mobileTemplate.Replace('__RIFT_READY_LOGO__',$mobileLogo),[Text.Encoding]::UTF8)
-$sourceNames = @('Core','App','DashboardNavigation','Pages','ReviewPage','HomeData','HomeDashboard','DashboardAssets','RankHistory','Matchup','AudioCues','Updates','ReleaseSecurity','Mobile','Theme','PreferencesUi','Brand','Pregame','BuildPlanner','LoadoutEditor','Recommendations','RecommendationDashboard','Postgame','Overlay','OverlayVisuals','PanelLayout','StatsPanel','NativeOverlayBridge')
+$sourceNames = @('Core','App','DashboardNavigation','Pages','ReviewPage','HomeData','HomeDashboard','DashboardAssets','RankHistory','Matchup','AudioCues','Updates','ReleaseSecurity','Mobile','Theme','PreferencesUi','PreferencesStore','Brand','Pregame','BuildPlanner','LoadoutEditor','Recommendations','RecommendationDashboard','Postgame','Overlay','OverlayVisuals','PanelLayout','StatsPanel','NativeOverlayBridge')
 if (Test-Path -LiteralPath (Join-Path $projectRoot 'src/Coaching.cs')) { $sourceNames += 'Coaching' }
 if (Test-Path -LiteralPath (Join-Path $projectRoot 'src/Practice.cs')) { $sourceNames += 'Practice' }
 $sources = $sourceNames | ForEach-Object { Join-Path $projectRoot "src/$_.cs" }
@@ -49,7 +49,7 @@ if ($Installer) {
             [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,$file.FullName,$relative,[IO.Compression.CompressionLevel]::Optimal) | Out-Null
         }
     } finally { $zip.Dispose() }
-    $dist = Join-Path $projectRoot 'dist'
+    $dist = if ($InstallerOutputDirectory) { [IO.Path]::GetFullPath($InstallerOutputDirectory) } else { Join-Path $projectRoot 'dist' }
     New-Item -ItemType Directory -Path $dist -Force | Out-Null
     & $compiler /nologo /target:winexe "/out:$dist/RiftReference-Setup.exe" "/resource:$publicKey,update-public-key.xml" "/resource:$payload,payload.zip" "/win32icon:$brandIcon" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll (Join-Path $projectRoot 'src/Installer.cs') (Join-Path $projectRoot 'src/ReleaseSecurity.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }

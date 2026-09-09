@@ -17,9 +17,15 @@ branding are not app requirements. No audio analysis is claimed.
 | existntl LP history, 23–26s | Role-based champion pool | Own loaded history filtered by role; no fabricated LP contributions |
 | existntl LP history, 38–56s | Graph, event timeline and win-probability tabs | Deferred: the local history model does not contain the required event/roster/prediction data |
 
-Champions, champion reference, rank history, match details, Matchups, Review and
-Updates are main-window pages. Alt+Left/Right and visible arrows support navigation.
-Preferences preserves its existing Save/Cancel behavior. Review drafts remain in
+Champions, champion reference, rank history, match details, Matchups and Review are
+main-window pages. Alt+Left/Right and visible arrows support navigation. Per the user's
+later clarification, Updates is a popup like Preferences (local 0.12.21), superseding
+the Updates page in published 0.12.20. Both use fixed close-only chrome and a dimmed
+owner. Updates preserves the underlying page/history/draft and blocks installation
+during a match or with unsaved Review edits. Preferences preserves Save/Cancel behavior.
+Navigation retains up to 64 entries, reuses a match's detail page and releases dynamic
+pages removed from history. Cached champion summaries refresh with loaded history.
+Review drafts remain in
 memory across page changes; switching notes, starting a new note or closing with
 unsaved edits uses an inline Save/Discard/Keep editing prompt. Match-time review
 gating remains, and saved review storage/recovery semantics are unchanged.
@@ -66,9 +72,11 @@ access alone supplies historical data. No enemy cast/countdown tracking is autho
 ## Verification
 
 `verify-home.ps1` includes PageNavigationTests. It exercises actual native button
-actions, page visibility/no top-level dialogs, Back/Forward, retained filters/scroll,
+actions, page visibility without top-level dialogs except Preferences/Updates,
+Updates modal ownership/native disabled owner/dirty-review gate, Back/Forward, retained filters/scroll,
 match row hit targets, saved/unsaved reviews, LP point counts, account clearing and
 old enabled-overlay settings. Renders cover 1920×1040 (1080p with taskbar) and 1280×950.
 `verify-ui.ps1` keeps preferences migration/hit-target/save/cancel and archived
 component tests. Old modal helper methods remain for isolated rendering/compatibility;
-they are not reachable from active navigation.
+they are not reachable from active navigation. AuditRegressionTests additionally covers
+stale page context, bounded history, repeated match detail reuse and helper shutdown.

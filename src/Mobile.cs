@@ -18,10 +18,11 @@ public sealed class MobileCompanion : IDisposable {
     string pending;
     readonly System.Threading.Timer sender;
     int sending;
+    bool disposed;
     public string Url { get; private set; }
     public Bitmap Qr { get; private set; }
     public bool Running { get { try { return process != null && !process.HasExited; } catch { return false; } } }
-    public MobileCompanion(string root) { home = root; sender=new System.Threading.Timer(Send,null,250,250); }
+    public MobileCompanion(string root) { home = root; sender=new System.Threading.Timer(Send,null,System.Threading.Timeout.Infinite,System.Threading.Timeout.Infinite); }
     void Send(object unused) {
         if(System.Threading.Interlocked.Exchange(ref sending,1)!=0)return;
         try {
@@ -40,6 +41,7 @@ public sealed class MobileCompanion : IDisposable {
             .SelectMany(n => n.GetIPProperties().UnicastAddresses).Select(a => a.Address).Where(PrivateAddress).Select(a => a.ToString()).Distinct().ToArray();
     }
     public async Task Start(string address) {
+        if(disposed)throw new ObjectDisposedException("MobileCompanion");
         Stop();
         if (!Addresses().Contains(address)) throw new InvalidOperationException("Choose an available home-network address.");
         var bytes = new byte[32]; using (var rng = RandomNumberGenerator.Create()) rng.GetBytes(bytes);
@@ -58,7 +60,7 @@ public sealed class MobileCompanion : IDisposable {
             if (await Task.WhenAny(line, Task.Delay(7000)) != line) throw new IOException("Local sharing took too long to start.");
             var response = J.Parse(await line ?? "{}");
             if (J.S(response,"url") == "") throw new IOException(J.S(response,"error") == "" ? "Local sharing could not start." : J.S(response,"error"));
-            if (process != child) throw new IOException("Sharing was stopped.");
+            if (disposed || process != child) throw new IOException("Sharing was stopped.");
             Url = J.S(response,"url");
             var rows = J.A(J.Get(response,"qr")).Select(Convert.ToString).ToArray();
             int scale = 4, size = rows.Length;
@@ -67,6 +69,7 @@ public sealed class MobileCompanion : IDisposable {
                 g.Clear(Color.White);
                 for(int y=0;y<size;y++)for(int x=0;x<size;x++)if(rows[y][x]=='1')g.FillRectangle(Brushes.Black,(x+4)*scale,(y+4)*scale,scale,scale);
             }
+            sender.Change(250,250);
         } catch { if(process==child)Stop(); throw; }
     }
     public void Publish(DataStore data, Snapshot state, Preferences prefs) {
@@ -96,11 +99,12 @@ public sealed class MobileCompanion : IDisposable {
         });
     }
     public void Stop() {
+        if(!disposed)sender.Change(System.Threading.Timeout.Infinite,System.Threading.Timeout.Infinite);
         var child=process;process=null;Url=null;System.Threading.Interlocked.Exchange(ref pending,null);
         if(Qr!=null){Qr.Dispose();Qr=null;}
         if(child!=null) {try { if(!child.HasExited)child.Kill(); } catch(InvalidOperationException) {} catch(System.ComponentModel.Win32Exception) {} finally {child.Dispose();}}
     }
-    public void Dispose() { sender.Dispose();Stop(); }
+    public void Dispose() { if(disposed)return;disposed=true;sender.Dispose();Stop(); }
 }
 
 public static class MobileSettings {

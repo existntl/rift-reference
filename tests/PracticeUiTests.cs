@@ -85,7 +85,7 @@ class PracticeUiTests {
             Modal(()=>dashboard.OpenPreferences(null,2),"Preferences",form=>{
                 Check(Desc<Panel>(form).Single(p=>p.Name=="PhonePage").Visible,"Phone preferences did not open directly");
             });
-            dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Updates").PerformClick();var updatePage=Desc<UpdatesDialog>(dashboard).Single();Check(updatePage.IsPage&&!updatePage.TopLevel,"Updates did not open inside the main window");Check(Desc<CheckBox>(updatePage).All(c=>c is RiftToggle),"Updates contain an unthemed checkbox");Desc<CheckBox>(updatePage).Single(c=>c.Text.StartsWith("Automatically check")).Checked=false;
+            Modal(()=>dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Updates").PerformClick(),"Updates",form=>{var popup=(UpdatesDialog)form;Check(popup.TopLevel&&popup.Modal&&!popup.IsPage,"Updates did not open as a popup");Check(Desc<CheckBox>(popup).All(c=>c is RiftToggle),"Updates contain an unthemed checkbox");Desc<CheckBox>(popup).Single(c=>c.Text.StartsWith("Automatically check")).Checked=false;});
             dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Live game").PerformClick();
             prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")));
             Check(!prefs.AutoUpdates,"Update preference did not save from the separate Updates area");

@@ -40,7 +40,8 @@ public static class HomeDashboard {
  static string Kda(IEnumerable<HomeMatch> matches){var rows=matches.Where(m=>m.Kills.HasValue&&m.Deaths.HasValue&&m.Assists.HasValue).ToList();if(rows.Count==0)return "—";long deaths=rows.Sum(m=>(long)m.Deaths.Value);return deaths==0?"Perfect":(rows.Sum(m=>(double)m.Kills.Value+m.Assists.Value)/deaths).ToString("0.00");}
  static string Average(List<HomeMatch> rows,Func<HomeMatch,int?> field,string format){var known=rows.Where(m=>field(m).HasValue).ToList();return known.Count==0?"—":known.Average(m=>(double)field(m).Value).ToString(format);}
  static string AverageRate(List<HomeMatch> rows,Func<HomeMatch,int?> field,string format){var known=rows.Where(m=>field(m).HasValue&&m.Duration>0).ToList();return known.Count==0?"—":known.Average(m=>field(m).Value*60.0/m.Duration).ToString(format);}
- static void RankBadge(Graphics g,Rectangle r,DataStore data,string tier){
+ static void RankBadge(Graphics g,Rectangle r,DataStore data,string tier,Func<string,Image> cached){
+  if(cached!=null){var img=cached(tier);if(img!=null){float scale=Math.Min(r.Width/(float)img.Width,r.Height/(float)img.Height);int w=(int)(img.Width*scale),h=(int)(img.Height*scale);g.DrawImage(img,new Rectangle(r.X+(r.Width-w)/2,r.Y+(r.Height-h)/2,w,h));}else Text(g,"—",r,26,Theme.Muted,true);return;}
   string key=(tier??"").ToLowerInvariant();if(!new[]{"iron","bronze","silver","gold","platinum","emerald","diamond","master","grandmaster","challenger"}.Contains(key))key="unranked";
   try{string file=Path.Combine(data.Root,"rank-badges",key+".png");if(File.Exists(file)){using(var img=Image.FromFile(file)){float scale=Math.Min(r.Width/(float)img.Width,r.Height/(float)img.Height);int w=(int)(img.Width*scale),h=(int)(img.Height*scale);g.DrawImage(img,new Rectangle(r.X+(r.Width-w)/2,r.Y+(r.Height-h)/2,w,h));}return;}}catch{}
   Text(g,"—",r,26,Theme.Muted,true);
@@ -58,11 +59,11 @@ public static class HomeDashboard {
   string format=points[0].At.Date==points[points.Count-1].At.Date?"HH:mm":"MMM d";
   Label(g,points[0].At.ToLocalTime().ToString(format),r.X,plot.Bottom+5,r.Width/2,18,8,Theme.Muted);Label(g,points[points.Count-1].At.ToLocalTime().ToString(format),r.Right-60,plot.Bottom+5,60,18,8,Theme.Muted);Label(g,"Recorded snapshots · rank + LP",r.X,r.Bottom-17,r.Width,18,8,Theme.Muted);
  }
- static void Profile(Graphics g,Rectangle bounds,DataStore data,HomeProfile profile,Func<string,Image> portrait,List<HomeMatch> matches){
+ static void Profile(Graphics g,Rectangle bounds,DataStore data,HomeProfile profile,Func<string,Image> portrait,List<HomeMatch> matches,Func<string,Image> rankBadge){
   int left=SidebarWidth(bounds),rankH=Math.Min(450,Math.Max(430,bounds.Height-280));var rank=new Rectangle(bounds.X,bounds.Y,left,rankH);Card(g,rank);int x=rank.X+26,w=left-52;
   Label(g,"YOUR PROFILE",x,rank.Y+19,w,23,10,Theme.Muted);
   Label(g,profile==null||String.IsNullOrWhiteSpace(profile.Name)?"Welcome to Rift Ready":profile.Name,x,rank.Y+47,w,36,left<340?17:21,Theme.Ink,true);
-  int badge=left<340?108:146;RankBadge(g,new Rectangle(rank.X+18,rank.Y+88,badge,badge),data,profile==null?null:profile.Tier);int rx=rank.X+badge+24,rw=rank.Right-rx-24;
+  int badge=left<340?108:146;RankBadge(g,new Rectangle(rank.X+18,rank.Y+88,badge,badge),data,profile==null?null:profile.Tier,rankBadge);int rx=rank.X+badge+24,rw=rank.Right-rx-24;
   Label(g,profile==null||String.IsNullOrWhiteSpace(profile.Rank)?"Rank unavailable":profile.Rank,rx,rank.Y+116,rw,32,left<340?12:17,Theme.Accent,true);
   bool capped=profile!=null&&new[]{"IRON","BRONZE","SILVER","GOLD","PLATINUM","EMERALD","DIAMOND"}.Contains((profile.Tier??"").ToUpperInvariant());
   Label(g,profile!=null&&profile.LP.HasValue?profile.LP+(capped?" / 100 LP":" LP"):"— LP",rx,rank.Y+154,rw,27,11,Theme.Ink,true);
@@ -86,10 +87,10 @@ public static class HomeDashboard {
   int groupX=metricX+3*metricWidth+20,space=r.Right-groupX-20;if(space<260)return;Label(g,"Most played",groupX,r.Y+23,space,26,10,Theme.Muted);int count=Math.Min(3,space/143),width=space/count;
   foreach(var group in matches.GroupBy(m=>m.Champion).OrderByDescending(a=>a.Count()).Take(count)){int won=group.Count(Win),lost=group.Count(Loss),total=won+lost;Portrait(g,new Rectangle(groupX,r.Y+69,53,60),group.Key,portrait);Label(g,total==0?"—":(100.0*won/total).ToString("0")+"%",groupX+64,r.Y+69,width-64,25,11,Theme.Accent,true);Label(g,Kda(group)+" KDA",groupX+64,r.Y+97,width-64,23,9,Gold);Label(g,won+"W – "+lost+"L",groupX+64,r.Y+124,width-64,22,9,Theme.Muted);groupX+=width;}
  }
- public static void Draw(Graphics g,Rectangle bounds,DataStore data,HomeProfile profile,Func<string,Image> portrait,int offset=0,string search="",int queue=0,int limit=100,Func<int,Image> itemIcon=null){
+ public static void Draw(Graphics g,Rectangle bounds,DataStore data,HomeProfile profile,Func<string,Image> portrait,int offset=0,string search="",int queue=0,int limit=100,Func<int,Image> itemIcon=null,Func<string,Image> rankBadge=null){
   if(bounds.Width<600||bounds.Height<300)return;var saved=g.Save();g.SetClip(bounds);g.SmoothingMode=SmoothingMode.AntiAlias;
   try{
-   var matches=HomeData.Filter(profile,search,queue,limit);Profile(g,bounds,data,profile,portrait,matches);var summary=SummaryBounds(bounds);Summary(g,summary,matches,queue==0?"All queues":Queue(queue),portrait);
+   var matches=HomeData.Filter(profile,search,queue,limit);Profile(g,bounds,data,profile,portrait,matches,rankBadge);var summary=SummaryBounds(bounds);Summary(g,summary,matches,queue==0?"All queues":Queue(queue),portrait);
    var table=TableBounds(bounds);Card(g,table);Label(g,"Recent matches",table.X+24,table.Y+16,300,35,18,Theme.Ink,true);
    if(matches.Count==0){Label(g,profile==null?"Your next session starts here":"No matches match these filters",table.X+30,table.Y+117,table.Width-60,42,23,Theme.Ink,true);Label(g,profile==null?"Open League of Legends to load your profile.":"Try another champion, queue, or match range.",table.X+30,table.Y+174,table.Width-60,30,12,Theme.Accent);if(profile!=null)Label(g,profile.Notice,table.X+30,table.Y+220,table.Width-60,30,10,Theme.Muted);return;}
    bool items=table.Width>=1040;float[] fractions=items?new[]{0f,.108f,.210f,.291f,.387f,.501f,.602f,.707f,.799f}:new[]{0f,.13f,.25f,.35f,.46f,.63f,.76f,.88f};string[] headings=items?new[]{"RESULT","CHAMPION","ROLE","TIME AGO","KDA","VISION/MIN","CS/MIN","DMG/MIN","ITEMS"}:new[]{"RESULT","CHAMPION","ROLE","TIME AGO","KDA","VISION/MIN","CS/MIN","DMG/MIN"};

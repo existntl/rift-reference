@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
@@ -29,7 +29,7 @@ static class Program {
  }
  static string Install(string input,bool register,bool failAfterBackup=false){string target=Target(input);Directory.SetCurrentDirectory(Path.GetTempPath());EnsureClosed(target);string parent=Path.GetDirectoryName(target);Directory.CreateDirectory(parent);string stage=Path.Combine(parent,".RiftReference-stage-"+Guid.NewGuid().ToString("N"));string backup=target+".previous-"+DateTime.UtcNow.ToString("yyyyMMddHHmmss")+"-"+Guid.NewGuid().ToString("N").Substring(0,6);bool moved=false;
   try{
-   Extract(stage);foreach(string name in new[]{"preferences.json","reviews.json","reviews.json.bak","overlay.json","overlay.json.bak","rank-history.json","rank-history.json.bak"}){string settings=Path.Combine(target,name);if(File.Exists(settings)){if((File.GetAttributes(settings)&FileAttributes.ReparsePoint)!=0)throw new IOException("Linked user data files are not supported.");File.Copy(settings,Path.Combine(stage,name),true);}}
+   Extract(stage);foreach(string name in new[]{"preferences.json","preferences.json.bak","reviews.json","reviews.json.bak","overlay.json","overlay.json.bak","rank-history.json","rank-history.json.bak"}){string settings=Path.Combine(target,name);if(File.Exists(settings)){if((File.GetAttributes(settings)&FileAttributes.ReparsePoint)!=0)throw new IOException("Linked user data files are not supported.");File.Copy(settings,Path.Combine(stage,name),true);}}
    File.WriteAllText(Path.Combine(stage,Marker),new JavaScriptSerializer().Serialize(new InstallRecord{product=ReleaseInfo.Product,version=ReleaseInfo.Version}));File.Copy(Assembly.GetExecutingAssembly().Location,Path.Combine(stage,"Uninstall.exe"),true);
    if(Directory.Exists(target)){MoveWithRetry(target,backup);moved=true;}if(failAfterBackup)throw new IOException("Injected rollback test.");MoveWithRetry(stage,target);
   }catch{if(moved&&!Directory.Exists(target))MoveWithRetry(backup,target);throw;}
@@ -44,7 +44,7 @@ static class Program {
   try{foreach(var folder in new[]{Environment.GetFolderPath(Environment.SpecialFolder.Programs),Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}){Shortcut(Path.Combine(folder,"Rift Ready.lnk"),Path.Combine(target,"RiftReference.exe"));RemoveOwnedLegacyShortcut(folder,target);}}catch{MessageBox.Show("Installed successfully, but Windows could not create shortcuts. Open RiftReference.exe in "+target);}
  }
  static void Wait(int pid){try{using(var p=Process.GetProcessById(pid)){if(!p.WaitForExit(30000))throw new IOException("Close Rift Ready and try the update again. No running process was terminated.");}}catch(ArgumentException){}}
- static bool Game(){return Process.GetProcessesByName("League of Legends").Length>0;}
+ static bool Game(){var games=Process.GetProcessesByName("League of Legends");try{return games.Length>0;}finally{foreach(var game in games)game.Dispose();}}
  static void Launch(string target){Process.Start(new ProcessStartInfo{FileName=Path.Combine(target,"RiftReference.exe"),UseShellExecute=true});}
  [STAThread] static int Main(string[] args){Application.EnableVisualStyles();try{
   if(args.Length==2&&args[0]=="--extract-test"){Install(args[1],false);return 0;}

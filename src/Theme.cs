@@ -246,8 +246,8 @@ public sealed class HistoryScrollBar : Control {
     int value,maximum,largeChange=1;bool hover,dragging;int grab;
     public event System.EventHandler ValueChanged;
     public int SmallChange{get;set;}
-    public int Maximum{get{return maximum;}set{maximum=System.Math.Max(0,value);Value=this.value;Invalidate();}}
-    public int LargeChange{get{return largeChange;}set{largeChange=System.Math.Max(1,value);Value=this.value;Invalidate();}}
+    public int Maximum{get{return maximum;}set{int next=System.Math.Max(0,value);if(next==maximum)return;maximum=next;Value=this.value;Invalidate();}}
+    public int LargeChange{get{return largeChange;}set{int next=System.Math.Max(1,value);if(next==largeChange)return;largeChange=next;Value=this.value;Invalidate();}}
     public int Limit{get{return System.Math.Max(0,Maximum-LargeChange+1);}}
     public int Value{get{return value;}set{int next=System.Math.Max(0,System.Math.Min(Limit,value));if(next==this.value)return;this.value=next;Invalidate();AccessibilityNotifyClients(AccessibleEvents.ValueChange,-1);if(ValueChanged!=null)ValueChanged(this,System.EventArgs.Empty);}}
     public HistoryScrollBar(){SmallChange=1;TabStop=true;AccessibleRole=AccessibleRole.ScrollBar;BackColor=Theme.Background;SetStyle(ControlStyles.Selectable|ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer|ControlStyles.ResizeRedraw,true);}

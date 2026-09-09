@@ -40,10 +40,10 @@ public static class Recommendations {
   double now=(DateTime.UtcNow-new DateTime(1970,1,1)).TotalSeconds,created=J.N(feed,"generatedAt");
   var regions=J.A(J.Get(feed,"regions")).Select(Convert.ToString).OrderBy(x=>x).ToArray();
   if(!new[]{"rift-diamond-1","rift-diamond-2"}.Contains(J.S(feed,"format"))||J.S(feed,"patch")!=Patch(data.Version)||J.N(feed,"queue")!=420||J.S(feed,"rankBasis")!="diamond-plus-at-collection"||!regions.SequenceEqual(new[]{"EUW1","KR","NA1"})||J.N(feed,"windowDays")!=7)throw new IOException("Feed does not match the current patch or the Diamond+ NA / EUW / KR solo-queue filters.");
-  if(created>now+300||created<now-86400)throw new IOException("Recommendation feed is over 24 hours old or has an invalid timestamp. Refresh the publisher's data.");
+  if(Double.IsNaN(created)||Double.IsInfinity(created)||created>now+300||created<now-86400)throw new IOException("Recommendation feed is over 24 hours old or has an invalid timestamp. Refresh the publisher's data.");
   return J.A(J.Get(feed,"results")).Where(r=>J.N(r,"championId")==J.N(data.Champion(champion),"key")&&J.S(r,"role")==role).ToArray();
  }
- public static void ValidateChoice(object choice){double games=J.N(choice,"games"),wins=J.N(choice,"wins"),players=J.N(choice,"players");if(games<30||players<10||players>games||wins<0||wins>games||games!=Math.Floor(games)||wins!=Math.Floor(wins)||players!=Math.Floor(players))throw new IOException("This choice does not meet the 30-game / 10-player minimum.");}
+ public static void ValidateChoice(object choice){double games=J.N(choice,"games"),wins=J.N(choice,"wins"),players=J.N(choice,"players");if(new[]{games,wins,players}.Any(n=>Double.IsNaN(n)||Double.IsInfinity(n))||games<30||players<10||players>games||wins<0||wins>games||games!=Math.Floor(games)||wins!=Math.Floor(wins)||players!=Math.Floor(players))throw new IOException("This choice does not meet the 30-game / 10-player minimum.");}
  public static string Plan(DataStore data,string champion,string role,object rune,object item){
   ValidateChoice(rune);ValidateChoice(item);var page=J.Get(rune,"value");var ids=J.A(J.Get(page,"perks")).Select(Convert.ToInt32).ToArray();
   int primary=(int)J.N(page,"primary"),secondary=(int)J.N(page,"secondary");Loadouts.RunePage(data,champion,primary,secondary,ids);
@@ -67,7 +67,7 @@ public static class Recommendations {
    if(J.N(detail,"games")>J.N(build,"games")||J.N(detail,"players")>J.N(build,"players")||J.N(detail,"wins")>J.N(build,"wins")||J.N(detail,"games")-J.N(detail,"wins")>J.N(build,"games")-J.N(build,"wins"))throw new IOException("Detail sample exceeds its build group.");
    var ids=Numbers(J.Get(detail,"value"),kind=="summonerSpells"?2:1,kind=="summonerSpells"?2:kind=="finalItems"?6:kind=="skillOrder"?18:20);
    if(kind=="summonerSpells"){
-    var spells=(Dictionary<string,object>)J.Get(J.Parse(File.ReadAllText(Path.Combine(data.Root,"summoner.json"))),"data");
+    var spells=data.Summoners;
     if(ids.Distinct().Count()!=2||ids.Any(id=>!spells.Values.Any(s=>J.N(s,"key")==id&&J.A(J.Get(s,"modes")).Select(Convert.ToString).Contains("CLASSIC"))))throw new IOException("Unknown Summoner's Rift spell pair.");
    }else if(kind=="skillOrder"){if(ids.Any(id=>id>4))throw new IOException("Unknown ability slot.");}
    else Items(data,ids,kind!="finalItems");

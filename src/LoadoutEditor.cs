@@ -10,8 +10,10 @@ namespace RiftReference {
 // Shared local asset ownership. Paint and selection never perform network I/O.
 public sealed class LoadoutIcons:IDisposable {
  readonly string root;readonly Dictionary<string,Image> images=new Dictionary<string,Image>();
- public LoadoutIcons(DataStore data){root=Path.Combine(data.Root,"loadout-icons");}
- public Image Get(string group,int id){string key=group+"/"+id+".png";Image image;if(images.TryGetValue(key,out image))return image;try{using(var original=Image.FromFile(Path.Combine(root,key)))image=new Bitmap(original);}catch(ArgumentException){image=null;}catch(IOException){image=null;}images[key]=image;return image;}
+ public LoadoutIcons(DataStore data){root=data.Root;}
+ public Image Get(string group,int id){return Load("loadout-icons/"+group+"/"+id+".png");}
+ public Image GetRankBadge(string tier){string key=(tier??"").ToLowerInvariant();if(!new[]{"iron","bronze","silver","gold","platinum","emerald","diamond","master","grandmaster","challenger"}.Contains(key))key="unranked";return Load("rank-badges/"+key+".png");}
+ Image Load(string key){Image image;if(images.TryGetValue(key,out image))return image;try{using(var original=Image.FromFile(Path.Combine(root,key)))image=new Bitmap(original);}catch(ArgumentException){image=null;}catch(IOException){image=null;}catch(UnauthorizedAccessException){image=null;}images[key]=image;return image;}
  public void Dispose(){foreach(var image in images.Values)if(image!=null)image.Dispose();images.Clear();}
 }
 

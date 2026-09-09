@@ -10,7 +10,8 @@ public sealed class PageHistory {
  readonly List<string> entries=new List<string>{"overview"};int index;
  public string Current{get{return entries[index];}}
  public bool CanBack{get{return index>0;}}public bool CanForward{get{return index+1<entries.Count;}}
- public void Navigate(string page){if(page==Current)return;entries.RemoveRange(index+1,entries.Count-index-1);entries.Add(page);index++;}
+ public bool Contains(string page){return entries.Contains(page);}
+ public void Navigate(string page){if(page==Current)return;entries.RemoveRange(index+1,entries.Count-index-1);entries.Add(page);if(entries.Count>64)entries.RemoveAt(0);index=entries.Count-1;}
  public string Back(){if(CanBack)index--;return Current;}public string Forward(){if(CanForward)index++;return Current;}
  public void Reset(){entries.Clear();entries.Add("overview");index=0;}
 }
@@ -19,13 +20,6 @@ public static class PageControls {
  public static Button Button(Control parent,string text,int x,int y,int width,Action action){var button=new Button{Text=text,Bounds=new Rectangle(x,y,width,36)};button.Click+=(s,e)=>action();parent.Controls.Add(button);Theme.Apply(button);return button;}
  public static TextBox Body(Control parent,string text,Rectangle bounds){var body=new TextBox{Text=text.Replace("\n",Environment.NewLine),ReadOnly=true,Multiline=true,ScrollBars=ScrollBars.Vertical,Bounds=bounds,BorderStyle=BorderStyle.None,BackColor=Theme.Panel,ForeColor=Theme.Ink,Font=new Font("Segoe UI",11)};parent.Controls.Add(body);return body;}
  public static string Kda(IEnumerable<HomeMatch> matches){var known=matches.Where(m=>m.Kills.HasValue&&m.Deaths.HasValue&&m.Assists.HasValue).ToArray();if(known.Length==0)return "—";long deaths=known.Sum(m=>(long)m.Deaths.Value);return deaths==0?"Perfect":(known.Sum(m=>(double)m.Kills+m.Assists.Value)/deaths).ToString("0.00");}
-}
-// Preserve the updater's integrity checks while hosting it in the main navigation.
-public sealed class HostedPage : Panel {
- public readonly MinimalWindow Content;
- public HostedPage(MinimalWindow content){Content=content;Name=content.GetType().Name+"Page";AutoScroll=true;BackColor=Theme.Background;content.UsePageLayout();Controls.Add(content);content.Location=Point.Empty;content.Show();Resize+=(s,e)=>Arrange();content.SizeChanged+=(s,e)=>Arrange();}
- void Arrange(){Content.Left=Math.Max(0,(ClientSize.Width-Content.Width)/2);AutoScrollMinSize=new Size(Content.Width,Content.Height);}
- protected override void Dispose(bool disposing){if(disposing)Content.Dispose();base.Dispose(disposing);}
 }
 public sealed class ChampionsPage : UserControl {
  readonly DataStore data;readonly Func<string,Image> portrait;readonly Action<string> open;HomeProfile profile;
@@ -50,11 +44,13 @@ public sealed class ChampionsPage : UserControl {
  }
 }
 public sealed class ChampionPage : UserControl {
+ readonly string championKey;readonly Label summary;HomeProfile currentProfile;
  public ChampionPage(DataStore data,string key,HomeProfile profile,Func<string,Image> portrait,Action matches){Name="ChampionPage";Size=new Size(1200,800);BackColor=Theme.Background;AutoScroll=true;var image=portrait(key);if(image!=null)Controls.Add(new PictureBox{Image=image,Bounds=new Rectangle(24,24,80,80),SizeMode=PictureBoxSizeMode.Zoom});PageControls.Label(this,data.Name(key),126,22,850,45,27);PageControls.Label(this,String.Join(" / ",data.Tags(key))+" · Bundled data "+data.Version,128,72,850,27,10,Theme.Muted);
   PageControls.Button(this,"View recent matches",24,128,200,matches);
-  var rows=HomeData.Filter(profile,"",0,100).Where(m=>m.Champion==key).ToArray();int wins=rows.Count(m=>m.Result=="Victory"),losses=rows.Count(m=>m.Result=="Defeat");PageControls.Label(this,rows.Length+" loaded matches   ·   "+wins+"W – "+losses+"L   ·   "+PageControls.Kda(rows)+" KDA",24,184,1080,32,13,Theme.Accent);
+  championKey=key;summary=PageControls.Label(this,"",24,184,1080,32,13,Theme.Accent);UpdateProfile(profile);
   PageControls.Label(this,"Champion reference",24,244,900,35,20);int top=298;foreach(var spell in J.A(J.Get(data.Champion(key),"spells")).Select((value,index)=>new{value,index})){PageControls.Label(this,"QWER"[spell.index]+" · "+J.S(spell.value,"name"),24,top,1100,30,15,Theme.Accent);var body=PageControls.Body(this,J.Clean(J.S(spell.value,"description")),new Rectangle(24,top+40,1100,94));body.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right;top+=162;}AutoScrollMinSize=new Size(0,top+24);
  }
+ public void UpdateProfile(HomeProfile profile){if(ReferenceEquals(currentProfile,profile)&&summary.Text!="")return;currentProfile=profile;var rows=HomeData.Filter(profile,"",0,100).Where(m=>m.Champion==championKey).ToArray();int wins=rows.Count(m=>m.Result=="Victory"),losses=rows.Count(m=>m.Result=="Defeat");summary.Text=rows.Length+" loaded matches   ·   "+wins+"W – "+losses+"L   ·   "+PageControls.Kda(rows)+" KDA";}
 }
 public sealed class RankHistoryPage : UserControl {
  HomeProfile profile;readonly FlowLayoutPanel rows=new FlowLayoutPanel{FlowDirection=FlowDirection.TopDown,WrapContents=false,AutoScroll=true};readonly RankHistoryPlot plot=new RankHistoryPlot();readonly RiftComboBox range=new RiftComboBox{Name="RankHistoryRange"};
@@ -85,7 +81,7 @@ public sealed class LessonsPage : UserControl {
  readonly DataStore data;readonly ListBox list=new ListBox{BorderStyle=BorderStyle.None,IntegralHeight=false};readonly TextBox body;string fingerprint="";
  List<CoachingCard> lessons=new List<CoachingCard>();
  public LessonsPage(DataStore data){this.data=data;Name="LessonsPage";BackColor=Theme.Background;PageControls.Label(this,"Matchups & playbook",24,14,1000,44,25);PageControls.Label(this,"Conditional reference lessons for the current or last observed lineup—not a measured outcome or prediction.",26,64,1160,32,10,Theme.Muted);Controls.Add(list);body=PageControls.Body(this,"",Rectangle.Empty);list.SelectedIndexChanged+=(s,e)=>{if(list.SelectedIndex>=0){body.Text=lessons[list.SelectedIndex].Body.Replace("\n",Environment.NewLine);body.SelectionStart=0;body.ScrollToCaret();}};Resize+=(s,e)=>{list.SetBounds(24,126,258,Math.Max(100,Height-150));body.SetBounds(308,126,Math.Max(200,Width-338),Math.Max(100,Height-150));};Theme.Apply(this);}
- public void UpdateContext(Snapshot state){string next=state.Phase+"|"+String.Join("|",state.Players.Select(p=>p.Champion+":"+p.Role+":"+p.Team));if(next==fingerprint)return;fingerprint=next;int chosen=Math.Max(0,list.SelectedIndex);list.Items.Clear();lessons=Coaching.Lessons(data,state).ToList();foreach(var lesson in lessons)list.Items.Add(lesson.Title);if(list.Items.Count>0)list.SelectedIndex=Math.Min(chosen,list.Items.Count-1);}
+ public void UpdateContext(Snapshot state){string next=state.Phase+"|"+state.Mode+"|"+String.Join("|",state.Players.Select(p=>p.Champion+":"+p.Role+":"+p.Team+":"+p.Self+":"+p.Level+":"+String.Join(",",p.Ranks.OrderBy(r=>r.Key).Select(r=>r.Key+"="+r.Value))));if(next==fingerprint)return;fingerprint=next;int chosen=Math.Max(0,list.SelectedIndex);list.Items.Clear();lessons=Coaching.Lessons(data,state).ToList();foreach(var lesson in lessons)list.Items.Add(lesson.Title);if(list.Items.Count>0)list.SelectedIndex=Math.Min(chosen,list.Items.Count-1);}
 }
 public sealed class MatchDetailPage : UserControl {
  public MatchDetailPage(DataStore data,HomeMatch match,Action champion){Name="MatchDetailPage";BackColor=Theme.Background;Size=new Size(1200,800);AutoScroll=true;PageControls.Label(this,data.Name(match.Champion)+" · "+match.Result,24,20,1100,45,25);PageControls.Label(this,(match.Played.HasValue?match.Played.Value.ToLocalTime().ToString("f"):"Date unavailable")+" · "+Postgame.Duration(match.Duration)+" · "+(match.Role==""?"Role unavailable":match.Role),26,76,1100,30,11,Theme.Muted);PageControls.Button(this,"Champion details",24,130,190,champion);

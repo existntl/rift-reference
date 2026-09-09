@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -107,13 +107,15 @@ public class LeagueClient : IDisposable {
   }
   homeCache=HomeData.Parse(data,me,ranked,history);homeUpdated=DateTime.UtcNow;RankHistory.Record(Path.GetDirectoryName(data.Root),puuid,homeCache,homeUpdated);return homeCache;
  }
- DataStore data; string lockPath="";Process transport;object transportLock=new object();
- public LeagueClient(DataStore d) {
-  data=d;ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;
+ DataStore data; string lockPath="";Process transport;object transportLock=new object();bool disposed;readonly bool includeOverlay;
+ public LeagueClient(DataStore d,bool includeOverlay=false) {
+  data=d;this.includeOverlay=includeOverlay;ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;
  }
  Task<object> Get(string url,string auth){return Request(url,auth,"GET",null);}
  async Task<object> Request(string url,string auth,string method,object body) {
   return await Task.Run(()=>{lock(transportLock){
+   if(disposed)throw new ObjectDisposedException("LeagueClient");
+   if(transport!=null&&transport.HasExited){transport.Dispose();transport=null;}
    if(transport==null||transport.HasExited){string home=AppDomain.CurrentDomain.BaseDirectory;transport=Process.Start(new ProcessStartInfo{FileName=Path.Combine(home,"runtime","python.exe"),Arguments="-I -u \""+Path.Combine(home,"transport.py")+"\"",WorkingDirectory=Path.GetTempPath(),UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true});}
    transport.StandardInput.WriteLine(new JavaScriptSerializer().Serialize(new {url=url,auth=auth,method=method,body=body}));transport.StandardInput.Flush();
    var line=transport.StandardOutput.ReadLineAsync();if(!line.Wait(5000)){transport.Kill();throw new TimeoutException("Local transport timed out");}
@@ -149,7 +151,7 @@ public class LeagueClient : IDisposable {
     if(p.Self) {p.CosmicInsight=J.A(J.Get(J.Get(active,"fullRunes"),"generalRunes")).Any(r=>J.N(r,"id")==8347);var stats=J.Get(active,"championStats"); if(J.Get(stats,"abilityHaste")!=null)p.Haste=J.N(stats,"abilityHaste");
      foreach(char key in "QWER") {var ability=J.Get(J.Get(active,"abilities"),key.ToString()); if(ability!=null)p.Ranks[key.ToString()]=(int)J.N(ability,"abilityLevel");}}
     s.Players.Add(p);
-   } homeUpdated=DateTime.MinValue;s.Overlay=OverlayData.Parse(data,root,s);return s;
+   } homeUpdated=DateTime.MinValue;if(includeOverlay)s.Overlay=OverlayData.Parse(data,root,s);return s;
   } catch(Exception) { }
   try {
    string path=FindLock(); if(path==""){ClearHome();return new Snapshot{Phase=ended?"WaitingForStats":"Waiting"};}
@@ -177,7 +179,7 @@ public class LeagueClient : IDisposable {
   } catch(Exception ex) {ClearHome();var web=ex as WebException;string detail=web==null?ex.GetType().Name:web.Status.ToString();if(web!=null && web.Response is HttpWebResponse)detail+=" "+(int)((HttpWebResponse)web.Response).StatusCode;if(ex.InnerException!=null)detail+=" / "+ex.InnerException.Message;return new Snapshot{Notice="Client connection unavailable ("+detail+"). References cleared; retrying automatically."};}
  }
  public async Task<double> Clock(){var raw=await Get("https://127.0.0.1:2999/liveclientdata/gamestats",null).ConfigureAwait(false);if(J.Get(raw,"gameTime")==null)throw new IOException("Game clock unavailable");return J.N(raw,"gameTime");}
- public void Dispose(){lock(transportLock){if(transport!=null){try{if(!transport.HasExited){transport.StandardInput.Close();if(!transport.WaitForExit(500)){transport.Kill();transport.WaitForExit(2000);}}}catch{}transport.Dispose();transport=null;}}}
+ public void Dispose(){lock(transportLock){disposed=true;if(transport!=null){try{if(!transport.HasExited){transport.StandardInput.Close();if(!transport.WaitForExit(500)){transport.Kill();transport.WaitForExit(2000);}}}catch{}transport.Dispose();transport=null;}}}
  public string Metrics(){lock(transportLock){if(transport==null||transport.HasExited)return "Transport not running";transport.Refresh();return "Transport working set MB: "+(transport.WorkingSet64/1048576.0).ToString("0.0")+"; cumulative CPU seconds: "+transport.TotalProcessorTime.TotalSeconds.ToString("0.000");}}
 }
 }

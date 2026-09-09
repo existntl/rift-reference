@@ -6,7 +6,7 @@ using System.Windows.Forms;
 namespace RiftReference {
 // The editor stays alive when navigating. Destructive transitions are confirmed inline.
 public sealed class ReviewPage : UserControl {
- readonly string root,champion,focus;readonly ListBox history=new ListBox{Name="ReviewHistory",IntegralHeight=false};
+ readonly string root;string champion,focus;readonly ListBox history=new ListBox{Name="ReviewHistory",IntegralHeight=false};
  readonly TextBox[] answers=new TextBox[3];readonly RiftComboBox influence=new RiftComboBox{Name="ReviewInfluence"};
  readonly Label heading,status;readonly Panel editor=new Panel{AutoScroll=true};readonly FlowLayoutPanel confirmation=new FlowLayoutPanel{Visible=false,Height=44};
  Reflection active;bool loading,editable=true;Action pending;readonly Button save;
@@ -29,7 +29,8 @@ public sealed class ReviewPage : UserControl {
  void Reload(){loading=true;try{history.Items.Clear();history.Items.AddRange(ReflectionStore.Read(root).AsEnumerable().Reverse().Cast<object>().ToArray());}catch(Exception ex){status.Text="Existing notes are preserved: "+ex.Message;}finally{loading=false;}}
  new void Load(Reflection value){loading=true;active=value;heading.Text=(value.SavedUtc==""?"New reflection":value.ToString())+" · Focus: "+value.Focus;answers[0].Text=value.Disadvantage;answers[1].Text=value.Conversion;answers[2].Text=value.NextGame;influence.SelectedItem=value.Influence;if(influence.SelectedIndex<0)influence.SelectedIndex=0;history.SelectedItem=history.Items.Cast<Reflection>().FirstOrDefault(r=>r.Id==value.Id);loading=false;Dirty=false;pending=null;confirmation.Visible=false;}
  public bool Save(){if(!editable){status.Text="Finish the match before saving a review. Your draft is kept.";return false;}if(answers.All(a=>String.IsNullOrWhiteSpace(a.Text))){status.Text="Write at least one answer before saving.";return false;}var next=new Reflection{Id=active.Id,SavedUtc=DateTime.UtcNow.ToString("o"),Champion=active.Champion,Focus=active.Focus,Influence=Convert.ToString(influence.SelectedItem),Disadvantage=answers[0].Text.Trim(),Conversion=answers[1].Text.Trim(),NextGame=answers[2].Text.Trim()};try{ReflectionStore.Save(root,next);var continuation=pending;Reload();Load(next);pending=continuation;status.Text="Saved locally. Select a previous reflection to revisit or edit it.";return true;}catch(Exception ex){status.Text="Could not save; your draft is retained: "+ex.Message;return false;}}
- public void SetEditable(bool value){editable=value;save.Enabled=value;foreach(var box in answers)box.ReadOnly=!value;influence.Enabled=value;if(!value)status.Text="Review is paused during your match. Your draft is kept.";}
+ public void UpdateContext(string nextChampion,string nextFocus){if(champion==nextChampion&&focus==nextFocus)return;champion=nextChampion;focus=nextFocus;if(!Dirty&&active.SavedUtc=="")Load(new Reflection{Champion=champion,Focus=focus});}
+ public void SetEditable(bool value){if(editable==value)return;editable=value;save.Enabled=value;foreach(var box in answers)box.ReadOnly=!value;influence.Enabled=value;status.Text=value?(Dirty?"Unsaved draft · Kept while you browse other pages.":"Review is ready."):"Review is paused during your match. Your draft is kept.";}
  public void ConfirmLeave(Action action,string message){if(!Dirty){action();return;}pending=action;status.Text=message;confirmation.Visible=true;editor.ScrollControlIntoView(confirmation);}
  void Continue(){var action=pending;pending=null;confirmation.Visible=false;if(action!=null)action();}
 }

@@ -4,6 +4,9 @@ Requires Windows .NET Framework 4.8 and PowerShell. No .NET SDK is required.
 Run `powershell -ExecutionPolicy Bypass -File scripts/build.ps1 -Installer` from the repository.
 The app goes into ignored `build/app`; the installer goes into ignored `dist`.
 Use `-OutputDirectory ABSOLUTE_PATH` for a separate validation build.
+Use `-InstallerOutputDirectory ABSOLUTE_PATH` with `-Installer` to keep a local test
+installer separate from an already-published `dist` installer/signed-manifest pair.
+For example: `-Installer -InstallerOutputDirectory build/audit-package-0.12.21`.
 
 ## Local cache bootstrap
 
@@ -42,11 +45,21 @@ Run tests in isolated output folders; layout tests intentionally change preferen
 `scripts/verify-home.ps1` includes the native page-navigation harness, which renders
 the active pages at 1920×1040 and 1280×950 and verifies navigation, retained drafts,
 account clearing and retired-overlay startup isolation. See docs/navigation-flow.md.
-`scripts/verify-installer.ps1` verifies inherited-working-directory upgrades and rollback.
+`scripts/verify-installer.ps1` verifies inherited-working-directory upgrades and rollback,
+including preferences.json.bak alongside the existing settings/review/rank recovery files.
 Use `-BaselineInstallerPath ABSOLUTE_OLD_INSTALLER` to exercise an older release upgrade.
 `scripts/verify-ui.ps1` builds an isolated app, tests settings and review controls and saves
 screenshots of dashboard variants and all playbook pages. `--render-practice` renders the
 playbook and empty review window. No real account is needed for these offline checks.
+
+`scripts/verify-audit.ps1` builds an isolated app and checks preference data-loss
+regressions, page freshness/reuse/history limits, helper shutdown, asset reuse,
+match-time gates and updater races. It also runs mobile/recommendation/archived-overlay
+and Python helper/collector suites. Its signed-update race uses a disposable test key
+and offline fixture downloader, never the publisher key or an installer launch.
+The performance output is a deterministic offscreen allocation/resource comparison,
+not an in-game FPS benchmark. Keep fixture data/tools confined to tests and ignored
+build directories; they must not enter the production app or installer.
 
 `scripts/verify-mobile.ps1` builds and checks sanitized mobile snapshots, the owned helper
 lifecycle, token rotation and HTTP access controls. `tests/mobile-browser.cjs` uses

@@ -1,8 +1,25 @@
 # Rift Ready working instructions
 
+- Local **0.12.21** is an unpublished audit build; public remains **0.12.20**.
+  The user explicitly restored Updates as a popup, matching Preferences: close-only,
+  fixed rounded chrome, centered over a dimmed owner. All other active sections remain
+  main-window pages. Opening Updates must preserve navigation and unsaved Review drafts;
+  installation remains blocked during matches/champion select/GameStart or dirty reviews.
+  Use PreferencesStore for active preference writes: atomic replacement with .bak,
+  and never overwrite an unreadable preferences.json. Preserve that recovery copy on
+  installer upgrades. Navigation history is bounded to 64 entries; reuse match-detail
+  routes and dispose unreachable dynamic pages. Client/mobile helpers must not restart
+  after disposal. The active client does not compute retired overlay payloads.
+  Run scripts/verify-audit.ps1 alongside verify-home/verify-ui and installer regressions.
+  Use build.ps1 -Installer -InstallerOutputDirectory build/audit-package-0.12.21 for
+  local installer verification without replacing the published dist installer/manifest.
+  See docs/code-audit-2026-09-08.md and the newest handoff entry. Do not publish or
+  replace the normal installation merely because local verification passed.
+
 - Published 0.12.20 follows both September 8 video captures with main-window pages for
   Champions/reference, LP history, match details, Matchups, Review and Updates.
-  Only Preferences is modal in active navigation. Preserve Back/Forward, filters,
+  That release's Updates-page choice is superseded by the local requirement above.
+  Preserve Back/Forward, filters,
   overview scroll and unsaved review drafts; destructive review transitions use an
   inline Save/Discard/Keep editing prompt. See docs/navigation-flow.md. No unsupported
   timeline, public profiles, win probabilities or invented statistics may be added.
