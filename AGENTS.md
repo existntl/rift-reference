@@ -1,6 +1,6 @@
 # Rift Ready working instructions
 
-- Local 0.12.17 follows the user's Blitz dashboard and settings references without copying
+- Published 0.12.17 follows the user's Blitz dashboard and settings references without copying
   ads, branding or unsupported statistics. Preferences, Updates, stats and scoreboard-alignment
   settings use compact charcoal/off and Rift Ready teal/on pill toggles with keyboard,
   accessibility, focus, hover, disabled and high-contrast behavior. All selection dropdowns
@@ -14,8 +14,12 @@
   Guarded save/apply semantics and complete-bundle identity are unchanged. Do not add the
   reference's personalized picks, tier/synergy statistics, player mastery/rank/KDA, damage
   percentages, matchup-conditioned builds, pro identities or click-to-lock-in without a
-  verified compliant data source and fresh scope review. Public remains 0.12.16; website and
-  normal installation are unchanged.
+  verified compliant data source and fresh scope review. Public source tag v0.12.17 points
+  to 40b1bf1e637ab0c846db3dcbd64a011d065ea900. Matching installer and signed manifest are
+  published and verified, including discovery/download by the 0.12.15 updater. Installer
+  SHA-256: 99FAA49CFC4BCCB3066F27F93FFEBD68258BA9F83F76E8AB40E29C51B4EDAF76.
+  Website content remains 0.12.16; its latest-installer link serves 0.12.17. Normal
+  installation was not replaced during publication.
 
 - Public 0.12.16 follows the user's Blitz titlebar references: a slim charcoal header with
   left Rift Ready/version text and small Windows-ordered glyph controls on the right. The

@@ -6,12 +6,25 @@ The user withdrew the standing permission for sub-agents. Keep future Rift Ready
 single-agent and do not spawn or delegate to sub-agents unless the user explicitly changes
 this preference again. This supersedes the historical 2026-09-06 parallel-work preference.
 
-## Local 0.12.17 Blitz-reference UI pass (2026-09-08)
+## Published 0.12.17 Blitz-reference UI pass (2026-09-08)
 
 The user supplied three current Blitz dashboard screenshots and requested UI/feature
 adjustments plus Blitz-style settings checkboxes in Rift Ready's palette. The screenshots
-were treated only as visual references. Local source version is now 0.12.17; public 0.12.16,
-the website and the normal installation remain unchanged.
+were treated only as visual references. Version 0.12.17 is now published at
+https://github.com/existntl/rift-reference/releases/tag/v0.12.17. The public tag points to
+source commit `40b1bf1e637ab0c846db3dcbd64a011d065ea900`, verified against local source
+commit `3e9d428` apart from line endings. Public assets are `RiftReference-Setup.exe`
+(23,669,248 bytes) and the signed `latest.json`. Installer SHA-256 is
+`99FAA49CFC4BCCB3066F27F93FFEBD68258BA9F83F76E8AB40E29C51B4EDAF76`.
+
+The public download passed publisher signature, installer size/hash, tampered-metadata and
+wrong-file rejection checks. A compiled 0.12.15 updater discovered, downloaded and verified
+0.12.17 without installing it. The final installer passed the inherited-working-directory
+upgrade from 0.12.16 and rollback checks, preserving preferences, reviews, overlay settings,
+rank history and recovery copies. Evidence is in `build/public-0.12.17`,
+`build/release-0.12.17` and `build/installer-test-62c3bb56ec21403491706c50be091246`.
+The website content remains 0.12.16 and its latest-download link serves the new installer.
+The normal installation was not replaced by publication.
 
 Added reusable `RiftToggle : CheckBox` controls with a compact pill track, charcoal/off and
 Rift Ready teal/on states, round thumb, hover/focus/disabled styling and a SystemColors
