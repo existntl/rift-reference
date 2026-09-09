@@ -1,0 +1,41 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Windows.Forms;
+using RiftReference;
+class PageNavigationTests {
+ static int checks;static readonly BindingFlags hidden=BindingFlags.NonPublic|BindingFlags.Instance;
+ static void Check(bool condition,string message){if(!condition)throw new Exception(message);checks++;}
+ static object Get(Dashboard form,string name){return typeof(Dashboard).GetField(name,hidden).GetValue(form);}
+ static void Call(Dashboard form,string name,params object[] args){typeof(Dashboard).GetMethod(name,hidden).Invoke(form,args);Application.DoEvents();}
+ static IEnumerable<T> Desc<T>(Control root) where T:Control{foreach(Control child in root.Controls){if(child is T)yield return (T)child;foreach(var nested in Desc<T>(child))yield return nested;}}
+ static void Capture(Dashboard form,string name){Application.DoEvents();using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,new Rectangle(Point.Empty,form.Size));image.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,name+".png"));}}
+ [STAThread]static int Main(){try{
+  Application.EnableVisualStyles();string root=AppDomain.CurrentDomain.BaseDirectory;
+  var history=new PageHistory();history.Navigate("champions");history.Navigate("rank");Check(history.Back()=="champions"&&history.CanForward,"Back history");history.Navigate("review");Check(!history.CanForward&&history.Back()=="champions","Forward branch must be discarded");history.Navigate("champions");Check(history.Back()=="overview","Repeated navigation must not add duplicate entries");
+  string overlay="{\"Enabled\":true,\"GameBar\":true,\"Stats\":true}";File.WriteAllText(Path.Combine(root,"overlay.json"),overlay);
+  var profile=new HomeProfile{Name="SAMPLE DATA · Navigation QA",Tier="EMERALD",Division="II",Rank="Emerald II",LP=64,Season="year:2026"};
+  for(int i=0;i<30;i++)profile.Matches.Add(new HomeMatch{Champion=i%3==0?"Ashe":"Vayne",Role="ADC",Queue=420,Result=i%2==0?"Victory":"Defeat",Duration=1800,Played=DateTime.UtcNow.AddHours(-i),CS=210,Kills=8,Deaths=4,Assists=6,Vision=19,Damage=24000,Items=new int?[]{3153,3006,3124,0,null,0,3363}});
+  for(int i=0;i<12;i++)profile.RankHistory.Add(new RankPoint{Season=profile.Season,At=DateTime.UtcNow.AddDays(i-12),Tier="EMERALD",Division="II",LP=i*5,Ladder=2200+i*5});
+  using(var form=new Dashboard(root,true)){
+   ((Preferences)Get(form,"prefs")).SecondMonitor=false;form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-30000,-30000);form.Size=new Size(1920,1040);form.Show();typeof(Dashboard).GetField("state",hidden).SetValue(form,new Snapshot{Phase="Lobby",Account=profile.Name,Home=profile});Call(form,"RefreshPageContext");
+   Check(typeof(Dashboard).GetFields(hidden).All(f=>f.FieldType!=typeof(GameOverlay)&&f.FieldType!=typeof(GameBarIntegration)),"Retired overlay runtime still owned by Dashboard");Check(((Timer)Get(form,"timer")).Interval>=3000,"Saved overlay forced high-frequency polling");Check(!form.Controls.OfType<Button>().Any(b=>b.Text.Contains("Builds")),"Unavailable build navigation still present");
+   Capture(form,"pages-overview");var scroll=(HistoryScrollBar)Get(form,"historyScroll");scroll.Value=3;int offset=(int)Get(form,"homeOffset");
+   form.Controls.OfType<Button>().Single(b=>b.Text=="Champions").PerformClick();var pool=Desc<ChampionsPage>(form).Single();Check(pool.Visible&&Application.OpenForms.Cast<Form>().All(f=>!f.TopLevel||f==form),"Champions opened a top-level window");Check(Desc<ChampionHistoryButton>(pool).Single(b=>b.Text=="Vayne").MatchCount==20,"Pool does not reflect local matches");Capture(form,"pages-champions");
+   var poolSearch=Desc<TextBox>(pool).Single();poolSearch.Text="Vayne";Desc<ChampionHistoryButton>(pool).Single().PerformClick();Check(Desc<ChampionPage>(form).Single().Visible,"Champion did not open as a page");Capture(form,"pages-champion");Call(form,"NavigatePage",((PageHistory)Get(form,"pageHistory")).Back(),false);Check(poolSearch.Text=="Vayne"&&pool.Visible,"Back lost pool filters");Call(form,"NavigatePage",((PageHistory)Get(form,"pageHistory")).Back(),false);Check((int)Get(form,"homeOffset")==offset,"Back lost match scroll");
+   var bounds=(Rectangle)typeof(Dashboard).GetProperty("HomeBounds",hidden).GetValue(form,null);var row=HomeDashboard.RowBounds(bounds,0);Call(form,"OnMouseClick",new MouseEventArgs(MouseButtons.Left,1,row.X+20,row.Y+70+25,0));Check(Desc<MatchDetailPage>(form).Single().Visible,"Match row did not open details");Capture(form,"pages-match");
+   Call(form,"NavigatePage","rank",true);Check(Desc<RankHistoryPlot>(form).Single().PointCount==12,"LP history invented or omitted points");Capture(form,"pages-rank");
+   Call(form,"NavigatePage","matchups",true);Check(Desc<LessonsPage>(form).Single().Visible,"Matchups did not open as a page");Capture(form,"pages-matchups");
+   Call(form,"NavigatePage","review",true);var review=Desc<ReviewPage>(form).Single();var answer=Desc<TextBox>(review).First(b=>b.Name=="ReviewAnswer0");answer.Text="Choose a recall purpose before staying.";Call(form,"NavigatePage","rank",true);Call(form,"NavigatePage","review",true);Check(review.Dirty&&answer.Text.Contains("recall"),"Changing pages lost unsaved edits");Capture(form,"pages-review");
+   Desc<Button>(review).Single(b=>b.Text=="New reflection").PerformClick();Check(review.Dirty&&Desc<Button>(review).Single(b=>b.Text=="Keep editing").Visible,"New review silently discarded edits");Desc<Button>(review).Single(b=>b.Text=="Keep editing").PerformClick();Check(review.Save()&&ReflectionStore.Read(root).Any(x=>x.Disadvantage.Contains("recall")),"Review save failed");
+   answer.Text="Unsaved next decision";Call(form,"NavigatePage","updates",true);var updates=Desc<UpdatesDialog>(form).Single();Check(updates.IsPage&&!updates.TopLevel&&updates.Visible,"Updates opened a popup");Check(!Desc<WindowCaptionButton>(updates).Any(b=>b.Visible),"Embedded updates retained window buttons");var canInstall=(Func<bool>)typeof(UpdatesDialog).GetField("canUpdate",hidden).GetValue(updates);Check(!canInstall(),"Updater can close the app with an unsaved review");Check(review.Save(),"Could not save before updater navigation");Capture(form,"pages-updates");
+   var updater=(UpdateManager)Get(form,"updater");updater.Status="Background check completed";Call(form,"NavigatePage","rank",true);Call(form,"NavigatePage","updates",true);Check(Desc<Label>(updates).Any(label=>label.Text==updater.Status),"Cached Updates page missed a background result");
+   foreach(var size in new[]{new Size(1280,950),new Size(1920,1040)}){form.Size=size;foreach(string page in new[]{"champions","rank","review","updates"}){Call(form,"NavigatePage",page,true);Capture(form,"pages-"+page+"-"+size.Width);Check(((Panel)Get(form,"pageHost")).Bottom<=form.ClientSize.Height,"Page outside viewport");}}
+   typeof(Dashboard).GetField("state",hidden).SetValue(form,new Snapshot());Call(form,"RefreshPageContext");Check(!Desc<ChampionPage>(form).Any()&&!Desc<MatchDetailPage>(form).Any(),"Previous account's detail pages survived disconnect");Check(File.ReadAllText(Path.Combine(root,"overlay.json"))==overlay,"Retired overlay settings were changed");Call(form,"NavigatePage","champions",true);Check(Desc<Label>(form).Any(label=>label.Visible&&label.Text.StartsWith("Open League to load your champion pool")),"Empty champion page lacks an honest next step");Capture(form,"pages-champions-empty");answer.Text="Unsaved close test";form.Close();Check(!form.IsDisposed&&review.Visible&&review.Dirty,"Closing silently lost the review draft");Desc<Button>(review).Single(b=>b.Text=="Keep editing").PerformClick();Check(review.Save(),"Could not save retained close draft");form.Close();
+  }
+  Console.WriteLine(checks+" page navigation and retired-feature checks passed");return 0;
+ }catch(Exception ex){Console.Error.WriteLine(ex);return 1;}}
+}

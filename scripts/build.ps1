@@ -24,7 +24,7 @@ Copy-Item -LiteralPath (Join-Path $projectRoot 'helpers/transport.py'),(Join-Pat
 $mobileTemplate = [IO.File]::ReadAllText((Join-Path $projectRoot 'helpers/mobile.html'),[Text.Encoding]::UTF8)
 $mobileLogo = [Convert]::ToBase64String([IO.File]::ReadAllBytes([IO.Path]::ChangeExtension($brandIcon,'.png')))
 [IO.File]::WriteAllText((Join-Path $appRoot 'mobile.html'),$mobileTemplate.Replace('__RIFT_READY_LOGO__',$mobileLogo),[Text.Encoding]::UTF8)
-$sourceNames = @('Core','App','HomeData','HomeDashboard','DashboardAssets','RankHistory','Matchup','AudioCues','Updates','ReleaseSecurity','Mobile','Theme','PreferencesUi','Brand','Pregame','BuildPlanner','LoadoutEditor','Recommendations','RecommendationDashboard','Postgame','Overlay','OverlayVisuals','PanelLayout','StatsPanel','NativeOverlayBridge')
+$sourceNames = @('Core','App','DashboardNavigation','Pages','ReviewPage','HomeData','HomeDashboard','DashboardAssets','RankHistory','Matchup','AudioCues','Updates','ReleaseSecurity','Mobile','Theme','PreferencesUi','Brand','Pregame','BuildPlanner','LoadoutEditor','Recommendations','RecommendationDashboard','Postgame','Overlay','OverlayVisuals','PanelLayout','StatsPanel','NativeOverlayBridge')
 if (Test-Path -LiteralPath (Join-Path $projectRoot 'src/Coaching.cs')) { $sourceNames += 'Coaching' }
 if (Test-Path -LiteralPath (Join-Path $projectRoot 'src/Practice.cs')) { $sourceNames += 'Practice' }
 $sources = $sourceNames | ForEach-Object { Join-Path $projectRoot "src/$_.cs" }

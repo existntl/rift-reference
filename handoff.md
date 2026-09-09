@@ -1,5 +1,93 @@
 # Rift Reference handoff
 
+## Local 0.12.20 page navigation and feature retirement (2026-09-08)
+
+Analyzed both supplied Blitz videos at one-second intervals with selected detailed
+frames. See docs/navigation-flow.md for timecoded findings, implemented mappings,
+data limits and future feature candidates. The user wants many of these features
+eventually; unavailable integrations are deferred, not visible placeholder controls.
+
+New DashboardNavigation.cs, Pages.cs and ReviewPage.cs implement main-window pages
+for champion pool/catalog/reference, LP history, match details, Matchups, Review and
+Updates. Back/Forward preserves page state and overview filters/row scroll. Review
+drafts survive navigation; leaving a dirty note or closing requires an inline decision.
+The history graph uses only recorded current-season rank snapshots with time filters.
+Match details use known final self stats and inventory, preserving unknown vs zero.
+No global tiers, public-profile backend, event timelines or predictions were invented.
+The overview retains its existing custom row scroll instead of copying whole-document
+scroll literally. Original logo and most-played-champion hero remain unchanged.
+
+Dashboard no longer creates either overlay runtime, starts a Game Bar feed or widget,
+or uses saved overlay settings to force 1s polling. Removed Game overlay from Preferences
+and Builds / Runes from active navigation. Archived source and compatibility tests remain;
+Preferences Save no longer touches overlay.json. Active settings has three sections.
+No gameplay logic, audio schedule, mobile sharing authority or policy scope was expanded.
+
+At explicit user request, uninstalled current-user package
+RiftReady.GameBarPrototype_1.1.1.0_x64__q4vf8r75vcnhg. Windows Game Bar remains installed
+with Status Ok; no Rift Ready widget/bridge process remains. Did not remove shared
+dependencies/certificates or touch League/Vanguard. Normal installation overlay.json
+was backed up to overlay.before-retirement-20260908.json and Enabled/GameBar set false
+for its next startup. The main installed app was not force-closed or replaced.
+
+Local source version 0.12.20 supersedes the unpublished 0.12.19 build below. Public
+remains 0.12.18, website unchanged; nothing was pushed, signed for release, published,
+or installed. Rebuild and sign a matching manifest before any future publication;
+the existing dist/latest.json is NOT valid for the new local installer.
+
+Validation passed: 769 app checks, 26 home-data / 14 rank-history checks, 132 dashboard
+checks, 35 new navigation/retirement checks, all-monitor chrome, full Preferences/UI/
+loadout/postgame suites, mobile privacy/lifecycle and 3 HTTP tests, and upgrade from
+public 0.12.18 with rollback from the installation working directory. New tests cover
+dirty-review close/install blocking, background-update refresh and honest empty states.
+Inspected 1920×1040 pages and 1280×950 variants, plus Preferences button hit targets.
+No fresh League live-game validation or claimed Riot/Overwolf approval.
+Evidence: build/home-af589a228d2c43eeb48bd5e6c91fbea9,
+build/ui-e700d5415df54bafbee8ef29cd42608e, final page renders/tests in build/app,
+and build/installer-test-86a65c991cdc4e97a7ccb56dfb81d24e.
+Final local installer: dist/RiftReference-Setup.exe, 23,647,744 bytes,
+SHA-256 9E96DB669C71B90A93B1241972AEA9D3440199AC8DE7D55F433CCF0C3272172F.
+Logo hash remains 200DC01A04D66023308E3D61D7D314725B9231907F33229BCBA36EC0F62A7C92.
+
+## Local 0.12.19 demo removal and Preferences fixes (2026-09-08)
+
+The user requested removal of all demo modes, reported clipped Cancel/Save controls on
+every Preferences page, and requested the shorter "Minutes and seconds" dropdown label.
+Removed the session selector, hidden legacy demo/connect buttons, simulated startup,
+--demo launch handling, dashboard/postgame sample factories, and demo-specific desktop
+copy. Normal startup still polls League automatically. Match/draft/results fixtures now
+live in tests/DashboardFixtures.cs, compiled only into standalone UI/mobile test tools.
+Render tools start with empty state and no automatic polling/audio; --render writes
+overview.png, not fake matches. Keep overlay-alignment/audio previews and internal
+Snapshot.Demo safety guards; these are not user-selectable game sessions.
+
+Preferences title/description child windows overlapped Cancel at its left and bottom edges
+(DrawToBitmap alone hid this native-window occlusion). Header geometry now reserves space
+for both action buttons, constrains labels and keeps buttons in front. Tests check native
+child hit targets at three points per button, label overlap and text fit on all four pages
+at 1040 and 980 px widths. Escape cancels. Dropdown text is "Minutes and seconds", with
+"Seconds only" retained; existing whole-second/minute-boundary calculations are unchanged.
+
+Passed: 769 app checks; 26 home-data/14 rank-history checks; 154 dashboard checks; full UI
+save/cancel/reopen, lane drag, postgame, loadout, toggle/dropdown suites; mobile privacy/
+helper lifecycle and 3 HTTP tests; 104 overlay checks; 0.12.18 installer upgrade and rollback
+from the installation working directory, preserving preferences/reviews/overlay/rank history.
+Local --probe detected the connected League lobby and account, with no roster (0 players).
+No fresh live-game test. Final overview/waiting and Preferences renders were inspected for
+the user's 1920x1080 display. Evidence:
+build/home-7d6ca2da99374337ad58ac43f39876f6,
+build/ui-f6999a2fcfbc47b1ae2844d6c04b0ded,
+build/overlay-edd479bebec246c2aa1a1826b67d3f8b,
+build/installer-test-3c843bf354904269a158d7b84dece550 and build/app.
+
+Local installer is dist/RiftReference-Setup.exe (23,636,992 bytes), SHA-256
+208E3F257250B311AB5DC274FB7AA4F3ABB97935D227A562F0D7885F13537094.
+This change is NOT published, signed for release, pushed, or installed into the normal
+user installation. Public remains 0.12.18; website unchanged. The older dist/latest.json
+must not be paired with this installer; create a matching 0.12.19 signed manifest when
+publication is requested. Existing backups and generated older demo screenshots remain
+untouched and excluded from the package.
+
 ## 0.12.18 player-overview redesign (2026-09-08)
 
 The user requested the supplied overview mockup, explicitly retaining the current logo,

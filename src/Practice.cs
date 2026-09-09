@@ -59,7 +59,7 @@ public static class PracticeWindows {
             list.Items.AddRange(pages.Select(p => (object)p.Title).ToArray());
             var body = new TextBox { Left=265, Top=66, Width=815, Height=660, Multiline=true,ScrollBars=ScrollBars.Vertical,ReadOnly=true, BackColor=Surface, ForeColor=Ink, BorderStyle=BorderStyle.None, Font=new Font("Segoe UI",12), Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right };
             list.SelectedIndexChanged += (s,e) => { if (list.SelectedIndex >= 0) { body.Text=pages[list.SelectedIndex].Body.Replace("\n",Environment.NewLine); body.SelectionStart=0; body.ScrollToCaret(); } };
-            form.Controls.AddRange(new Control[] { Label("PLAYBOOK · Conditional lessons / " + (state.Demo ? "demo lineup" : "current or last observed lineup"),20,22,1050,32), list, body });
+            form.Controls.AddRange(new Control[] { Label("PLAYBOOK · Conditional lessons / current or last observed lineup",20,22,1050,32), list, body });
             list.SelectedIndex=0;
             Show(form,owner,renderPath);
         }

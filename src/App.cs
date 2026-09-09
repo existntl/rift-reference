@@ -12,17 +12,17 @@ namespace RiftReference {
 public class Preferences {public bool Adjust=true;public bool SecondMonitor=true;public int PollSeconds=5;public string Focus="Punish windows";public string TrainingFocus="Support position";public bool ShowCoaching=true;public bool AutoUpdates=true,AudioEnabled=true,ToneCues=true,VoiceCues=true,RespawnCues=true,RespawnLaneOnly=false,MinutesAndSeconds=true,TenSecondCue=true,ThirtySecondCue=true,MinuteCue=true;public int SettingsVersion=0;public bool EnemiesLeft=true;public bool SecondClick=false;public int AudioVolume=25,JungleFirst=120,JungleInterval=90,JungleEnd=480;
  public bool Migrate(){bool changed=SettingsVersion<2;if(SettingsVersion<1){RespawnLaneOnly=false;EnemiesLeft=true;}if(SettingsVersion<2){TrainingFocus=Coaching.NormalizeFocus(Focus);SettingsVersion=2;}string normalized=Coaching.NormalizeFocus(TrainingFocus);changed|=normalized!=TrainingFocus;TrainingFocus=normalized;return changed;}
 }
-public class Dashboard : MinimalWindow {
+public partial class Dashboard : MinimalWindow {
  const int ShellHeight=70;
  protected override int CaptionHeight{get{return ShellHeight;}}
  protected new int ContentHeight{get{return Math.Max(1,ClientSize.Height-ShellHeight);}}
  string selectedView="";
  readonly MatchSearch matchSearch=new MatchSearch();
- readonly RiftComboBox historyQueue=new RiftComboBox{AccessibleName="Match queue"},historyRange=new RiftComboBox{AccessibleName="Match range"},sessionMode=new RiftComboBox{AccessibleName="Client or demo session"};
+ readonly RiftComboBox historyQueue=new RiftComboBox{AccessibleName="Match queue"},historyRange=new RiftComboBox{AccessibleName="Match range"};
  ChampionArtwork artwork;LoadoutIcons homeIcons;HomeProfile retainedHome;string retainedAccount="";
  HomeProfile CurrentHome{get{return state.Home??(state.Account!=""&&state.Account==retainedAccount?retainedHome:null);}}
- bool ShowHome{get{return selectedView=="overview"||(selectedView!="match"&&state.Players.Count==0&&!Postgame.Active(state.Phase)&&state.Phase!="ChampSelect"&&state.Phase!="InProgress"&&state.Phase!="Reconnect");}}
- Rectangle HomeBounds{get{return new Rectangle(40,200,ClientSize.Width-80,ContentHeight-224);}}
+ bool ShowHome{get{return selectedView=="overview"||(selectedView==""&&state.Players.Count==0&&!Postgame.Active(state.Phase)&&state.Phase!="ChampSelect"&&state.Phase!="InProgress"&&state.Phase!="Reconnect");}}
+ Rectangle HomeBounds{get{return new Rectangle(40,238,ClientSize.Width-80,ContentHeight-262);}}
  int SelectedQueue{get{return new[]{0,420,440,450}[Math.Max(0,historyQueue.SelectedIndex)];}}
  int SelectedRange{get{return new[]{100,50,20}[Math.Max(0,historyRange.SelectedIndex)];}}
  int homeOffset;
@@ -32,17 +32,17 @@ public class Dashboard : MinimalWindow {
   var bounds=HomeBounds;
   int count=HomeData.Filter(CurrentHome,matchSearch.Text,SelectedQueue,SelectedRange).Count;
   historyQueue.Visible=historyRange.Visible=ShowHome;
-  sessionMode.Top=ShellHeight+(ShowHome?118:84);
   var table=HomeDashboard.TableBounds(bounds);historyRange.Bounds=new Rectangle(table.Right-160,ShellHeight+table.Y+19,136,36);historyQueue.Bounds=new Rectangle(table.Right-351,ShellHeight+table.Y+19,176,36);
   bool show=ShowHome&&count>0&&bounds.Width>=600&&bounds.Height>=300;
-  historyScroll.Visible=show;if(!show){homeOffset=0;return;}
+  historyScroll.Visible=show;if(!show)return;
   int visible=Math.Min(count,HomeDashboard.VisibleMatches(bounds)),nextOffset=Math.Max(0,Math.Min(homeOffset,count-visible));
   historyScroll.Maximum=count-1;historyScroll.LargeChange=visible;historyScroll.Value=nextOffset;homeOffset=nextOffset;historyScroll.Enabled=count>visible;
   var track=HomeDashboard.HistoryScrollBounds(bounds);track.Offset(0,ShellHeight);historyScroll.Bounds=track;
  }
- GameOverlay overlay;GameBarIntegration gameBar;OverlayOptions overlayOptions=new OverlayOptions();
+ // Retain the schema for compatibility; retired overlays are never constructed or started.
+ OverlayOptions overlayOptions=new OverlayOptions();
  DataStore data;LeagueClient client;Snapshot state=new Snapshot(); Snapshot lastGame;MobileCompanion mobile;
- Preferences prefs=new Preferences(); string home; bool busy, demo; DateTime lastSuccess;
+ Preferences prefs=new Preferences(); string home; bool busy; readonly bool offline; DateTime lastSuccess;
  Timer timer=new Timer(); Dictionary<string,Image> portraits=new Dictionary<string,Image>();
  Timer audioTimer=new Timer{Interval=1000};AttentionSchedule schedule=new AttentionSchedule();AttentionAudio audio=new AttentionAudio();bool audioBusy,settingsOpen;string audioStatus="";
  RespawnWatch respawns=new RespawnWatch();DateTime lastEventVoice=DateTime.MinValue;
@@ -51,57 +51,49 @@ public class Dashboard : MinimalWindow {
  Font normal=new Font("Segoe UI",11),small=new Font("Segoe UI",9),title=new Font("Segoe UI",25,FontStyle.Bold),bold=new Font("Segoe UI",12,FontStyle.Bold);
  Font cooldown=new Font("Segoe UI",25,FontStyle.Bold),compactCd=new Font("Segoe UI",17,FontStyle.Bold),micro=new Font("Segoe UI",8);
  Color gold=Color.FromArgb(255,213,116);
- Button live,demoButton,draftButton,postButton,settings,updatesButton,playbook,review,dashboardButton,buildButton,championsButton,liveGameButton;
+ Button settings,updatesButton,playbook,review,dashboardButton,championsButton,liveGameButton;
  Rectangle leftHeader,rightHeader;int dragSide=-1;Point dragStart;
  void SaveLayout(){try{File.WriteAllText(Path.Combine(home,"preferences.json"),new JavaScriptSerializer().Serialize(prefs));}catch{audioStatus="Could not save layout preferences";}}
  protected override void OnMouseDown(MouseEventArgs e){base.OnMouseDown(e);if(e.Button==MouseButtons.Left){dragSide=leftHeader.Contains(e.Location)?0:rightHeader.Contains(e.Location)?1:-1;dragStart=e.Location;if(dragSide>=0)Capture=true;}}
  protected override void OnMouseMove(MouseEventArgs e){base.OnMouseMove(e);Cursor=dragSide>=0?Cursors.SizeWE:(leftHeader.Contains(e.Location)||rightHeader.Contains(e.Location)?Cursors.Hand:Cursors.Default);}
  protected override void OnMouseUp(MouseEventArgs e){base.OnMouseUp(e);if(dragSide>=0&&Math.Abs(e.X-dragStart.X)>SystemInformation.DragSize.Width&&((dragSide==0&&rightHeader.Contains(e.Location))||(dragSide==1&&leftHeader.Contains(e.Location)))){prefs.EnemiesLeft=!prefs.EnemiesLeft;SaveLayout();Invalidate();}dragSide=-1;Capture=false;Cursor=Cursors.Default;}
  Color AbilityColor(int i){return new[]{Color.FromArgb(105,196,255),Color.FromArgb(182,147,255),Color.FromArgb(255,170,100),Color.FromArgb(255,119,170)}[i];}
- public Dashboard(string root,bool startDemo) {
+ // Offline construction is reserved for isolated render/test tools; it never creates a roster.
+ public Dashboard(string root,bool offline=false) {
+  this.offline=offline;
   Controls.Add(historyScroll);historyScroll.ValueChanged+=(s,e)=>{homeOffset=historyScroll.Value;Invalidate();};
   home=root;data=new DataStore(Path.Combine(root,"data"));client=new LeagueClient(data);mobile=new MobileCompanion(root);
   artwork=new ChampionArtwork(data,this);homeIcons=new LoadoutIcons(data);
-  try{overlayOptions=new JavaScriptSerializer().Deserialize<OverlayOptions>(File.ReadAllText(Path.Combine(home,"overlay.json"),System.Text.Encoding.UTF8))??new OverlayOptions();}catch{}
-  overlay=new GameOverlay(data,()=>overlayOptions);
-  gameBar=new GameBarIntegration(data,()=>overlayOptions);
-  if(overlayOptions.Enabled&&overlayOptions.GameBar)Shown+=(s,e)=>{try{GameBarIntegration.Open();}catch{}};
   updater=new UpdateManager(home);
   Icon=Brand.Icon;Theme.TitleBar(this);
   try {prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")))??new Preferences();}catch{}
   if(prefs.Migrate())SaveLayout();
   data.MinutesAndSeconds=prefs.MinutesAndSeconds;
   Text="Rift Ready · "+ReleaseInfo.Version;BackColor=bg;ForeColor=ink;DoubleBuffered=true;MinimumSize=new Size(1280,950);Size=new Size(1720,980);AutoScaleMode=AutoScaleMode.None;
-  live=Button("Connect",()=>{demo=false;state=new Snapshot();PublishMobile();Invalidate();Tick();});
-  demoButton=Button("Demo match",()=>{demo=true;state=Demo(false);PublishMobile();Invalidate();});
-  draftButton=Button("Demo draft",()=>{demo=true;state=Demo(true);PublishMobile();Invalidate();});
-  postButton=Button("Demo results",()=>{demo=true;state=Postgame.Demo(data,Demo(false));PublishMobile();Invalidate();});
   settings=Button("Preferences",()=>OpenPreferences());
   updatesButton=Button("Updates",()=>Updates());
   playbook=Button("Matchups",()=>OpenPractice(false));
   review=Button("Review",()=>OpenPractice(true));
-  dashboardButton=Button("Overview",()=>{selectedView="overview";LayoutHistoryScroll();Invalidate();});
+  dashboardButton=Button("Overview",()=>NavigatePage("overview"));
   championsButton=Button("Champions",()=>OpenChampions());
-  liveGameButton=Button("Live game",()=>{selectedView="match";LayoutHistoryScroll();Invalidate();});
-  buildButton=Button("Builds / Runes",()=>{var self=state.Players.FirstOrDefault(p=>p.Self);using(var form=new RecommendationPicker(data,self==null?HomeData.MostPlayedChampion(CurrentHome):self.Champion,client,()=>demo||state.Demo))form.ShowDialog(this);});
-  Controls.AddRange(new Control[]{matchSearch,historyQueue,historyRange,sessionMode});
-  historyQueue.Items.AddRange(new object[]{"All queues","Ranked solo","Ranked flex","ARAM"});historyRange.Items.AddRange(new object[]{"Last 100","Last 50","Last 20"});sessionMode.Items.AddRange(new object[]{"Local client","Demo match","Demo draft","Demo results"});historyQueue.SelectedIndex=historyRange.SelectedIndex=sessionMode.SelectedIndex=0;
-  matchSearch.TextChanged+=(s,e)=>{selectedView="overview";homeOffset=0;LayoutHistoryScroll();Invalidate();};historyQueue.SelectedIndexChanged+=(s,e)=>{homeOffset=0;LayoutHistoryScroll();Invalidate();};historyRange.SelectedIndexChanged+=(s,e)=>{homeOffset=0;LayoutHistoryScroll();Invalidate();};
-  sessionMode.SelectedIndexChanged+=(s,e)=>{selectedView="";homeOffset=0;demo=sessionMode.SelectedIndex!=0;state=demo?(sessionMode.SelectedIndex==3?Postgame.Demo(data,Demo(false)):Demo(sessionMode.SelectedIndex==2)):new Snapshot();PublishMobile();LayoutHistoryScroll();Invalidate();if(!demo)Tick();};
+  liveGameButton=Button("Live game",()=>NavigatePage("match"));
+  Controls.AddRange(new Control[]{matchSearch,historyQueue,historyRange});
+  historyQueue.Items.AddRange(new object[]{"All queues","Ranked solo","Ranked flex","ARAM"});historyRange.Items.AddRange(new object[]{"Last 100","Last 50","Last 20"});historyQueue.SelectedIndex=historyRange.SelectedIndex=0;
+  matchSearch.TextChanged+=(s,e)=>{homeOffset=0;NavigatePage("overview");};historyQueue.SelectedIndexChanged+=(s,e)=>{homeOffset=0;LayoutHistoryScroll();Invalidate();};historyRange.SelectedIndexChanged+=(s,e)=>{homeOffset=0;LayoutHistoryScroll();Invalidate();};
+  InitializePages();
   ((NavigationButton)dashboardButton).Symbol="dashboard";((NavigationButton)dashboardButton).Active=true;
   ((NavigationButton)playbook).Symbol="book";((NavigationButton)review).Symbol="review";((NavigationButton)settings).Symbol="settings";((NavigationButton)updatesButton).Symbol="update";
   Resize+=(s,e)=>LayoutButtons();Shown+=(s,e)=>{if(prefs.SecondMonitor && Screen.AllScreens.Length>1){Bounds=Screen.AllScreens.First(x=>!x.Primary).WorkingArea;WindowState=FormWindowState.Maximized;}LayoutButtons();};
-  timer.Interval=overlayOptions.Enabled?1000:Math.Max(3,Math.Min(30,prefs.PollSeconds))*1000;timer.Tick+=(s,e)=>Tick();timer.Start();
-  demo=startDemo;if(demo){state=Demo(false);sessionMode.SelectedIndex=1;}else Tick();
-  audioTimer.Tick+=(s,e)=>AudioTick();audioTimer.Start();
+  timer.Interval=Math.Max(3,Math.Min(30,prefs.PollSeconds))*1000;timer.Tick+=(s,e)=>Tick();
+  audioTimer.Tick+=(s,e)=>AudioTick();
+  if(!offline){timer.Start();audioTimer.Start();Tick();}
  }
  Button Button(string label,Action action){var b=new NavigationButton{Text=label,BackColor=bg,ForeColor=ink,Font=normal,Size=new Size(140,34),TabStop=true};b.Click+=(s,e)=>action();Controls.Add(b);return b;}
- void OpenOverlay(){overlay.Suspend();using(var form=new OverlaySettings(data,overlayOptions)){if(form.ShowDialog(this)==DialogResult.OK){try{bool open=form.Result.Enabled&&form.Result.GameBar&&(!overlayOptions.GameBar||!overlayOptions.Enabled);OverlayStorage.Save(home,form.Result);overlayOptions=form.Result;timer.Interval=overlayOptions.Enabled?1000:Math.Max(3,Math.Min(30,prefs.PollSeconds))*1000;if(open)try{GameBarIntegration.Open();}catch{MessageBox.Show(this,"Press Win + G and choose Rift Ready from Widgets to open the fullscreen overlay.");}}catch(Exception ex){MessageBox.Show(this,"Could not save overlay settings: "+ex.Message);}}}}
  async void AudioTick(){
   if(IsDisposed||audioBusy)return;
-  if(!prefs.AudioEnabled||demo||settingsOpen||state.Phase!="In game"){schedule.Reset();respawns.Reset();if(!settingsOpen)audio.Stop();return;}
+  if(offline||!prefs.AudioEnabled||state.Demo||settingsOpen||state.Phase!="In game"){schedule.Reset();respawns.Reset();if(!settingsOpen)audio.Stop();return;}
   audioBusy=true;
-  try{double clock=await client.Clock();if(IsDisposed||demo||settingsOpen||!prefs.AudioEnabled||state.Phase!="In game")return;
+  try{double clock=await client.Clock();if(IsDisposed||offline||state.Demo||settingsOpen||!prefs.AudioEnabled||state.Phase!="In game")return;
    var cue=schedule.Observe(clock,true,prefs.ToneCues,prefs.VoiceCues,prefs.JungleFirst,prefs.JungleInterval,prefs.JungleEnd,prefs.TenSecondCue,prefs.ThirtySecondCue,prefs.MinuteCue,prefs.SecondClick);
    if(cue==AttentionCue.JungleCheck){if((DateTime.UtcNow-lastEventVoice).TotalSeconds>12)audio.Speak(AttentionAudio.JungleMessage(state),prefs.AudioVolume);}
    else if(cue!=AttentionCue.None)audio.Tone(cue,prefs.AudioVolume,false);
@@ -110,25 +102,17 @@ public class Dashboard : MinimalWindow {
  }
  void LayoutButtons(){
   if(dashboardButton==null)return;
-  foreach(var b in new[]{live,demoButton,draftButton,postButton})b.Visible=false;
-  int searchWidth=Math.Min(310,Math.Max(180,ClientSize.Width-1280+180));matchSearch.Bounds=new Rectangle(178,15,searchWidth,40);int x=matchSearch.Right+16,index=0;int[] widths={90,100,120,100,90,75};
-  foreach(var b in new[]{dashboardButton,championsButton,buildButton,playbook,liveGameButton,review}){((NavigationButton)b).HeaderTab=true;b.Font=small;b.Bounds=new Rectangle(x,0,widths[index++],ShellHeight);x=b.Right;}
+  int searchWidth=Math.Min(310,Math.Max(180,ClientSize.Width-1280+180));matchSearch.Bounds=new Rectangle(178,15,searchWidth,40);int x=matchSearch.Right+16,index=0;int[] widths={100,110,110,100,90};
+  foreach(var b in new[]{dashboardButton,championsButton,playbook,liveGameButton,review}){((NavigationButton)b).HeaderTab=true;b.Font=small;b.Bounds=new Rectangle(x,0,widths[index++],ShellHeight);x=b.Right;}
   settings.Bounds=new Rectangle(ClientSize.Width-314,17,40,36);updatesButton.Bounds=new Rectangle(ClientSize.Width-270,17,40,36);settings.BackColor=updatesButton.BackColor=Theme.TitleSurface;
   foreach(var button in Controls.OfType<WindowCaptionButton>()){button.Top=17;button.Height=36;}
-  sessionMode.Bounds=new Rectangle(ClientSize.Width-204,ShellHeight+118,164,34);
-  LayoutHistoryScroll();
+  LayoutHistoryScroll();LayoutPages();
  }
- void OpenChampions(){
-  using(var form=new MinimalDialog("Champions · Local match history",new Size(680,660))){
-   var header=new Label{Text="Your champions",Font=title,ForeColor=ink,Bounds=new Rectangle(28,57,620,50)};var detail=new Label{Text="Loaded local matches · Select a champion to filter your overview",Font=normal,ForeColor=muted,Bounds=new Rectangle(30,115,620,40)};var list=new FlowLayoutPanel{Bounds=new Rectangle(28,168,624,454),AutoScroll=true,FlowDirection=FlowDirection.TopDown,WrapContents=false};form.Controls.AddRange(new Control[]{header,detail,list});
-   var groups=HomeData.Filter(CurrentHome,"",0,100).Where(m=>!String.IsNullOrEmpty(m.Champion)).GroupBy(m=>m.Champion).OrderByDescending(group=>group.Count()).ToList();
-   foreach(var group in groups){string key=group.Key;var button=new ChampionHistoryButton{Text=data.Name(key),Portrait=Portrait(key),MatchCount=group.Count(),Wins=group.Count(m=>m.Result=="Victory"),Losses=group.Count(m=>m.Result=="Defeat"),Size=new Size(586,68),Margin=new Padding(0,0,0,10),Font=bold};button.Click+=(s,e)=>{historyQueue.SelectedIndex=0;matchSearch.Text=key;selectedView="overview";form.Close();LayoutHistoryScroll();Invalidate();};list.Controls.Add(button);}
-   if(groups.Count==0)list.Controls.Add(new Label{Text="Champion performance appears when local match history is available.",Size=new Size(570,80),Font=normal});Theme.Apply(form);form.ShowDialog(this);
-  }
- }
- bool CanReview(){return demo||(state.Phase!="In game"&&state.Phase!="InProgress"&&state.Phase!="Reconnect"&&state.Phase!="ChampSelect");}
+ void OpenChampions(){NavigatePage("champions");}
+ bool CanReview(){return state.Phase!="In game"&&state.Phase!="InProgress"&&state.Phase!="Reconnect"&&state.Phase!="ChampSelect";}
  void OpenPractice(bool reflection,string renderPath=null){
   if(reflection&&!CanReview())return;
+  if(renderPath==null){NavigatePage(reflection?"review":"matchups");return;}
   settingsOpen=true;audio.Stop();try{var context=state.Players.Count>0?state:lastGame??state;
    if(reflection){var self=context.Players.FirstOrDefault(p=>p.Self);PracticeWindows.Review(this,home,self==null?"":data.Name(self.Champion),prefs.TrainingFocus,renderPath);}
    else PracticeWindows.Playbook(this,data,context,renderPath);
@@ -136,22 +120,16 @@ public class Dashboard : MinimalWindow {
  }
  bool CanUpdate(){return state.Phase!="In game"&&state.Phase!="ChampSelect"&&state.Phase!="InProgress"&&state.Phase!="Reconnect"&&!UpdateManager.GameRunning();}
  async Task CheckUpdates(){if(updateBusy)return;if(!CanUpdate()){updater.Status="Updates are paused until your match or champion select ends.";return;}updateBusy=true;lastUpdateCheck=DateTime.UtcNow;try{await updater.Check();}catch(Exception ex){updater.Status=ex.Message;}finally{updateBusy=false;if(!IsDisposed){updatesButton.Text=updater.Available==null?"Updates":"Update available";Invalidate();}}}
- void PublishMobile(){if(!IsDisposed){mobile.Publish(data,state,prefs);overlay.Update(state);gameBar.Update(state);}}
- async void Tick(){if(IsDisposed)return;if(demo){PublishMobile();return;}if(busy)return;busy=true;try{var next=await client.Poll();if(IsDisposed||demo)return;
+ void PublishMobile(){if(!IsDisposed){mobile.Publish(data,state,prefs);RefreshPageContext();}}
+ async void Tick(){if(IsDisposed||offline||busy)return;busy=true;try{var next=await client.Poll();if(IsDisposed)return;
   if(next.Phase=="In game"){lastGame=next;lastSuccess=DateTime.Now;}
   string respawn=respawns.Observe(next,data,prefs.RespawnLaneOnly,Math.Max(15,prefs.PollSeconds+5));
   if(respawn!=null&&prefs.AudioEnabled&&prefs.RespawnCues&&!settingsOpen){audio.Speak(respawn,prefs.AudioVolume);lastEventVoice=DateTime.UtcNow;}
   state=next;if(state.Home!=null){retainedHome=state.Home;retainedAccount=state.Account;}else if(state.Account==""||state.Account!=retainedAccount){retainedHome=null;retainedAccount="";}artwork.SetProfile(CurrentHome);PublishMobile();Invalidate();if(prefs.AutoUpdates&&(DateTime.UtcNow-lastUpdateCheck).TotalHours>=4)await CheckUpdates();
  }catch(Exception){respawns.Reset();state=new Snapshot{Notice="Connection failed. Live values cleared."};PublishMobile();Invalidate();}finally{busy=false;}}
- public Snapshot Demo(bool draft){var s=new Snapshot{Phase=draft?"ChampSelect":"In game",Account="Demo Vayne · NA",Mode="CLASSIC",Time=840,Demo=true};
-  string[] names={"Ornn","Vi","Ahri","Vayne","Lulu","Darius","LeeSin","Syndra","Caitlyn","Nautilus"};string[] roles={"TOP","JUNGLE","MIDDLE","BOTTOM","UTILITY"};
-  for(int i=0;i<10;i++){var p=new Player{Champion=names[i],Team=i<5?"ALLY":"ENEMY",Role=roles[i%5],Level=draft?1:(i%5==3?9:10),Self=i==3};p.Summoners.Add("Flash");p.Summoners.Add(i%5==1?"Smite":i%5==4?"Exhaust":"Heal");
-   if(!draft){p.Items.Add(i%5==4?3158:3078);if(p.Self){p.Items.Clear();p.Haste=0;p.Ranks["Q"]=5;p.Ranks["W"]=2;p.Ranks["E"]=1;p.Ranks["R"]=1;}}
-   s.Players.Add(p);
-  }return s;
- }
  protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);var g=e.Graphics;g.Clear(bg);DrawNavigation(g);
-  LayoutHistoryScroll();
+  RefreshPageContext();LayoutHistoryScroll();LayoutPages();
+  if(pageHost.Visible){leftHeader=rightHeader=Rectangle.Empty;return;}
   int width=Math.Max(1,ClientSize.Width);using(var canvas=new Bitmap(width,ContentHeight))using(var content=Graphics.FromImage(canvas)){DrawMatch(content,width);g.DrawImageUnscaled(canvas,0,ShellHeight);}
   if(!leftHeader.IsEmpty)leftHeader.Offset(0,ShellHeight);if(!rightHeader.IsEmpty)rightHeader.Offset(0,ShellHeight);
  }
@@ -160,7 +138,7 @@ public class Dashboard : MinimalWindow {
   using(var p=new Pen(Theme.Border))g.DrawLine(p,0,ShellHeight-1,ClientSize.Width,ShellHeight-1);
   g.DrawImage(Brand.Logo,24,11,48,48);
   using(var f=new Font("Segoe UI",11,FontStyle.Bold)){TextAt(g,"RIFT",f,ink,82,12,88,24);TextAt(g,"READY",f,ink,82,33,88,24);}
-  bool connected=!demo&&state.Account!="";int x=ClientSize.Width-216;using(var dot=new SolidBrush(connected?accent:muted))g.FillEllipse(dot,x,31,8,8);TextAt(g,demo?"Preview":connected?"Connected":"Offline",small,connected?accent:muted,x+15,23,88,25);
+  bool connected=!state.Demo&&state.Account!="";int x=ClientSize.Width-216;using(var dot=new SolidBrush(connected?accent:muted))g.FillEllipse(dot,x,31,8,8);TextAt(g,connected?"Connected":"Offline",small,connected?accent:muted,x+15,23,88,25);
  }
  void DrawDraft(Graphics g,int w,int y){
    var self=state.Players.FirstOrDefault(p=>p.Self);int gap=16,half=(w-56-gap)/2;
@@ -188,7 +166,7 @@ public class Dashboard : MinimalWindow {
   int tall=Math.Max(275,ContentHeight-y-134);
   Card(g,28,y,half,tall,"MATCHUP CONSIDERATIONS",Pregame.Matchup(data,state));
   Card(g,right,y,half,tall,"TEAM WIN CONDITIONS · OPTIONS",Pregame.Composition(data,state));y+=tall+16;
-  Card(g,28,y,w-56,90,"PREPARE YOUR LOADOUT · BUILDS / RUNES IN THE TOP BAR","Review available Diamond+ aggregate paths or a saved manual plan. Rune pages and item sets have separate previews and explicit confirmation; nothing is applied or locked in automatically.");
+  Card(g,28,y,w-56,90,"DRAFT REFERENCE · CURRENT LOCAL LINEUP","Review available Diamond+ aggregate paths or a saved manual plan. Rune pages and item sets have separate previews and explicit confirmation; nothing is applied or locked in automatically.");
  }
  void DrawPostgame(Graphics g,int w,int y){
   if(state.Players.Count==0){Card(g,28,y,w-56,180,"MATCH FINISHED · RESULTS PENDING",state.Notice==""?"Waiting for the League client to provide this match's final scoreboard. No cooldowns or estimated match statistics are shown.":state.Notice);return;}
@@ -235,9 +213,9 @@ public class Dashboard : MinimalWindow {
   using(var heading=new Font("Segoe UI",homeView?34:27,FontStyle.Bold))TextAt(g,homeView?"Player overview":Postgame.Active(state.Phase)?"Match summary":state.Players.Count==0?"Live game":state.Phase=="ChampSelect"?"Champion select":"Match overview",heading,ink,38,homeView?52:48,w-380,homeView?62:47);review.Enabled=CanReview();
   ((NavigationButton)dashboardButton).Active=homeView;((NavigationButton)liveGameButton).Active=!homeView;dashboardButton.Invalidate();liveGameButton.Invalidate();
   string phase=state.Phase=="ChampSelect"?"CHAMPION SELECT":state.Phase.ToUpperInvariant();
-  string info=(demo?"DEMO · SIMULATED DATA":phase)+"    /    "+(state.Account==""?"Waiting for League":state.Account)+"    /    "+(audioStatus!=""?audioStatus:!prefs.AudioEnabled?"Audio off":demo?"Audio paused":"Audio on · "+prefs.AudioVolume+"%");
-  if(Postgame.Active(state.Phase))info=(demo?"DEMO · SIMULATED DATA":phase)+"    /    "+(state.Players.Count>0?"Final scoreboard":"Waiting for final statistics");
-  TextAt(g,info,small,demo?Color.FromArgb(213,184,126):accent,40,homeView?118:94,w-280,24);
+  string info=phase+"    /    "+(state.Account==""?"Waiting for League":state.Account)+"    /    "+(audioStatus!=""?audioStatus:!prefs.AudioEnabled?"Audio off":"Audio on · "+prefs.AudioVolume+"%");
+  if(Postgame.Active(state.Phase))info=phase+"    /    "+(state.Players.Count>0?"Final scoreboard":"Waiting for final statistics");
+  TextAt(g,info,small,accent,40,homeView?118:94,w-80,24);
   TextAt(g,homeView?"Your profile and recent matches · Local League client · Unavailable statistics stay blank":Postgame.Active(state.Phase)?(state.Result==""?"Results pending":state.Result)+" · Duration "+Postgame.Duration(state.Time)+" · "+state.Notice:(state.Phase=="ChampSelect"?"Draft brief · Kit guidance and composition patterns · Data ":"Cooldown references · Unknown ranks are estimates · Data ")+data.Version+" · Patch match unverified",small,muted,40,homeView?153:120,w-280,23);
   leftHeader=Rectangle.Empty;rightHeader=Rectangle.Empty;int y=147;
   if(homeView){HomeDashboard.Draw(g,HomeBounds,data,CurrentHome,Portrait,homeOffset,matchSearch.Text,SelectedQueue,SelectedRange,id=>homeIcons.Get("items",id));return;}
@@ -317,12 +295,12 @@ public class Dashboard : MinimalWindow {
  }
 
  Image Portrait(string champion){string id=data.Resolve(champion);if(portraits.ContainsKey(id))return portraits[id];string p=Path.Combine(data.Root,"portraits",id+".png");if(!File.Exists(p))return null;var image=Image.FromFile(p);portraits[id]=image;return image;}
- void DrawEmpty(Graphics g,int w,int y){string headline="Ready when you are.";string body="Open League and enter champion select or a practice game. This app checks the local client automatically.\n\nTry Demo match or Demo draft to explore the dashboard without a game.";
+ void DrawEmpty(Graphics g,int w,int y){string headline="Ready when you are.";string body="Open League and enter champion select or a practice game. This app checks the local client automatically.\n\nYour picks and match information will appear when the local client makes them available.";
   if(state.Phase=="InProgress"||state.Phase=="Reconnect"){headline="Waiting for live game data";body="The League client reports a game, but the local game feed is unavailable. Reference values are cleared until the connection returns.";}
   if(state.Phase=="EndOfGame"||state.Phase=="PreEndOfGame"||state.Phase=="WaitingForStats"){headline="Take one lesson into the next game.";body="Open Review to save your reflection and revisit previous notes.\nWhat decision created your first major disadvantage?\nWhat advantage did you fail to convert?\nWhat will you do differently next game?\n\nSelf-assessment only. Missed opportunities were not measured.";}
   Card(g,28,y,w-56,260,headline,body+"\n\n"+state.Notice);
   Card(g,28,y+278,(w-70)/2,180,"ONE FOCUS · "+prefs.TrainingFocus.ToUpperInvariant(),Coaching.FocusText(prefs.TrainingFocus)+"\n\nChoose your focus in Preferences. Explore wave, recall and conversion lessons in Playbook before queueing.");
-  Card(g,42+(w-70)/2,y+278,(w-70)/2,180,"PRIVATE BY DEFAULT","No cloud AI, game inputs or match uploads. This preview reads local League endpoints. Build saves and guarded client imports happen only after your explicit review. Updates use GitHub.");
+  Card(g,42+(w-70)/2,y+278,(w-70)/2,180,"PRIVATE BY DEFAULT","No cloud AI, game inputs or match uploads. This app reads local League endpoints. Reviews and preferences stay on this PC. Overlays and unavailable build integrations are paused. Updates use GitHub.");
  }
  string[] Advice(bool draft,string own){var self=state.Players.FirstOrDefault(p=>p.Self)??state.Players[0];var enemies=state.Players.Where(p=>p.Team!=own && p.Champion!="").ToList();var allies=state.Players.Where(p=>p.Team==own&&p.Champion!="").ToList();
   var threat=enemies.FirstOrDefault(p=>p.Role==self.Role)??enemies.FirstOrDefault();
@@ -353,16 +331,13 @@ public class Dashboard : MinimalWindow {
    if(renderFolder!=null){form.CapturePages(renderFolder);return;}
    if(ModalBackdrop.Show(this,form)!=DialogResult.OK)return;
    try{
-    bool open=form.OverlayResult.Enabled&&form.OverlayResult.GameBar&&(!overlayOptions.Enabled||!overlayOptions.GameBar);
-    OverlayStorage.Save(home,form.OverlayResult);
     File.WriteAllText(Path.Combine(home,"preferences.json"),new JavaScriptSerializer().Serialize(form.Result));
-    prefs=form.Result;overlayOptions=form.OverlayResult;data.MinutesAndSeconds=prefs.MinutesAndSeconds;timer.Interval=overlayOptions.Enabled?1000:prefs.PollSeconds*1000;audioStatus="";
-    if(open)try{GameBarIntegration.Open();}catch{MessageBox.Show(this,"Open Game Bar and choose Rift Ready from Widgets to start the fullscreen overlay.");}
+    prefs=form.Result;data.MinutesAndSeconds=prefs.MinutesAndSeconds;timer.Interval=prefs.PollSeconds*1000;audioStatus="";
     Invalidate();
    }catch(Exception ex){MessageBox.Show(this,"Could not save preferences: "+ex.Message);}
   }}finally{settingsOpen=false;audio.Stop();schedule.Reset();}
  }
- public void Updates(string renderPath=null){settingsOpen=true;schedule.Reset();audio.Stop();
+ public void Updates(string renderPath=null){if(renderPath==null){NavigatePage("updates");return;}settingsOpen=true;schedule.Reset();audio.Stop();
   try{using(var form=new UpdatesDialog(updater,prefs.AutoUpdates,()=>CheckUpdates(),CanUpdate,value=>{prefs.AutoUpdates=value;SaveLayout();})){
    if(renderPath!=null){form.CaptureImage(renderPath);return;}
    form.ShowDialog(this);if(form.InstallLaunched)Close();
@@ -384,7 +359,7 @@ public class Dashboard : MinimalWindow {
    var focusLabel=new Label{Text="One training focus",Left=20,Top=157,Width=480};
    var focus=new RiftComboBox{Left=20,Top=184,Width=480};focus.Items.AddRange(Coaching.FocusNames.Cast<object>().ToArray());focus.SelectedItem=prefs.TrainingFocus;if(focus.SelectedIndex<0)focus.SelectedIndex=0;
    var formatLabel=new Label{Text="Cooldown display",Left=20,Top=225,Width=480};
-   var format=new RiftComboBox{Left=20,Top=252,Width=480};format.Items.AddRange(new object[]{"Minutes + seconds at 1 minute or more (1m 40s)","Seconds only (100s)"});format.SelectedIndex=prefs.MinutesAndSeconds?0:1;
+   var format=new RiftComboBox{Left=20,Top=252,Width=480};format.Items.AddRange(new object[]{"Minutes and seconds","Seconds only"});format.SelectedIndex=prefs.MinutesAndSeconds?0:1;
    var enemiesLeft=new CheckBox{Text="Enemies on the left (or drag the lane headers)",Checked=prefs.EnemiesLeft,Left=20,Top=300,Width=520};
    var coaching=new CheckBox{Text="Show lane plan, enemy tools and training focus",Checked=prefs.ShowCoaching,Left=20,Top=342,Width=520};
    var coachingNote=new Label{Text="Unchecked: show the original matchup cards.\nFull matchup, teamfight and wave lessons are in Playbook.\nReview saves your own notes locally after a game.\n\nRift Ready is not endorsed by Riot Games.\nMechanic sources and coverage: Playbook > Sources and coverage.",Left=20,Top=386,Width=520,Height=150};
@@ -400,7 +375,7 @@ public class Dashboard : MinimalWindow {
    var laneOnly=new CheckBox{Text="Respawns: only my lane opponents (uncheck for all enemies)",Checked=prefs.RespawnLaneOnly,Left=20,Top=181,Width=530};
    var volumeLabel=new Label{Text="Volume: "+prefs.AudioVolume+"%",Left=20,Top=214,Width=500};
    var volume=new TrackBar{Minimum=0,Maximum=100,TickFrequency=10,Value=Math.Max(0,Math.Min(100,prefs.AudioVolume)),Left=20,Top=240,Width=500};volume.ValueChanged+=(s,e)=>volumeLabel.Text="Volume: "+volume.Value+"%";
-   var explain=new Label{Text="Only the longest enabled interval sounds at a shared boundary.\nVoice replaces a coinciding tone. No automatic sound in demo or lobby.",Left=20,Top=292,Width=515,Height=43};
+   var explain=new Label{Text="Only the longest enabled interval sounds at a shared boundary.\nVoice replaces a coinciding tone. Automatic sound requires an active game.",Left=20,Top=292,Width=515,Height=43};
    var firstLabel=new Label{Text="First jungle check (sec)",Left=20,Top=350,Width=170};var everyLabel=new Label{Text="Repeat every (sec)",Left=200,Top=350,Width=155};var endLabel=new Label{Text="Stop after (sec)",Left=380,Top=350,Width=155};
    var first=new NumericUpDown{Minimum=30,Maximum=1800,Increment=30,Value=Math.Max(30,Math.Min(1800,prefs.JungleFirst)),Left=20,Top=377,Width=135};
    var every=new NumericUpDown{Minimum=30,Maximum=600,Increment=30,Value=Math.Max(30,Math.Min(600,prefs.JungleInterval)),Left=200,Top=377,Width=135};
@@ -415,21 +390,21 @@ public class Dashboard : MinimalWindow {
    var save=new Button{Text="Save preferences",Left=415,Top=675,Width=175,Height=32};save.Click+=(s,e)=>{
     if(end.Value<first.Value){MessageBox.Show("The last jungle check must be at or after the first check.");return;}
     var next=new Preferences{SettingsVersion=2,TrainingFocus=Convert.ToString(focus.SelectedItem),ShowCoaching=coaching.Checked,EnemiesLeft=enemiesLeft.Checked,AutoUpdates=automatic.Checked,Adjust=adjust.Checked,SecondMonitor=monitor.Checked,PollSeconds=(int)poll.Value,Focus=prefs.Focus,AudioEnabled=master.Checked,ToneCues=tones.Checked,SecondClick=secondClick.Checked,TenSecondCue=tenCue.Checked,ThirtySecondCue=thirtyCue.Checked,MinuteCue=minuteCue.Checked,VoiceCues=voice.Checked,RespawnCues=respawnToggle.Checked,RespawnLaneOnly=laneOnly.Checked,MinutesAndSeconds=format.SelectedIndex==0,AudioVolume=volume.Value,JungleFirst=(int)first.Value,JungleInterval=(int)every.Value,JungleEnd=(int)end.Value};
-    try{File.WriteAllText(Path.Combine(home,"preferences.json"),new JavaScriptSerializer().Serialize(next));}catch(Exception ex){MessageBox.Show("Could not save preferences: "+ex.Message);return;}prefs=next;data.MinutesAndSeconds=prefs.MinutesAndSeconds;timer.Interval=overlayOptions.Enabled?1000:prefs.PollSeconds*1000;audioStatus="";f.Close();Invalidate();};
+    try{File.WriteAllText(Path.Combine(home,"preferences.json"),new JavaScriptSerializer().Serialize(next));}catch(Exception ex){MessageBox.Show("Could not save preferences: "+ex.Message);return;}prefs=next;data.MinutesAndSeconds=prefs.MinutesAndSeconds;timer.Interval=prefs.PollSeconds*1000;audioStatus="";f.Close();Invalidate();};
    f.Controls.AddRange(new Control[]{tabs,save});Theme.Apply(f);Timer shot=null;if(renderFolder!=null){f.StartPosition=FormStartPosition.Manual;f.Location=new Point(-30000,-30000);shot=new Timer{Interval=250};shot.Tick+=(s,e)=>{shot.Stop();for(int page=0;page<tabs.TabPages.Count;page++){tabs.SelectedIndex=page;using(var bmp=new Bitmap(f.Width,f.Height)){f.DrawToBitmap(bmp,new Rectangle(Point.Empty,f.Size));bmp.Save(Path.Combine(renderFolder,new[]{"display-settings.png","audio-settings.png","update-settings.png","mobile-settings.png"}[page]));}}f.Close();};shot.Start();}try{f.ShowDialog(this);}finally{statusTimer.Dispose();if(shot!=null)shot.Dispose();}
   }}finally{settingsOpen=false;audio.Stop();schedule.Reset();}
  }
- public void Render(string path,bool draft,bool postgame=false){demo=true;state=postgame?Postgame.Demo(data,Demo(false)):Demo(draft);prefs.SecondMonitor=false;StartPosition=FormStartPosition.Manual;Location=new Point(-30000,-30000);Size=new Size(1920,1040);Show();LayoutButtons();using(var bmp=new Bitmap(Width,Height)){DrawToBitmap(bmp,new Rectangle(Point.Empty,Size));bmp.Save(path,System.Drawing.Imaging.ImageFormat.Png);}Hide();}
- public void RenderPractice(){demo=true;state=Demo(false);OpenPractice(false,Path.Combine(home,"playbook.png"));OpenPractice(true,Path.Combine(home,"review.png"));}
+ public void Render(string path){prefs.SecondMonitor=false;StartPosition=FormStartPosition.Manual;Location=new Point(-30000,-30000);Size=new Size(1920,1040);Show();LayoutButtons();using(var bmp=new Bitmap(Width,Height)){DrawToBitmap(bmp,new Rectangle(Point.Empty,Size));bmp.Save(path,System.Drawing.Imaging.ImageFormat.Png);}Hide();}
+ public void RenderPractice(){OpenPractice(false,Path.Combine(home,"playbook.png"));OpenPractice(true,Path.Combine(home,"review.png"));}
  public void Benchmark(){prefs.SecondMonitor=false;StartPosition=FormStartPosition.Manual;Location=new Point(-30000,-30000);var stop=new Timer{Interval=10000};stop.Tick+=(s,e)=>{stop.Stop();using(var p=System.Diagnostics.Process.GetCurrentProcess()){p.Refresh();File.WriteAllText(Path.Combine(home,"performance.txt"),"10-second offscreen lobby smoke test; includes startup CPU. Not an in-game benchmark.\nUI working set MB: "+(p.WorkingSet64/1048576.0).ToString("0.0")+"; cumulative CPU seconds: "+p.TotalProcessorTime.TotalSeconds.ToString("0.000")+"\n"+client.Metrics());}stop.Dispose();Close();};stop.Start();}
- protected override void Dispose(bool disposing){if(disposing){artwork.Dispose();homeIcons.Dispose();gameBar.Dispose();overlay.Dispose();mobile.Dispose();audioTimer.Dispose();audio.Dispose();timer.Dispose();client.Dispose();foreach(var p in portraits.Values)p.Dispose();normal.Dispose();small.Dispose();title.Dispose();bold.Dispose();cooldown.Dispose();compactCd.Dispose();micro.Dispose();}base.Dispose(disposing);}
+ protected override void Dispose(bool disposing){if(disposing){artwork.Dispose();homeIcons.Dispose();mobile.Dispose();audioTimer.Dispose();audio.Dispose();timer.Dispose();client.Dispose();foreach(var p in portraits.Values)p.Dispose();normal.Dispose();small.Dispose();title.Dispose();bold.Dispose();cooldown.Dispose();compactCd.Dispose();micro.Dispose();}base.Dispose(disposing);}
 }
 static class Program {
  [STAThread] static int Main(string[] args){try{Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);string home=AppDomain.CurrentDomain.BaseDirectory;
   if(args.Contains("--test")){Tests.Run(home);return 0;}
   if(args.Contains("--audio-export")){foreach(var cue in new[]{AttentionCue.SecondClick,AttentionCue.TenSeconds,AttentionCue.ThirtySeconds,AttentionCue.Minute})File.WriteAllBytes(Path.Combine(home,cue+".wav"),AttentionAudio.Wave(cue,25));try{using(var voice=new System.Speech.Synthesis.SpeechSynthesizer()){voice.SetOutputToWaveFile(Path.Combine(home,"voice-preview.wav"));voice.Speak("Jungle check. A gank is possible. Check the minimap and river vision before pushing. Caitlyn is back alive.");}File.WriteAllText(Path.Combine(home,"audio-validation.txt"),"Three PCM tone files generated. Windows speech successfully synthesized the jungle-check and respawn messages to a WAV file. Audio device playback still needs user verification.");}catch(Exception ex){File.WriteAllText(Path.Combine(home,"audio-validation.txt"),"PCM tones generated; speech unavailable: "+ex.ToString());}return 0;}
   if(args.Contains("--probe")){using(var c=new LeagueClient(new DataStore(Path.Combine(home,"data")))){var s=c.Poll().GetAwaiter().GetResult();File.WriteAllText(Path.Combine(home,"connection-test.txt"),"Phase: "+s.Phase+"\nAccount detected: "+(s.Account!="")+"\nPlayers: "+s.Players.Count+"\n"+s.Notice);}return 0;}
-  using(var form=new Dashboard(home,args.Contains("--demo")||args.Contains("--render-settings")||args.Contains("--render")||args.Contains("--render-practice"))){if(args.Contains("--render-practice")){form.RenderPractice();return 0;}if(args.Contains("--render-settings")){form.OpenPreferences(home);form.Updates(Path.Combine(home,"update-settings.png"));return 0;}if(args.Contains("--render")){form.Render(Path.Combine(home,"demo-match.png"),false);form.Render(Path.Combine(home,"demo-draft.png"),true);form.Render(Path.Combine(home,"demo-postgame.png"),false,true);return 0;}if(args.Contains("--benchmark"))form.Benchmark();Application.Run(form);}return 0;
+  using(var form=new Dashboard(home,args.Contains("--render-settings")||args.Contains("--render")||args.Contains("--render-practice"))){if(args.Contains("--render-practice")){form.RenderPractice();return 0;}if(args.Contains("--render-settings")){form.OpenPreferences(home);form.Updates(Path.Combine(home,"update-settings.png"));return 0;}if(args.Contains("--render")){form.Render(Path.Combine(home,"overview.png"));return 0;}if(args.Contains("--benchmark"))form.Benchmark();Application.Run(form);}return 0;
  }catch(Exception ex){File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"error.log"),ex.ToString());if(!args.Contains("--test"))MessageBox.Show(ex.Message,"Rift Ready");return 1;}}
 }
 public static class Tests {

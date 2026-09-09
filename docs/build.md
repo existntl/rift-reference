@@ -33,8 +33,15 @@ Data Dragon splash endpoint. DashboardUiTests uses isolated synthetic images to 
 champion switching, neutral fallback and filter independence without network access.
 
 `build/app/RiftReference.exe --test` writes test-results.txt beside the executable.
-`--render` and `--render-settings` write demo and preferences PNGs there.
+`--render` writes a neutral, empty overview to overview.png; `--render-settings` writes
+preferences PNGs. Neither creates a simulated match. There is no demo launch mode.
+Simulated match/draft/results fixtures live in tests/DashboardFixtures.cs and are compiled
+only into standalone test executables, not the app or installer. Snapshot.Demo remains an
+internal safety marker for test fixtures and overlay-alignment previews, not a session mode.
 Run tests in isolated output folders; layout tests intentionally change preferences.
+`scripts/verify-home.ps1` includes the native page-navigation harness, which renders
+the active pages at 1920×1040 and 1280×950 and verifies navigation, retained drafts,
+account clearing and retired-overlay startup isolation. See docs/navigation-flow.md.
 `scripts/verify-installer.ps1` verifies inherited-working-directory upgrades and rollback.
 Use `-BaselineInstallerPath ABSOLUTE_OLD_INSTALLER` to exercise an older release upgrade.
 `scripts/verify-ui.ps1` builds an isolated app, tests settings and review controls and saves

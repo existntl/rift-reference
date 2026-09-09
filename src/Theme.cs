@@ -6,6 +6,13 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 namespace RiftReference {
 public class MinimalWindow : Form {
+    public bool IsPage {get;private set;}
+    public void UsePageLayout(){
+        if(IsPage)return;IsPage=true;TopLevel=false;ShowInTaskbar=false;FormBorderStyle=FormBorderStyle.None;
+        MinimumSize=Size.Empty;MaximumSize=Size.Empty;Region=null;
+        foreach(Control control in Controls){if(control is WindowCaptionButton)control.Visible=false;else control.Top-=TitleHeight;}
+        ClientSize=new Size(ClientSize.Width,ClientSize.Height-TitleHeight);
+    }
     public const int TitleHeight=32;
     protected virtual int CaptionHeight{get{return TitleHeight;}}
     protected int ContentHeight{get{return System.Math.Max(1,ClientSize.Height-TitleHeight);}}
@@ -26,6 +33,7 @@ public class MinimalWindow : Form {
     protected override void OnTextChanged(System.EventArgs e){base.OnTextChanged(e);Invalidate(new Rectangle(0,0,ClientSize.Width,TitleHeight));}
     protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);DrawWindowChrome(e.Graphics);}
     protected void DrawWindowChrome(Graphics g){
+        if(IsPage)return;
         using(var surface=new SolidBrush(Theme.TitleSurface))g.FillRectangle(surface,0,0,ClientSize.Width,TitleHeight);
         using(var line=new Pen(Theme.Border))g.DrawLine(line,0,TitleHeight-1,ClientSize.Width,TitleHeight-1);
         using(var brandFont=new Font("Segoe UI",8.5f,FontStyle.Bold))using(var detailFont=new Font("Segoe UI",8f)){
@@ -41,6 +49,7 @@ public class MinimalWindow : Form {
     void UpdateRoundedRegion(){if(!roundedDialog||ClientSize.Width<20||ClientSize.Height<20)return;using(var path=Rounded(new Rectangle(0,0,ClientSize.Width,ClientSize.Height),14)){var previous=Region;Region=new Region(path);if(previous!=null)previous.Dispose();}}
     static GraphicsPath Rounded(Rectangle box,int radius){var path=new GraphicsPath();int d=radius*2;path.AddArc(box.Left,box.Top,d,d,180,90);path.AddArc(box.Right-d,box.Top,d,d,270,90);path.AddArc(box.Right-d,box.Bottom-d,d,d,0,90);path.AddArc(box.Left,box.Bottom-d,d,d,90,90);path.CloseFigure();return path;}
     protected override void WndProc(ref Message m){
+        if(IsPage){base.WndProc(ref m);return;}
         const int HitTest=0x84;
         if(m.Msg==HitTest){
             base.WndProc(ref m);if((int)m.Result!=1)return;

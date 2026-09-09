@@ -22,7 +22,7 @@ class PostgameTests {
   string mobile=MobileCompanion.Serialize(d,s,new Preferences());Check(!mobile.Contains("PRIVATE")&&!mobile.Contains("spells")&&!mobile.Contains("summoners"),"Postgame mobile privacy/durations");
   using(var form=new Dashboard(home,true)){
    form.Render(Path.Combine(home,"demo-postgame.png"),false,true);
-   var demo=Postgame.Demo(d,form.Demo(false));File.WriteAllText(Path.Combine(home,"mobile-postgame.json"),MobileCompanion.Serialize(d,demo,new Preferences()));
+   var demo=DashboardFixtures.Results(form.Demo(false));File.WriteAllText(Path.Combine(home,"mobile-postgame.json"),MobileCompanion.Serialize(d,demo,new Preferences()));
    foreach(var size in new[]{new Size(1720,980),new Size(1280,950)}){typeof(Dashboard).GetField("state",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(form,demo);form.Size=size;form.Show();using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,new Rectangle(Point.Empty,form.Size));image.Save(Path.Combine(home,"postgame-"+size.Width+".png"));}form.Hide();}
    typeof(Dashboard).GetField("state",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(form,new Snapshot{Phase="WaitingForStats"});form.Show();using(var image=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(image,new Rectangle(Point.Empty,form.Size));image.Save(Path.Combine(home,"postgame-pending.png"));}form.Hide();
   }

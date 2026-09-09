@@ -1,5 +1,32 @@
 # Rift Ready working instructions
 
+- Local 0.12.20 follows both September 8 video captures with main-window pages for
+  Champions/reference, LP history, match details, Matchups, Review and Updates.
+  Only Preferences is modal in active navigation. Preserve Back/Forward, filters,
+  overview scroll and unsaved review drafts; destructive review transitions use an
+  inline Save/Discard/Keep editing prompt. See docs/navigation-flow.md. No unsupported
+  timeline, public profiles, win probabilities or invented statistics may be added.
+- The user has temporarily retired overlays and unavailable build recommendations.
+  Dashboard must not construct GameOverlay/GameBarIntegration, emit their feed, launch
+  the widget or accelerate polling for saved overlay settings. No Game overlay section
+  or Builds / Runes navigation. Preserve archived source, saved configurations and
+  compatibility tests; later restoration requires an explicit feature/integration review.
+  The exact RiftReady.GameBarPrototype 1.1.1.0 package was uninstalled from this PC at
+  user request; Microsoft Xbox Game Bar remains intact. Do not reinstall the prototype.
+  Normal installed overlay Enabled/GameBar were set false with a preserved backup.
+  Current Preferences has THREE pages; test Save/Cancel native hit targets on all three.
+  Local 0.12.20 is not published or installed. Public remains 0.12.18.
+
+- Local 0.12.19 removes all user-facing demo session choices and the --demo launch mode.
+  Do not restore fake match/draft/results data or a session selector. Normal startup
+  automatically observes the local League client. DashboardFixtures.cs belongs only in
+  standalone test executables; build.ps1 must never include it. Offline render construction
+  starts empty with polling/audio disabled. Keep the Snapshot.Demo safety marker for
+  test/calibration data, overlay alignment previews and explicit audio preview controls.
+  Preferences header labels must never overlap Save/Cancel; test child-window hit targets
+  on all four pages. The cooldown option is exactly "Minutes and seconds"; formatting
+  behavior and the "Seconds only" alternative are unchanged. Public remains 0.12.18.
+
 - Published 0.12.18 follows the user's player-overview mockup: horizontal navigation,
   blue-black surfaces with the existing teal accent, profile/performance sidebar,
   summary ring and dense match-history table. Keep the original white-and-teal logo

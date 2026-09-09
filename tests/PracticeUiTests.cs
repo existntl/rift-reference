@@ -14,6 +14,25 @@ class PracticeUiTests {
     static object Get(Dashboard form,string field){return typeof(Dashboard).GetField(field,BindingFlags.Instance|BindingFlags.NonPublic).GetValue(form);}
     static void Set(Dashboard form,string field,object value){typeof(Dashboard).GetField(field,BindingFlags.Instance|BindingFlags.NonPublic).SetValue(form,value);}
     static System.Collections.Generic.IEnumerable<T> Desc<T>(Control root) where T:Control {foreach(Control child in root.Controls){var value=child as T;if(value!=null)yield return value;foreach(var nested in Desc<T>(child))yield return nested;}}
+    static void CheckPreferencesHeader(Form form){
+        var dialog=(PreferencesDialog)form;var original=form.ClientSize;
+        foreach(int width in new[]{1040,980}){
+            form.ClientSize=new Size(width,900);
+            for(int page=0;page<3;page++){
+                dialog.SelectSection(page);Application.DoEvents();
+                var save=form.Controls.OfType<Button>().Single(b=>b.Name=="SavePreferences");
+                var cancel=form.Controls.OfType<Button>().Single(b=>b.Name=="CancelPreferences");
+                Check(save.Right<=form.ClientSize.Width-24&&cancel.Right+12<=save.Left,"Preferences action buttons overlap or leave the window");
+                foreach(var button in new[]{save,cancel}){
+                    foreach(var label in form.Controls.OfType<Label>())Check(!label.Bounds.IntersectsWith(button.Bounds),"Preferences header label covers "+button.Text);
+                    foreach(var point in new[]{new Point(button.Left+2,button.Top+2),new Point(button.Right-3,button.Bottom-3),new Point(button.Left+button.Width/2,button.Top+button.Height/2)})Check(form.GetChildAtPoint(point)==button,"Preferences action is clipped or not clickable: "+button.Text);
+                    Check(TextRenderer.MeasureText(button.Text,button.Font).Width+12<button.Width,"Preferences action text does not fit");
+                }
+                Capture(form,"preferences-header-"+width+"-"+page);
+            }
+        }
+        form.ClientSize=original;dialog.SelectSection(0);
+    }
     static void Modal(Action open,string title,Action<Form> operate){
         Exception failure=null;int ticks=0;
         using(var timer=new Timer{Interval=100}){
@@ -30,31 +49,31 @@ class PracticeUiTests {
     [STAThread]static int Main(){try{
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
         File.WriteAllText(Path.Combine(home,"preferences.json"),"{\"SettingsVersion\":1,\"EnemiesLeft\":false,\"AudioVolume\":37,\"Focus\":\"Positioning\"}");
+        var savedOverlay="{\"Enabled\":true,\"GameBar\":true,\"Stats\":true}";File.WriteAllText(Path.Combine(home,"overlay.json"),savedOverlay);
         using(var dashboard=new Dashboard(home,true)){
             dashboard.Render(Path.Combine(home,"migrated.png"),false);
             Modal(()=>dashboard.OpenPreferences(),"Preferences",form=>{
+                CheckPreferencesHeader(form);
                 Check(!Desc<TabControl>(form).Any(),"Native settings tabs remain");
                 Check(Desc<CheckBox>(form).Any()&&Desc<CheckBox>(form).All(c=>c is RiftToggle),"Preferences contain an unthemed checkbox");
                 var categories=Desc<NavigationButton>(form).Select(b=>b.Text).ToArray();
-                Check(categories.SequenceEqual(new[]{"General","Game overlay","Audio & reminders","Phone / tablet"}),"Preference categories were not consolidated");
+                Check(categories.SequenceEqual(new[]{"General","Audio & reminders","Phone / tablet"}),"Retired overlay category remains in preferences");
                 var general=Desc<Panel>(form).Single(p=>p.Name=="GeneralPage");
                 var focus=Desc<RiftComboBox>(general).Single(c=>c.Name=="TrainingFocus");
+                var format=Desc<RiftComboBox>(general).Single(c=>c.Name=="CooldownFormat");
+                Check(format.Items.Cast<object>().Select(Convert.ToString).SequenceEqual(new[]{"Minutes and seconds","Seconds only"}),"Cooldown option wording changed");
+                format.SelectedIndex=1;
                 Check(Convert.ToString(focus.SelectedItem)=="Main threat","Settings did not show migrated focus");
                 focus.SelectedItem="Recall purpose";
                 Desc<CheckBox>(general).Single(c=>c.Text.StartsWith("Show lane plan")).Checked=false;
-                Desc<NavigationButton>(form).Single(b=>b.Text=="Game overlay").PerformClick();
-                var overlayPage=Desc<OverlayPreferencesPage>(form).Single();
-                Desc<CheckBox>(overlayPage).Single(c=>c.Text=="Personal stats panel").Checked=true;
+                Check(!Desc<OverlayPreferencesPage>(form).Any(),"Retired overlay controls were constructed");
                 form.Controls.OfType<Button>().Single(b=>b.Name=="SavePreferences").PerformClick();
             });
             var prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")));
-            Check(prefs.TrainingFocus=="Recall purpose"&&!prefs.ShowCoaching&&!prefs.EnemiesLeft&&prefs.AudioVolume==37,"Preferences save lost values");
-            var overlay=new JavaScriptSerializer().Deserialize<OverlayOptions>(File.ReadAllText(Path.Combine(home,"overlay.json")));
-            Check(overlay.Stats,"Consolidated overlay preference did not save");
-            var savedOverlay=File.ReadAllText(Path.Combine(home,"overlay.json"));
+            Check(prefs.TrainingFocus=="Recall purpose"&&!prefs.ShowCoaching&&!prefs.EnemiesLeft&&prefs.AudioVolume==37&&!prefs.MinutesAndSeconds,"Preferences save lost values");
+            Check(File.ReadAllText(Path.Combine(home,"overlay.json"))==savedOverlay,"Save modified retired overlay settings");
             Modal(()=>dashboard.OpenPreferences(null,1),"Preferences",form=>{
-                var overlayPage=Desc<OverlayPreferencesPage>(form).Single();
-                var enabled=Desc<CheckBox>(overlayPage).Single(c=>c.Text=="Enable the game overlay");
+                var enabled=Desc<CheckBox>(form).Single(c=>c.Text=="Enable audio during live games");
                 enabled.Checked=!enabled.Checked;
                 form.Controls.OfType<Button>().Single(b=>b.Name=="CancelPreferences").PerformClick();
             });
@@ -63,14 +82,11 @@ class PracticeUiTests {
             dashboard.Show();
             var mainNavigation=dashboard.Controls.OfType<NavigationButton>().Select(b=>b.Text).ToArray();
             Check(mainNavigation.Contains("Preferences")&&mainNavigation.Contains("Updates")&&!mainNavigation.Contains("Phone / tablet")&&!mainNavigation.Contains("Game overlay"),"Main navigation did not consolidate settings");
-            Modal(()=>dashboard.OpenPreferences(null,3),"Preferences",form=>{
+            Modal(()=>dashboard.OpenPreferences(null,2),"Preferences",form=>{
                 Check(Desc<Panel>(form).Single(p=>p.Name=="PhonePage").Visible,"Phone preferences did not open directly");
             });
-            Modal(()=>dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Updates").PerformClick(),"Updates",form=>{
-                Check(!Desc<Control>(form).Any(c=>c.Name=="PreferencesPageHost")&&Desc<SettingsCard>(form).Any(c=>c.Name=="ReleaseCard"),"Updates are not a separate area");
-                Check(Desc<CheckBox>(form).All(c=>c is RiftToggle),"Updates contain an unthemed checkbox");
-                Desc<CheckBox>(form).Single(c=>c.Text.StartsWith("Automatically check")).Checked=false;
-            });
+            dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Updates").PerformClick();var updatePage=Desc<UpdatesDialog>(dashboard).Single();Check(updatePage.IsPage&&!updatePage.TopLevel,"Updates did not open inside the main window");Check(Desc<CheckBox>(updatePage).All(c=>c is RiftToggle),"Updates contain an unthemed checkbox");Desc<CheckBox>(updatePage).Single(c=>c.Text.StartsWith("Automatically check")).Checked=false;
+            dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Live game").PerformClick();
             prefs=new JavaScriptSerializer().Deserialize<Preferences>(File.ReadAllText(Path.Combine(home,"preferences.json")));
             Check(!prefs.AutoUpdates,"Update preference did not save from the separate Updates area");
             ((Preferences)Get(dashboard,"prefs")).ShowCoaching=true;
@@ -81,7 +97,7 @@ class PracticeUiTests {
             demo=dashboard.Demo(false);demo.Players[3].Self=false;demo.Players[0].Self=true;Set(dashboard,"state",demo);Capture(dashboard,"solo-lane");
             var post=new Snapshot{Phase="EndOfGame"};Set(dashboard,"state",post);Capture(dashboard,"postgame");
             Check(dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Review").Enabled,"Postgame review unavailable");
-            Set(dashboard,"demo",false);Set(dashboard,"state",dashboard.Demo(false));Capture(dashboard,"live-review-disabled");
+            Set(dashboard,"state",dashboard.Demo(false));Capture(dashboard,"live-review-disabled");
             Check(!dashboard.Controls.OfType<Button>().Single(b=>b.Text=="Review").Enabled,"Review available in a live game");
             dashboard.Hide();
             var data=new DataStore(Path.Combine(home,"data"));
@@ -105,7 +121,7 @@ class PracticeUiTests {
                 var entry=ReflectionStore.Read(home).Single();Check(entry.Champion=="Vayne"&&entry.Focus=="Main threat"&&entry.NextGame.StartsWith("Decide"),"Edit changed review context or duplicated entry");
             });
         }
-        using(var reopened=new Dashboard(home,true)){var prefs=(Preferences)Get(reopened,"prefs");Check(prefs.TrainingFocus=="Recall purpose"&&!prefs.ShowCoaching,"Preferences did not survive reopen");}
+        using(var reopened=new Dashboard(home,true)){var prefs=(Preferences)Get(reopened,"prefs");Check(prefs.TrainingFocus=="Recall purpose"&&!prefs.ShowCoaching&&!prefs.MinutesAndSeconds,"Preferences did not survive reopen");}
         Console.WriteLine("PASS: preferences save/reopen, original-card option, alternate/partial/solo layouts, all playbook pages, postgame availability, reflection save/reopen/edit.");return 0;
     }catch(Exception ex){Console.Error.WriteLine(ex);return 1;}}
 }

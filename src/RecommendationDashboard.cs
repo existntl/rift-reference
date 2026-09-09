@@ -95,7 +95,7 @@ public sealed class RecommendationPicker : MinimalWindow {
   object payload=rune?Loadouts.RunePage(data,champ,(int)J.N(plan,"primary"),(int)J.N(plan,"secondary"),perks):Loadouts.ItemSet(data,champ,sections);
   string preview=rune?String.Join("\n",perks.Select(RuneName)):String.Join("\n\n",sections.Select(s=>s.Key+": "+String.Join(", ",s.Value.Split(',').Select(v=>ItemName(Int32.Parse(v.Trim()))))));
   if(MessageBox.Show(this,data.Name(champ)+"\n\n"+preview+"\n\n"+J.S(plan,"source")+"\n\nCreate "+(rune?"and select a new rune page":"a new custom item set")+" in League?","Review loadout",MessageBoxButtons.OKCancel,MessageBoxIcon.Information)!=DialogResult.OK)return;
-  if(demo!=null&&demo()){status.Text="Demo preview complete. Nothing was sent to League.";return;}
+  if(demo!=null&&demo()){status.Text="Client changes are unavailable in this preview. Nothing was sent to League.";return;}
   if(client==null)throw new InvalidOperationException("League client is unavailable. Nothing was sent.");
   applying=true;UpdateActions();status.Text="Checking your selected champion and sending to League…";
   await client.ApplyLoadout(champ,payload,rune);

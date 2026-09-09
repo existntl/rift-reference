@@ -81,7 +81,7 @@ public sealed class BuildPlanner:Form {
   itemEditor=new ItemEditor(d,icons){Location=new Point(3,3)};itemTab.Controls.Add(itemEditor);
   AddButton("Save plan…",24,768,125,Save);AddButton("Load plan…",159,768,125,LoadPlan);
   applyRunes=AddButton("Preview / apply runes",724,768,247,()=>Apply(true));applyItems=AddButton("Preview / apply item set",986,768,270,()=>Apply(false));
-  status=LabelAt("Nothing is applied automatically. Demo mode allows editing and saving, but cannot change League.",24,815,1232,35,10);
+  status=LabelAt("Nothing is applied automatically. Review and confirm each change before sending it to League.",24,815,1232,35,10);
   FormClosing+=(s,e)=>{if(applying)e.Cancel=true;};Theme.Apply(this);
  }
  void SelectChampion(string key){champion.SelectedItem=champion.Items.Cast<BuildChoice>().FirstOrDefault(x=>x.Id==(int)J.N(data.Champion(key),"key"));}
@@ -94,7 +94,7 @@ public sealed class BuildPlanner:Form {
   var payload=Payload(rune);string champ=SelectedChampion();
   string preview=rune?String.Join("\n",runeEditor.Names()):String.Join("\n\n",itemEditor.Sections().Where(s=>!String.IsNullOrWhiteSpace(s.Value)).Select(s=>s.Key+": "+String.Join(", ",s.Value.Split(',').Select(v=>J.S(data.Items[v.Trim()],"name")))));
   if(MessageBox.Show(this,data.Name(champ)+"\n\n"+preview+"\n\n"+source.Text+"\n\nCreate "+(rune?"and select a new rune page":"a new custom item set")+" in League?","Review loadout",MessageBoxButtons.OKCancel,MessageBoxIcon.Information)!=DialogResult.OK)return;
-  if(demo()){status.Text="Demo preview complete. Nothing was sent to League.";return;}
+  if(demo()){status.Text="Client changes are unavailable in this preview. Nothing was sent to League.";return;}
   applying=true;applyRunes.Enabled=applyItems.Enabled=false;status.Text="Checking your selected champion and sending to League…";
   await client.ApplyLoadout(champ,payload,rune);status.Text=rune?"League accepted the new rune page. Check your runes in the client before lock-in.":"League accepted the custom item set. Choose RR · "+data.Name(champ)+" in the shop's Item Sets dropdown.";
  }catch(Exception e){status.Text=e.Message;}finally{applying=false;applyRunes.Enabled=applyItems.Enabled=true;}}

@@ -44,6 +44,5 @@ public static class Postgame {
   var teams=s.Players.GroupBy(p=>p.Team).OrderBy(g=>(g.Key==own)==enemiesLeft?1:0).Select(g=>new{title=own==""?"Team "+g.Key:g.Key==own?"Allies":"Enemies",players=g.Select(p=>new{name=d.Name(p.Champion)+(p.Self?" · You":""),role=p.Role,values=Cells(p,s.Time)}).ToArray()}).ToArray();
   return new{result=s.Result==""?"Results pending":s.Result,duration=Duration(s.Time),notice=s.Notice,summary=Summary(d,s).Select(c=>new{title=c.Title,body=c.Body}).ToArray(),items=Items(d,self),teams};
  }
- public static Snapshot Demo(DataStore d,Snapshot s){s.Phase="EndOfGame";s.Time=1895;s.Result="Victory";s.Notice="Simulated postgame results";s.GameId=1;for(int i=0;i<s.Players.Count;i++){var p=s.Players[i];p.Level=16;if(p.Self)p.Items=new List<int>{3153,3006,3124};p.Stats=new MatchStats{Kills=i==3?12:3+i%4,Deaths=i==3?4:3+i%5,Assists=8+i,Cs=i==3?241:85+i*12,Gold=9500+i*510,Damage=i==3?32410:12300+i*1300,Vision=11+i*3};}return s;}
 }
 }

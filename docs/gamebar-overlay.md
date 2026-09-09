@@ -1,5 +1,14 @@
 # Windows Game Bar live prototype
 
+## Retired at user request — 2026-09-08
+
+The user reported strange behavior and explicitly requested removal of our Win+G
+component. RiftReady.GameBarPrototype 1.1.1.0 was uninstalled; Windows Game Bar remains.
+Local 0.12.20 removes active runtime integration and all overlay entry points. Existing
+installed settings were backed up and disabled. Do not reinstall or reactivate this
+prototype without a new explicit request. Source/packages below are historical and
+retained for possible future work. See docs/navigation-flow.md for scope and evidence.
+
 ## App integration in progress
 
 Local main app0.12.14 installed through the existing installer with preserved
