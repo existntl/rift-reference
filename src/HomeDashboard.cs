@@ -16,10 +16,15 @@ public static class HomeDashboard {
  public static Rectangle HistoryScrollBounds(Rectangle bounds){var table=TableBounds(bounds);return new Rectangle(table.Right-17,table.Y+92,14,Math.Max(1,VisibleMatches(bounds)*94));}
  public static Rectangle RowBounds(Rectangle bounds,int row){var table=TableBounds(bounds);return new Rectangle(table.X+15,table.Y+92+row*94,table.Width-37,94);}
  static readonly Color Red=Color.FromArgb(245,75,101),Gold=Color.FromArgb(239,188,111);
+ // A small, fixed set of UI fonts; avoid creating a native font for every table cell.
+ static readonly Dictionary<int,Font> Fonts=new Dictionary<int,Font>();
+ static readonly StringFormat CellFormat=new StringFormat(StringFormat.GenericTypographic){FormatFlags=StringFormatFlags.NoWrap,Trimming=StringTrimming.EllipsisCharacter,LineAlignment=StringAlignment.Center};
+ static Font FontAt(float size,bool bold=false){int key=(int)(size*2)+(bold?1000:0);Font font;if(!Fonts.TryGetValue(key,out font)){font=new Font("Segoe UI",size,bold?FontStyle.Bold:FontStyle.Regular);Fonts.Add(key,font);}return font;}
  static void Text(Graphics g,string value,Rectangle r,float size,Color color,bool bold=false){
   if(r.Width<1||r.Height<1)return;
-  using(var f=new Font("Segoe UI",size,bold?FontStyle.Bold:FontStyle.Regular))
-   TextRenderer.DrawText(g,value??"",f,r,color,TextFormatFlags.NoPadding|TextFormatFlags.NoPrefix|TextFormatFlags.EndEllipsis|TextFormatFlags.VerticalCenter|TextFormatFlags.SingleLine);
+  // Draw directly into the retained bitmap. TextRenderer/GetHdc copies the bitmap
+  // for every cell and made a scrollbar input spend hundreds of ms in rasterization.
+  using(var brush=new SolidBrush(color))g.DrawString(value??"",FontAt(size,bold),brush,r,CellFormat);
  }
  static void Label(Graphics g,string value,int x,int y,int w,int h,float size,Color color,bool bold=false){Text(g,value,new Rectangle(x,y,w,h),size,color,bold);}
  static void Card(Graphics g,Rectangle r){Theme.Surface(g,r,Theme.Panel,Theme.Accent);}
@@ -87,11 +92,15 @@ public static class HomeDashboard {
   int groupX=metricX+3*metricWidth+20,space=r.Right-groupX-20;if(space<260)return;Label(g,"Most played",groupX,r.Y+23,space,26,10,Theme.Muted);int count=Math.Min(3,space/143),width=space/count;
   foreach(var group in matches.GroupBy(m=>m.Champion).OrderByDescending(a=>a.Count()).Take(count)){int won=group.Count(Win),lost=group.Count(Loss),total=won+lost;Portrait(g,new Rectangle(groupX,r.Y+69,53,60),group.Key,portrait);Label(g,total==0?"—":(100.0*won/total).ToString("0")+"%",groupX+64,r.Y+69,width-64,25,11,Theme.Accent,true);Label(g,Kda(group)+" KDA",groupX+64,r.Y+97,width-64,23,9,Gold);Label(g,won+"W – "+lost+"L",groupX+64,r.Y+124,width-64,22,9,Theme.Muted);groupX+=width;}
  }
- public static void Draw(Graphics g,Rectangle bounds,DataStore data,HomeProfile profile,Func<string,Image> portrait,int offset=0,string search="",int queue=0,int limit=100,Func<int,Image> itemIcon=null,Func<string,Image> rankBadge=null){
+ public static string ProfileDescription(HomeProfile profile){return profile==null?"Your profile is unavailable. Open League of Legends to load your profile.":"Your profile: "+profile.Name+". "+profile.Rank+". "+Count(profile.LP)+" LP. Ranked solo season: "+Count(profile.Wins)+" wins, "+Count(profile.Losses)+" losses. Open LP history for recorded rank snapshots.";}
+ public static string SummaryDescription(List<HomeMatch> rows){int wins=rows.Count(Win),losses=rows.Count(Loss);return "Current filters: "+rows.Count+" matches, "+wins+" wins, "+losses+" losses. Win rate "+(wins+losses==0?"unavailable":(100.0*wins/(wins+losses)).ToString("0")+" percent")+". Average KDA "+Kda(rows)+". Average CS "+Average(rows,m=>m.CS,"0")+". Average damage per minute "+AverageRate(rows,m=>m.Damage,"0")+".";}
+ public static string MatchDescription(DataStore data,HomeMatch m){return Champion(data,m.Champion)+", "+m.Result+", "+Queue(m.Queue)+", "+(String.IsNullOrEmpty(m.Role)?"role unavailable":m.Role)+", "+(m.Played.HasValue?m.Played.Value.ToLocalTime().ToString("f"):"date unavailable")+". Kills "+Count(m.Kills)+", deaths "+Count(m.Deaths)+", assists "+Count(m.Assists)+". KDA "+Kda(new[]{m})+". CS "+Count(m.CS)+", "+Rate(m.CS,m.Duration,1)+" per minute. Vision per minute "+Rate(m.Vision,m.Duration,2)+". Damage per minute "+Rate(m.Damage,m.Duration,0)+". Team damage share "+Percent(m.DamageShare)+".";}
+ public static void Draw(Graphics g,Rectangle bounds,DataStore data,HomeProfile profile,Func<string,Image> portrait,int offset=0,string search="",int queue=0,int limit=100,Func<int,Image> itemIcon=null,Func<string,Image> rankBadge=null,bool rowsOnly=false,List<HomeMatch> filtered=null){
   if(bounds.Width<600||bounds.Height<300)return;var saved=g.Save();g.SetClip(bounds);g.SmoothingMode=SmoothingMode.AntiAlias;
   try{
-   var matches=HomeData.Filter(profile,search,queue,limit);Profile(g,bounds,data,profile,portrait,matches,rankBadge);var summary=SummaryBounds(bounds);Summary(g,summary,matches,queue==0?"All queues":Queue(queue),portrait);
-   var table=TableBounds(bounds);Card(g,table);Label(g,"Recent matches",table.X+24,table.Y+16,300,35,18,Theme.Ink,true);
+   var matches=filtered??HomeData.Filter(profile,search,queue,limit);var table=TableBounds(bounds);
+   if(!rowsOnly){Profile(g,bounds,data,profile,portrait,matches,rankBadge);var summary=SummaryBounds(bounds);Summary(g,summary,matches,queue==0?"All queues":Queue(queue),portrait);Card(g,table);Label(g,"Recent matches",table.X+24,table.Y+16,300,35,18,Theme.Ink,true);}
+   else {g.SetClip(new Rectangle(table.X+1,table.Y+92,table.Width-2,table.Height-93));using(var fill=new SolidBrush(Theme.Panel))g.FillRectangle(fill,table);}
    if(matches.Count==0){Label(g,profile==null?"Your next session starts here":"No matches match these filters",table.X+30,table.Y+117,table.Width-60,42,23,Theme.Ink,true);Label(g,profile==null?"Open League of Legends to load your profile.":"Try another champion, queue, or match range.",table.X+30,table.Y+174,table.Width-60,30,12,Theme.Accent);if(profile!=null)Label(g,profile.Notice,table.X+30,table.Y+220,table.Width-60,30,10,Theme.Muted);return;}
    bool items=table.Width>=1040;float[] fractions=items?new[]{0f,.108f,.210f,.291f,.387f,.501f,.602f,.707f,.799f}:new[]{0f,.13f,.25f,.35f,.46f,.63f,.76f,.88f};string[] headings=items?new[]{"RESULT","CHAMPION","ROLE","TIME AGO","KDA","VISION/MIN","CS/MIN","DMG/MIN","ITEMS"}:new[]{"RESULT","CHAMPION","ROLE","TIME AGO","KDA","VISION/MIN","CS/MIN","DMG/MIN"};
    var firstRow=RowBounds(bounds,0);for(int col=0;col<headings.Length;col++){int x=firstRow.X+12+(int)(fractions[col]*(firstRow.Width-24));Label(g,headings[col],x,table.Y+66,130,23,9,Theme.Muted);}Line(g,firstRow.X,table.Y+91,firstRow.Width);
@@ -111,7 +120,7 @@ public static class HomeDashboard {
     if(items){int size=Math.Min(34,(row.Right-x[8]-15)/7-3);for(int slot=0;slot<7;slot++){var box=new Rectangle(x[8]+slot*(size+3),row.Y+(row.Height-size)/2,size,size);using(var fill=new SolidBrush(Theme.Background))g.FillRectangle(fill,box);int? id=m.Items!=null&&slot<m.Items.Length?m.Items[slot]:null;if(id.HasValue&&id>0){Image icon=itemIcon==null?null:itemIcon(id.Value);if(icon!=null)g.DrawImage(icon,box);else Text(g,id.Value.ToString(),box,7,Theme.Muted);}else if(!id.HasValue)Text(g,"—",box,9,Theme.Muted);using(var border=new Pen(Theme.Border))g.DrawRectangle(border,box);}}
     Line(g,row.X,row.Bottom-1,row.Width);
    }
-   Label(g,"Matches "+(offset+1)+"–"+(offset+visible)+" of "+matches.Count+"  ·  Scroll to see more  ·  Completed games  ·  Local League client",table.X+24,table.Bottom-34,table.Width-48,25,9,Theme.Muted);
+   Label(g,"Matches "+(offset+1)+"–"+(offset+visible)+" of "+matches.Count+"  ·  Select a row for details  ·  ↑ ↓ browse / Enter open",table.X+24,table.Bottom-34,table.Width-48,25,9,Theme.Muted);
   }finally{g.Restore(saved);}
  }
 }

@@ -7,8 +7,8 @@ using System.Windows.Forms;
 namespace RiftReference {
 public partial class Dashboard {
  readonly PageHistory pageHistory=new PageHistory();
- readonly Panel pageHost=new Panel{Name="PageHost",Visible=false};
- readonly Panel pageTrail=new Panel{Name="PageNavigation"};
+ readonly Panel pageHost=new Panel{Name="PageHost",AccessibleName="Current page",Visible=false,TabIndex=30};
+ readonly Panel pageTrail=new Panel{Name="PageNavigation",AccessibleName="Page navigation",TabIndex=10};
  readonly Dictionary<string,Control> pages=new Dictionary<string,Control>();
  readonly Dictionary<string,HomeMatch> detailMatches=new Dictionary<string,HomeMatch>();
  Button backPage,forwardPage;string pageAccount="";bool allowClose;
@@ -17,7 +17,7 @@ public partial class Dashboard {
   backPage=PageControls.Button(pageTrail,"←",0,0,42,()=>NavigatePage(pageHistory.Back(),false));backPage.AccessibleName="Back";
   forwardPage=PageControls.Button(pageTrail,"→",48,0,42,()=>NavigatePage(pageHistory.Forward(),false));forwardPage.AccessibleName="Forward";
   PageControls.Button(pageTrail,"Overview",110,0,126,()=>NavigatePage("overview"));
-  PageControls.Button(pageTrail,"Champion pool",248,0,150,()=>NavigatePage("champions"));
+  PageControls.Button(pageTrail,"Champions",248,0,150,()=>NavigatePage("champions"));
   PageControls.Button(pageTrail,"LP history",410,0,126,()=>NavigatePage("rank"));
   MouseClick+=(s,e)=>{if(e.Button!=MouseButtons.Left||!ShowHome)return;var matches=HomeData.Filter(CurrentHome,matchSearch.Text,SelectedQueue,SelectedRange);for(int i=0;i<HomeDashboard.VisibleMatches(HomeBounds)&&i+homeOffset<matches.Count;i++){var bounds=HomeDashboard.RowBounds(HomeBounds,i);bounds.Offset(0,ShellHeight);if(!bounds.Contains(e.Location))continue;OpenMatch(matches[i+homeOffset]);break;}};
   FormClosing+=(s,e)=>{ReviewPage page;if(!allowClose&&pages.ContainsKey("review")&&(page=pages["review"] as ReviewPage)!=null&&page.Dirty){e.Cancel=true;NavigatePage("review");page.ConfirmLeave(()=>{allowClose=true;Close();},"Save or discard your reflection before closing Rift Ready.");}};
@@ -29,7 +29,7 @@ public partial class Dashboard {
   Control old;if(detailMatches.ContainsKey(key)&&!ReferenceEquals(detailMatches[key],match)&&pages.TryGetValue(key,out old)){old.Dispose();pages.Remove(key);}
   detailMatches[key]=match;NavigatePage(key);
  }
- void LayoutPages(){if(backPage==null)return;pageTrail.SetBounds(40,ShellHeight+(ShowHome?182:8),Math.Max(540,ClientSize.Width-80),38);pageTrail.Visible=selectedView!="match";pageHost.SetBounds(16,ShellHeight+58,ClientSize.Width-32,ContentHeight-74);pageTrail.BringToFront();}
+ void LayoutPages(){if(backPage==null)return;pageTrail.SetBounds(40,ShellHeight+(ShowHome?182:8),Math.Max(540,ClientSize.Width-80),38);pageTrail.Visible=true;pageHost.SetBounds(16,ShellHeight+58,ClientSize.Width-32,ContentHeight-74);}
  void NavigatePage(string route,bool record=true){
   if(route=="updates"){Updates();return;}
   if(pageAccount!=ContextAccount)RefreshPageContext();
@@ -69,6 +69,6 @@ public partial class Dashboard {
   }
   review.Enabled=CanReview();backPage.Enabled=pageHistory.CanBack;forwardPage.Enabled=pageHistory.CanForward;
  }
- protected override bool ProcessCmdKey(ref Message msg,Keys keyData){if(keyData==(Keys.Alt|Keys.Left)&&pageHistory.CanBack){NavigatePage(pageHistory.Back(),false);return true;}if(keyData==(Keys.Alt|Keys.Right)&&pageHistory.CanForward){NavigatePage(pageHistory.Forward(),false);return true;}return base.ProcessCmdKey(ref msg,keyData);}
+ protected override bool ProcessCmdKey(ref Message msg,Keys keyData){if(keyData==(Keys.Control|Keys.F)&&ShowHome){matchSearch.FocusInput();return true;}if(keyData==(Keys.Alt|Keys.Left)&&pageHistory.CanBack){NavigatePage(pageHistory.Back(),false);if(ShowHome)homeOverview.Focus();return true;}if(keyData==(Keys.Alt|Keys.Right)&&pageHistory.CanForward){NavigatePage(pageHistory.Forward(),false);if(ShowHome)homeOverview.Focus();return true;}return base.ProcessCmdKey(ref msg,keyData);}
 }
 }

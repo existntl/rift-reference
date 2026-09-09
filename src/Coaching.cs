@@ -103,10 +103,10 @@ public static class Coaching {
     }
     public static CoachingCard LanePlan(DataStore d, Snapshot s) {
         var self = s.Players.FirstOrDefault(p => p.Self);
-        if (!Supported(s)) return new CoachingCard("LANE PLAN · MODE UNSUPPORTED", "These lane lessons assume Summoner's Rift. General lessons remain in the Playbook.");
+        if (!Supported(s)) return new CoachingCard("LANE PLAN · MODE UNSUPPORTED", "These lane lessons assume Summoner's Rift. General lessons remain in Matchups.");
         if (self == null || String.IsNullOrEmpty(self.Team)) return new CoachingCard("LANE PLAN · WAITING", "Your champion and team are not identified. No lane pairing has been guessed.");
         string role = LaneView.Role(self.Role);
-        if (role != "BOTTOM" && role != "UTILITY") return new CoachingCard("LANE PLAN · GENERAL REFERENCE", "A four-champion plan needs bot-lane roles.\n\nCompare your trade pattern, the wave and who can join. Consult the Playbook for your existing matchup reference.");
+        if (role != "BOTTOM" && role != "UTILITY") return new CoachingCard("LANE PLAN · GENERAL REFERENCE", "A four-champion plan needs bot-lane roles.\n\nCompare your trade pattern, the wave and who can join. Open Matchups for your existing matchup reference.");
         var allies = s.Players.Where(p => p.Team == self.Team);
         var enemies = s.Players.Where(p => p.Team != self.Team && p.Team != "");
         var adc = Unique(allies, "BOTTOM"); var support = Unique(allies, "UTILITY");

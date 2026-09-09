@@ -15,6 +15,7 @@ public class MinimalWindow : Form {
     }
     public const int TitleHeight=32;
     protected virtual int CaptionHeight{get{return TitleHeight;}}
+    protected virtual bool PaintDefaultCaption{get{return true;}}
     protected int ContentHeight{get{return System.Math.Max(1,ClientSize.Height-TitleHeight);}}
     readonly WindowCaptionButton close,minimize,maximize;
     bool titleMovable=true,edgeResize=true,roundedDialog;
@@ -26,12 +27,12 @@ public class MinimalWindow : Form {
         maximize.Click+=(s,e)=>{UpdateMaximizedBounds();WindowState=WindowState==FormWindowState.Maximized?FormWindowState.Normal:FormWindowState.Maximized;maximize.Invalidate();};
     }
     protected void UseFixedDialogChrome(){titleMovable=false;edgeResize=false;roundedDialog=true;minimize.Visible=false;maximize.Visible=false;MinimizeBox=false;MaximizeBox=false;UpdateRoundedRegion();Invalidate();}
-    void UpdateMaximizedBounds(){var screen=Screen.FromControl(this);var work=screen.WorkingArea;MaximizedBounds=new Rectangle(work.X-screen.Bounds.X,work.Y-screen.Bounds.Y,work.Width,work.Height);}
+    void UpdateMaximizedBounds(){var screen=Screen.FromControl(this);var work=screen.WorkingArea;var next=new Rectangle(work.X-screen.Bounds.X,work.Y-screen.Bounds.Y,work.Width,work.Height);if(MaximizedBounds!=next)MaximizedBounds=next;}
     protected override void OnHandleCreated(System.EventArgs e){base.OnHandleCreated(e);UpdateMaximizedBounds();}
     protected override void OnLocationChanged(System.EventArgs e){base.OnLocationChanged(e);if(WindowState==FormWindowState.Normal)UpdateMaximizedBounds();}
     protected override void OnSizeChanged(System.EventArgs e){base.OnSizeChanged(e);UpdateRoundedRegion();}
     protected override void OnTextChanged(System.EventArgs e){base.OnTextChanged(e);Invalidate(new Rectangle(0,0,ClientSize.Width,TitleHeight));}
-    protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);DrawWindowChrome(e.Graphics);}
+    protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);if(PaintDefaultCaption)DrawWindowChrome(e.Graphics);}
     protected void DrawWindowChrome(Graphics g){
         if(IsPage)return;
         using(var surface=new SolidBrush(Theme.TitleSurface))g.FillRectangle(surface,0,0,ClientSize.Width,TitleHeight);
@@ -277,7 +278,7 @@ public sealed class HistoryScrollBar : Control {
     protected override void OnMouseMove(MouseEventArgs e){base.OnMouseMove(e);if(!dragging)return;int travel=Height-4-Thumb.Height;if(travel>0)Value=(int)System.Math.Round((e.Y-grab-2)*Limit/(double)travel);}
     protected override void OnMouseUp(MouseEventArgs e){base.OnMouseUp(e);if(e.Button==MouseButtons.Left){dragging=false;Capture=false;Invalidate();}}
     protected override void OnMouseCaptureChanged(System.EventArgs e){base.OnMouseCaptureChanged(e);if(!Capture){dragging=false;Invalidate();}}
-    protected override void OnMouseWheel(MouseEventArgs e){if(e.Delta!=0)Value+=e.Delta<0?SmallChange:-SmallChange;}
+    protected override void OnMouseWheel(MouseEventArgs e){if(e.Delta!=0)Value+=e.Delta<0?SmallChange:-SmallChange;var handled=e as HandledMouseEventArgs;if(handled!=null)handled.Handled=true;}
     protected override bool IsInputKey(Keys keyData){switch(keyData&Keys.KeyCode){case Keys.Up:case Keys.Down:case Keys.Home:case Keys.End:case Keys.PageUp:case Keys.PageDown:return true;}return base.IsInputKey(keyData);}
     protected override void OnKeyDown(KeyEventArgs e){base.OnKeyDown(e);switch(e.KeyCode){case Keys.Up:Value-=SmallChange;break;case Keys.Down:Value+=SmallChange;break;case Keys.PageUp:Value-=LargeChange;break;case Keys.PageDown:Value+=LargeChange;break;case Keys.Home:Value=0;break;case Keys.End:Value=Limit;break;default:return;}e.Handled=true;e.SuppressKeyPress=true;}
     protected override AccessibleObject CreateAccessibilityInstance(){return new ScrollAccessible(this);}

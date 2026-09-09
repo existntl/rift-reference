@@ -1,5 +1,61 @@
 # Rift Reference handoff
 
+## 0.12.22 publication prepared; signing authorized (2026-09-09)
+
+The user requested publication. Prepared docs/releases/0.12.22.md and built
+build/app/RiftReference.exe plus build/release-0.12.22/RiftReference-Setup.exe.
+Upgrade from published 0.12.21 and rollback passed in
+build/installer-test-dc033f2ed9cf44eea42ef40c891120cd, preserving settings/recovery data.
+GitHub main remains 52eac552fecee00d08455418092707c979761720; v0.12.22 was absent.
+
+The initial combined signing command was rejected before execution. The user then
+explicitly granted permission; compiling the signer and signing with the original
+external key succeeded. The key was not printed, copied, uploaded or changed.
+The matching signed manifest and installer passed signature/hash/size, altered
+metadata/wrong-installer rejection and HTTPS checks. The built app passed 769 tests.
+Installer: 23,899,136 bytes; SHA-256
+0F6754AE9DC29D56C6E7BE2E738E8FDB495B4160E4EDBD57B65A148145EEE7EE.
+Prepared assets are in build/release-0.12.22. Source/release publication and public
+updater verification are next. Existing dist/0.12.21 assets, normal installed app
+and website content remain untouched. Prior local-only notes below are historical.
+
+## Local 0.12.22 UX and interaction-performance fixes (2026-09-08)
+
+User authorized fixing the hands-on UX findings and continuing visual inspection,
+then reported delayed window dragging and history-scrollbar dragging. Kept work
+single-agent. Local source is 0.12.22; public/normal installation remains 0.12.21.
+No publish, install, website change, key access or user preference modification.
+
+See docs/ux-audit-2026-09-08.md. Added HomeOverview with retained pixels, table-only
+scroll redraw, accessible profile/summary/records/native controls, keyboard row
+navigation/default actions and focus outline. Cached main shell/hero pixels and
+avoided redundant title drawing, tab invalidations and maximize-bound assignments.
+Direct bitmap text rendering replaces the expensive per-cell TextRenderer path.
+Wheel input is consumed once. Overview search is page-scoped and retains filters;
+Ctrl+F focuses it. Live game retains Back/Forward with a compact heading so the
+draft footer fits at 1280x950. Active names are Champions/Matchups. Champion catalog
+honors its sort control and shows its selected section. Active draft copy no longer
+advertises retired build integrations. Preferences and Updates remain popups.
+
+Final verify-home passed: 769 app, 26 home-data, 14 rank-history, 132 dashboard,
+39 page-navigation, 42 UX/accessibility/cache checks and all-monitor chrome tests.
+Controlled 60-cycle move/repaint workload fell from 16,659 ms to 632 ms; scrolling
+fell from 16,634 ms to 847 ms (about 278→11 and 277→14 ms per cycle). Not live FPS
+or proof of compositor/mouse smoothness. Evidence in
+build/home-6641f37b5aa0440ebb522da0833f4535; new tests are part of verify-home.
+
+Visuals checked through app-rendered fixtures at 1920x1040 and 1280x950, including
+focused last row, filtered/empty overview, Champions, Matchups, draft/live/postgame
+and Preferences. Native screenshots in the preceding installed-app walkthrough
+failed with SetIsBorderRequired / 0x80004002; pointer actions lacked geometry.
+Do not claim a successful live mouse-drag retest or screen-reader session.
+Published dist installer and signed manifest are unchanged. New test sources and
+source edits are uncommitted local work; preserve them for a later publish request.
+Final verify-ui and verify-audit also passed. Evidence:
+build/ui-92f0b223e1474b7ebfa0cb5f608ab9f3 and
+build/audit-b75551c349054af78d9abaeb04ede394. The latter's full 60-capture workload
+took 1,159 ms, retaining one match-detail page and 38 additional USER objects.
+
 ## Published 0.12.21 reliability audit (2026-09-08)
 
 At the user's explicit request, published 0.12.21 as Latest:

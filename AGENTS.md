@@ -1,5 +1,18 @@
 # Rift Ready working instructions
 
+- Local **0.12.22** is the UX/performance follow-up, now authorized for publication.
+  Its installer and signed manifest passed local integrity and upgrade/rollback checks;
+  public remains 0.12.21 until the release is confirmed. Do not replace the normal
+  installation as part of publication. Keep Overview-only search,
+  visible Live-game Back/Forward, keyboard-accessible match rows/statistics and
+  consistent Champions/Matchups labels. HomeOverview owns the history controls
+  and cached overview pixels; scroll changes repaint only rows/footer, not the
+  profile/hero/title shell. Do not restore per-cell TextRenderer calls into the
+  large cached bitmap or redundant maximize-bound assignments while dragging.
+  verify-home now includes UxInteractionTests and InteractionPerformanceTests.
+  See docs/ux-audit-2026-09-08.md for measurements, visual evidence and native
+  capture limitations. Sample records remain standalone test fixtures only.
+
 - Published **0.12.21** is the current release, including the reliability audit fixes.
   Public source tag: 01a8a0f2efc75ae5ab5f0f5d0b430ee8fef36078. Matching installer and
   signed latest.json passed versioned and latest-feed signature/hash/size/tamper checks;

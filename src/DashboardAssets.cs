@@ -43,6 +43,7 @@ public sealed class ChampionArtwork : IDisposable {
 }
 
 public sealed class MatchSearch : UserControl {
+ public void FocusInput(){input.Focus();}
  readonly TextBox input=new TextBox{BorderStyle=BorderStyle.None,BackColor=Theme.Panel,ForeColor=Theme.Ink,Font=new Font("Segoe UI",10),AccessibleName="Search recent matches"};
  readonly Label hint=new Label{Text="Search matches…",ForeColor=Theme.Muted,BackColor=Theme.Panel,Font=new Font("Segoe UI",10),AutoSize=false,Cursor=Cursors.IBeam};
  public override string Text{get{return input.Text;}set{input.Text=value;}}
