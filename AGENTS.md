@@ -1,13 +1,17 @@
 # Rift Ready working instructions
 
-- Local 0.12.16 follows the user's Blitz titlebar references: a slim charcoal header with
+- Public 0.12.16 follows the user's Blitz titlebar references: a slim charcoal header with
   left Rift Ready/version text and small Windows-ordered glyph controls on the right. The
   Preferences window is a fixed, centered close-only modal with rounded corners and a
   dimmed owner backdrop. Its Save and Cancel actions remain inside the dialog. The optional
   one-second click is about 43% stronger at the same master volume; other cues and its
-  off-by-default setting are unchanged. Public remains 0.12.15 until release verification.
+  off-by-default setting are unchanged. The matching source, installer and signed manifest
+  are published at GitHub tag v0.12.16. Installer SHA-256 is
+  C3A772BF33A89E291EA1BECEC0B9979A6A3404375140E1D9E4E3FFE2EB8FFFB0. The matching
+  website runtime is source `bb6eb12099b5e26ccceba25db839daeabff91790`, deployed as
+  Sites version 16 at `https://riftready.gg`.
 
-- Public 0.12.15 consolidates user settings into one themed Preferences window with
+- Version 0.12.15 introduced one themed Preferences window with
   General, Game overlay, Audio & reminders, and Phone / tablet sections. Updates is
   a separate main-navigation utility and window. Preserve independent
   `preferences.json`/`overlay.json` schemas, overlay draft/cancel behavior, the
@@ -15,8 +19,8 @@
   phone sharing controls. The matching source, installer and signed update manifest are
   published at GitHub tag v0.12.15. Installer SHA-256 is
   55152F26810794583FC2A0793A9AD3D91461F6719CA50C09E72C9B3443A3C68C. The matching
-  matching website is deployed as Sites version14 at `https://riftready.gg`; read the
-  first handoff section for source and production verification.
+  matching website deployment is historical; read the first handoff section for the
+  current release and production verification.
 
 - Game Bar local widget1.0.3.0 installed with same-package AppService desktop
   live helper (experiments/gamebar). User photo confirmed pinned display-test
