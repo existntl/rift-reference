@@ -18,18 +18,28 @@ images are fetched asynchronously over HTTPS and cached in data/splashes; accoun
 and match records are not uploaded. Original logo SHA-256 remains
 200DC01A04D66023308E3D61D7D314725B9231907F33229BCBA36EC0F62A7C92.
 
-Local source version is 0.12.18. Publication was requested after the implementation turn
-was interrupted; release verification and publication are in progress. Public remains
-0.12.17 until the matching new installer and signed manifest are verified online.
+Version 0.12.18 is published as the latest release:
+https://github.com/existntl/rift-reference/releases/tag/v0.12.18.
+The public tag points to source commit `2789ca2479b6dfafca79da5217b49bfde35f1406`;
+tested local source is commit `26c9e2a836ddb01dd7963d3f2552572651c14f7f`, equivalent
+apart from line endings and the ReleaseSecurity.cs UTF-8 BOM. The matching installer is
+23,881,728 bytes, SHA-256
+`B124178B1F9D642C940DB225629DE1479BA61442B3379C78595DDE3C010B6EC5`.
+Public assets passed publisher-signature, size/hash, tampered-metadata, wrong-installer
+and HTTPS checks. The compiled 0.12.15 updater discovered, downloaded and verified
+0.12.18 without installing it. Evidence is in build/release-0.12.18 and build/public-0.12.18.
 
 Passed: 769 app checks; 26 home-data and 14 rank-history checks; 149 dashboard
 control/artwork checks; all-monitor chrome; full UI settings/toggle/dropdown/loadout/
 postgame suite; 39 recommendation checks, 18 collector tests and 104 overlay checks.
 Home evidence: build/home-7ea7bc33fa0b4fd4b378b9e2b2272295. UI evidence:
 build/ui-6c7dc69859fa433b8a8cac6e05d187b0. Overlay evidence:
-build/overlay-1ed4912192f0464d99d2805ec76b1f4d. Inspect final release renders and run
-installer upgrade/rollback plus public signature/updater verification before declaring
-publication complete. The normal installation has not been replaced.
+build/overlay-1ed4912192f0464d99d2805ec76b1f4d. Final 1920x1080 overview/live/draft/
+settings and 1280-wide overview renders were inspected. The inherited-working-directory
+upgrade from 0.12.17 and rollback passed, preserving preferences, reviews, overlay settings,
+rank history and recovery copies; evidence: build/installer-test-53f0c1f75be648e2b84c290971db0c3e.
+Website content remains 0.12.16; its latest-download link serves 0.12.18. The normal
+installation has not been replaced. Live-game integration was not revalidated this turn.
 
 ## Single-agent work preference (2026-09-08)
 

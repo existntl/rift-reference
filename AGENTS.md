@@ -1,6 +1,6 @@
 # Rift Ready working instructions
 
-- 0.12.18 redesign follows the user's player-overview mockup: horizontal navigation,
+- Published 0.12.18 follows the user's player-overview mockup: horizontal navigation,
   blue-black surfaces with the existing teal accent, profile/performance sidebar,
   summary ring and dense match-history table. Keep the original white-and-teal logo
   unchanged. The hero artwork follows the most-played champion across up to 100 loaded
@@ -11,7 +11,11 @@
   champion/role filtering, not a public summoner lookup. Queue/range controls reset
   and bound scrolling. Preserve inventory slot zero versus unavailable values.
   Run verify-home (including DashboardUiTests), verify-ui and affected render checks.
-  Release publication status is recorded in the newest handoff entry.
+  Matching installer and signed manifest are public and verified, including the older
+  updater's discovery/download and installer upgrade/rollback. The release source tag
+  is 2789ca2479b6dfafca79da5217b49bfde35f1406. See the newest handoff entry for evidence.
+  Website content remains 0.12.16; its latest-download link now serves 0.12.18. Normal
+  installation was not replaced by publication. Older release entries below are historical.
 
 - Published 0.12.17 follows the user's Blitz dashboard and settings references without copying
   ads, branding or unsupported statistics. Preferences, Updates, stats and scoreboard-alignment
