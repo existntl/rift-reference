@@ -9,7 +9,7 @@ public class Manifest {public string product,version,installerUrl,sha256,notes;p
 public class Envelope {public string payload,signature;}
 public static class ReleaseInfo {
  // Product is the stable updater/install identity; the display brand is Rift Ready.
- public const string Product="RiftReference",Version="0.12.15";
+ public const string Product="RiftReference",Version="0.12.16";
  public static string PublicKey(){using(var s=Assembly.GetExecutingAssembly().GetManifestResourceStream("update-public-key.xml"))using(var r=new StreamReader(s)){return r.ReadToEnd();}}
  public static string Hash(string file){using(var h=SHA256.Create())using(var f=File.OpenRead(file)){return BitConverter.ToString(h.ComputeHash(f)).Replace("-","").ToLowerInvariant();}}
  public static void Https(string url){Uri u;if(!Uri.TryCreate(url,UriKind.Absolute,out u)||u.Scheme!="https"||u.UserInfo!=""||u.Fragment!=""||url.Contains("\""))throw new InvalidDataException("A valid HTTPS release URL is required.");}

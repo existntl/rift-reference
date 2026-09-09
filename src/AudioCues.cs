@@ -50,7 +50,7 @@ public class AttentionAudio : IDisposable {
    for(int n=0;n<notes.Length;n++)for(int i=0;i<per;i++){
     double t=(double)i/rate,limit=(double)duration/1000;
     double envelope=t<limit?Math.Min(1,Math.Min(t/0.012,(limit-t)/0.025)):0;
-    short sample=(short)(Math.Sin(2*Math.PI*notes[n]*t)*Math.Max(0,envelope)*(cue==AttentionCue.SecondClick?3500:10000)*Math.Max(0,Math.Min(100,volume))/100.0);writer.Write(sample);
+    short sample=(short)(Math.Sin(2*Math.PI*notes[n]*t)*Math.Max(0,envelope)*(cue==AttentionCue.SecondClick?5000:10000)*Math.Max(0,Math.Min(100,volume))/100.0);writer.Write(sample);
    }return memory.ToArray();
   }
  }

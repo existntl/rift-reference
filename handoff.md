@@ -1,9 +1,19 @@
 # Rift Reference handoff
 
-## Consolidated themed Preferences and separate Updates0.12.15 (2026-09-08)
+## Local 0.12.16 title chrome, Preferences modal and click level (2026-09-08)
+
+The current source follows the user's Blitz references with a slim charcoal title strip,
+Rift Ready/version text at the left and compact Windows-ordered minimize, maximize/restore
+and close glyphs at the right. Preferences uses the same strip with only close visible,
+cannot be dragged or edge-resized, has rounded corners, and opens over a 58% black owner
+backdrop. Save and Cancel remain explicit inside the dialog. The one-second click PCM level
+increases from 3500 to 5000 while other cues, master-volume scaling and its off-by-default
+preference remain unchanged. Source version is 0.12.16; validation and publication remain.
+
+## Published 0.12.15 and website continuation (2026-09-08)
 
 The user requested one Preferences area for all settings, a separate Updates area,
-and styling consistent with Rift Ready. The0.12.15 release candidate replaces the
+and styling consistent with Rift Ready. The published0.12.15 release replaces the
 native TabControl flow with a minimal-window Preferences shell and an internal left
 rail for General, Game overlay, Audio & reminders, and Phone / tablet. Game overlay
 and Phone / tablet were removed from the main feature navigation; Preferences and
@@ -19,11 +29,27 @@ yellow/green/red title controls. Overlay options are edited as a draft; Cancel l
 embedded in Preferences. UI, mobile, server, postgame, home/rank history, window
 chrome, app self-check, and overlay tests pass. Fresh render evidence is in
 `build/app/*settings.png` and `build/app/overlay-preferences.png`; UI evidence is
-`build/ui-500bc7e6a98a43f08ec809beca4b39e3` and home evidence is
-`build/home-044a62d2e37b4c8584b0478ac82deb83`. A candidate installer exists at
-`dist/RiftReference-Setup.exe`. Public0.12.0 remains the release baseline until the
-matching installer and signed manifest are published together. The normal user
-installation is unchanged.
+`build/ui-6528b17ec1ed465f8f99f39235b96548` and home evidence is
+`build/home-fae708783413450692aa195bf1fdf500`.
+
+Version0.12.15 is now the public latest release:
+https://github.com/existntl/rift-reference/releases/tag/v0.12.15. GitHub main and the
+tag point to public release commit `4a6a6e827df428b7fc8900e2b5e7df1e0106d58e`;
+the exact locally tested source commit is
+`6ee20b20e9e9a61ef47493704e7021322dea3ceb`. The workflow used to transfer that
+source removed its staging archive and workflow afterward. Public assets are
+`RiftReference-Setup.exe` and signed `latest.json`. Installer SHA-256 is
+`55152F26810794583FC2A0793A9AD3D91461F6719CA50C09E72C9B3443A3C68C`.
+The normal user installation was not replaced by the publication workflow.
+
+The matching website is live at `https://riftready.gg`. Runtime source commit
+`7df2339f736ddfcb0bfa856efb89e738e87041c5` was confirmed at the Sites remote,
+saved as Sites version14, and deployed successfully. Production HTTP verification found
+the new0.12.15, Preferences, Updates, and installer content. Site source has a later
+documentation-only commit `d492ac1217aad6a7b7c7fbcd06f7d3c30fb4630e`; it does
+not require another runtime deployment. Direct Sites Git access worked, so the approved
+GitHub Actions fallback was not used and no GitHub secret was created. Never copy a Sites
+credential or release signing key into either repository.
 
 ## Supported Windows widget candidate (2026-09-07)
 

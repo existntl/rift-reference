@@ -1,26 +1,37 @@
 # Rift Ready working instructions
 
-- Local0.12.15 consolidates user settings into one themed Preferences window with
+- Local 0.12.16 follows the user's Blitz titlebar references: a slim charcoal header with
+  left Rift Ready/version text and small Windows-ordered glyph controls on the right. The
+  Preferences window is a fixed, centered close-only modal with rounded corners and a
+  dimmed owner backdrop. Its Save and Cancel actions remain inside the dialog. The optional
+  one-second click is about 43% stronger at the same master volume; other cues and its
+  off-by-default setting are unchanged. Public remains 0.12.15 until release verification.
+
+- Public 0.12.15 consolidates user settings into one themed Preferences window with
   General, Game overlay, Audio & reminders, and Phone / tablet sections. Updates is
   a separate main-navigation utility and window. Preserve independent
   `preferences.json`/`overlay.json` schemas, overlay draft/cancel behavior, the
   update match gate and signature checks, Game Bar launch behavior, and immediate
-  phone sharing controls. Public0.12.0 remains the release baseline until the matching
-  0.12.15 installer and signed update manifest are published together.
+  phone sharing controls. The matching source, installer and signed update manifest are
+  published at GitHub tag v0.12.15. Installer SHA-256 is
+  55152F26810794583FC2A0793A9AD3D91461F6719CA50C09E72C9B3443A3C68C. The matching
+  matching website is deployed as Sites version14 at `https://riftready.gg`; read the
+  first handoff section for source and production verification.
 
 - Game Bar local widget1.0.3.0 installed with same-package AppService desktop
   live helper (experiments/gamebar). User photo confirmed pinned display-test
   counter visible over fullscreen Practice Tool. Helper activation-argument bug
   fixed; actual AppService open/send Success verified. Current game EndOfGame;
   fresh-match visible data/FPS validation still pending. User accepted Game Bar
-  dependency for now. See docs/gamebar-overlay.md. Main app stays0.12.13/public0.12.0.
+  dependency for now. See docs/gamebar-overlay.md. This separately installed test
+  component is not bundled with the public0.12.15 installer.
   Use build-gamebar.ps1, sign-gamebar-test.ps1 and install-gamebar-test.ps1;
   reuse approved development certificate. No game-process injection retry.
 
 - User chose an independent fullscreen integration. Experimental C++ D3D11 renderer,
   normal user-mode Present adapter and isolated C# frame producer live under
-  experiments/native-overlay. Read docs/independent-overlay.md. Installed0.12.13 and
-  public0.12.0 remain unchanged. The own fullscreen host works; League compatibility
+  experiments/native-overlay. Read docs/independent-overlay.md. The experiment remains
+  unbundled from public0.12.15. The own fullscreen host works; League compatibility
   is unverified until an actual Practice Tool test. Do not claim production readiness.
   Use scripts/verify-native-overlay.ps1; ordinary access denial ends the test, never
   elevate or change anti-cheat/security protections to work around it.

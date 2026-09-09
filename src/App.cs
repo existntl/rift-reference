@@ -117,7 +117,7 @@ public class Dashboard : MinimalWindow {
    s.Players.Add(p);
   }return s;
  }
- protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);var g=e.Graphics;g.Clear(bg);
+ protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);var g=e.Graphics;g.Clear(bg);DrawWindowChrome(g);
   LayoutHistoryScroll();
   using(var navigation=new Bitmap(NavigationWidth,ContentHeight))using(var nav=Graphics.FromImage(navigation)){DrawNavigation(nav);g.DrawImageUnscaled(navigation,0,TitleHeight);}
   int width=Math.Max(1,ClientSize.Width-NavigationWidth);using(var canvas=new Bitmap(width,ContentHeight))using(var content=Graphics.FromImage(canvas)){DrawMatch(content,width);g.DrawImageUnscaled(canvas,NavigationWidth,TitleHeight);}
@@ -296,7 +296,7 @@ public class Dashboard : MinimalWindow {
  public void OpenPreferences(string renderFolder=null,int selectedSection=0){settingsOpen=true;schedule.Reset();audio.Stop();
   try{using(var form=new PreferencesDialog(data,prefs,overlayOptions,mobile,PublishMobile,audio,()=>state,selectedSection)){
    if(renderFolder!=null){form.CapturePages(renderFolder);return;}
-   if(form.ShowDialog(this)!=DialogResult.OK)return;
+   if(ModalBackdrop.Show(this,form)!=DialogResult.OK)return;
    try{
     bool open=form.OverlayResult.Enabled&&form.OverlayResult.GameBar&&(!overlayOptions.Enabled||!overlayOptions.GameBar);
     OverlayStorage.Save(home,form.OverlayResult);
@@ -437,6 +437,7 @@ public static class Tests {
   watcher.Reset();watcher.Observe(respawnState(100,true,true),d,false,15);assert(watcher.Observe(respawnState(160,false,false),d,false,15)==null,"stale respawn suppressed");
   watcher.Reset();watcher.Observe(respawnState(100,true,true),d,false,15);assert(watcher.Observe(respawnState(0,false,false),d,false,15)==null,"new match does not announce old respawn");
   assert(AttentionAudio.Wave(AttentionCue.Minute,25).Length>AttentionAudio.Wave(AttentionCue.ThirtySeconds,25).Length&&AttentionAudio.Wave(AttentionCue.ThirtySeconds,25).Length>AttentionAudio.Wave(AttentionCue.TenSeconds,25).Length,"distinct note pattern lengths");
+  var clickWave=AttentionAudio.Wave(AttentionCue.SecondClick,100);int clickPeak=0;for(int i=44;i+1<clickWave.Length;i+=2)clickPeak=Math.Max(clickPeak,Math.Abs((int)BitConverter.ToInt16(clickWave,i)));assert(clickPeak>=2300,"one-second click is too quiet");
   foreach(var c in d.Champions.Keys)for(int slot=0;slot<4;slot++)assert(!string.IsNullOrEmpty(d.Spell(new Player{Champion=c,Level=18},slot,true)),"all champion spell coverage");
   CoachingTests.Run(d,home,assert);
   File.WriteAllText(Path.Combine(home,"test-results.txt"),checks+" checks passed. Covers formulas, rank handling, missing data, haste, spell records, coaching conditions, preferences migration and reflection storage. Does not validate live League integration or special mechanics.");

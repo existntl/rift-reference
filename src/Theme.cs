@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -5,50 +6,77 @@ namespace RiftReference {
 public class MinimalWindow : Form {
     public const int TitleHeight=32;
     protected int ContentHeight{get{return System.Math.Max(1,ClientSize.Height-TitleHeight);}}
+    readonly WindowCaptionButton close,minimize,maximize;
+    bool titleMovable=true,edgeResize=true,roundedDialog;
     protected MinimalWindow(){
         FormBorderStyle=FormBorderStyle.None;
-        var close=new WindowDot(Color.FromArgb(255,95,87),"Close",0);
-        var minimize=new WindowDot(Color.FromArgb(254,188,46),"Minimize",1);
-        var maximize=new WindowDot(Color.FromArgb(40,200,64),"Maximize or restore",2);
-        int x=ClientSize.Width-80;foreach(var button in new[]{minimize,maximize,close}){button.Bounds=new Rectangle(x,2,24,28);button.Anchor=AnchorStyles.Top|AnchorStyles.Right;Controls.Add(button);x+=24;}
+        minimize=new WindowCaptionButton("Minimize",1);maximize=new WindowCaptionButton("Maximize or restore",2);close=new WindowCaptionButton("Close",0);
+        int x=ClientSize.Width-120;foreach(var button in new[]{minimize,maximize,close}){button.Bounds=new Rectangle(x,0,40,TitleHeight);button.Anchor=AnchorStyles.Top|AnchorStyles.Right;Controls.Add(button);x+=40;}
         close.Click+=(s,e)=>Close();minimize.Click+=(s,e)=>WindowState=FormWindowState.Minimized;
-        maximize.Click+=(s,e)=>{UpdateMaximizedBounds();WindowState=WindowState==FormWindowState.Maximized?FormWindowState.Normal:FormWindowState.Maximized;};
+        maximize.Click+=(s,e)=>{UpdateMaximizedBounds();WindowState=WindowState==FormWindowState.Maximized?FormWindowState.Normal:FormWindowState.Maximized;maximize.Invalidate();};
     }
+    protected void UseFixedDialogChrome(){titleMovable=false;edgeResize=false;roundedDialog=true;minimize.Visible=false;maximize.Visible=false;MinimizeBox=false;MaximizeBox=false;UpdateRoundedRegion();Invalidate();}
     void UpdateMaximizedBounds(){var screen=Screen.FromControl(this);var work=screen.WorkingArea;MaximizedBounds=new Rectangle(work.X-screen.Bounds.X,work.Y-screen.Bounds.Y,work.Width,work.Height);}
     protected override void OnHandleCreated(System.EventArgs e){base.OnHandleCreated(e);UpdateMaximizedBounds();}
     protected override void OnLocationChanged(System.EventArgs e){base.OnLocationChanged(e);if(WindowState==FormWindowState.Normal)UpdateMaximizedBounds();}
+    protected override void OnSizeChanged(System.EventArgs e){base.OnSizeChanged(e);UpdateRoundedRegion();}
+    protected override void OnTextChanged(System.EventArgs e){base.OnTextChanged(e);Invalidate(new Rectangle(0,0,ClientSize.Width,TitleHeight));}
+    protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);DrawWindowChrome(e.Graphics);}
+    protected void DrawWindowChrome(Graphics g){
+        using(var surface=new SolidBrush(Theme.TitleSurface))g.FillRectangle(surface,0,0,ClientSize.Width,TitleHeight);
+        using(var line=new Pen(Theme.Border))g.DrawLine(line,0,TitleHeight-1,ClientSize.Width,TitleHeight-1);
+        using(var brandFont=new Font("Segoe UI",8.5f,FontStyle.Bold))using(var detailFont=new Font("Segoe UI",8f)){
+            var flags=TextFormatFlags.VerticalCenter|TextFormatFlags.NoPrefix|TextFormatFlags.NoPadding|TextFormatFlags.EndEllipsis;
+            int x=13;TextRenderer.DrawText(g,"RIFT",brandFont,new Rectangle(x,0,42,TitleHeight),Theme.Ink,flags);x+=TextRenderer.MeasureText(g,"RIFT ",brandFont,new Size(100,TitleHeight),flags).Width;
+            TextRenderer.DrawText(g,"READY",brandFont,new Rectangle(x,0,48,TitleHeight),Theme.Accent,flags);x+=TextRenderer.MeasureText(g,"READY ",brandFont,new Size(100,TitleHeight),flags).Width+6;
+            string detail=Text??"";const string prefix="Rift Ready · ";if(detail.StartsWith(prefix,StringComparison.OrdinalIgnoreCase))detail=detail.Substring(prefix.Length);else if(String.Equals(detail,"Rift Ready",StringComparison.OrdinalIgnoreCase))detail="";
+            Version parsed;if(Version.TryParse(detail,out parsed))detail="v"+detail;
+            if(detail!="")TextRenderer.DrawText(g,detail,detailFont,new Rectangle(x,0,Math.Max(1,ClientSize.Width-x-(close.Visible?close.Left==ClientSize.Width-40?48:128:8)),TitleHeight),Theme.Muted,flags);
+        }
+        if(roundedDialog)using(var pen=new Pen(Theme.Border))g.DrawRectangle(pen,0,0,Math.Max(1,ClientSize.Width-1),Math.Max(1,ClientSize.Height-1));
+    }
+    void UpdateRoundedRegion(){if(!roundedDialog||ClientSize.Width<20||ClientSize.Height<20)return;using(var path=Rounded(new Rectangle(0,0,ClientSize.Width,ClientSize.Height),14)){var previous=Region;Region=new Region(path);if(previous!=null)previous.Dispose();}}
+    static GraphicsPath Rounded(Rectangle box,int radius){var path=new GraphicsPath();int d=radius*2;path.AddArc(box.Left,box.Top,d,d,180,90);path.AddArc(box.Right-d,box.Top,d,d,270,90);path.AddArc(box.Right-d,box.Bottom-d,d,d,0,90);path.AddArc(box.Left,box.Bottom-d,d,d,90,90);path.CloseFigure();return path;}
     protected override void WndProc(ref Message m){
         const int HitTest=0x84;
         if(m.Msg==HitTest){
             base.WndProc(ref m);if((int)m.Result!=1)return;
             long packed=m.LParam.ToInt64();Point point=PointToClient(new Point((short)(packed&65535),(short)((packed>>16)&65535)));
-            if(WindowState!=FormWindowState.Maximized){
+            if(edgeResize&&WindowState!=FormWindowState.Maximized){
                 bool left=point.X<5,right=point.X>=ClientSize.Width-5,top=point.Y<5,bottom=point.Y>=ClientSize.Height-5;
                 int hit=top?(left?13:right?14:12):bottom?(left?16:right?17:15):left?10:right?11:0;
                 if(hit!=0){m.Result=(System.IntPtr)hit;return;}
             }
-            if(point.Y<TitleHeight&&point.X<ClientSize.Width-82)m.Result=(System.IntPtr)2;
+            int controls=close.Visible&&minimize.Visible?120:40;if(titleMovable&&point.Y<TitleHeight&&point.X<ClientSize.Width-controls)m.Result=(System.IntPtr)2;
             return;
         }
         base.WndProc(ref m);
     }
 }
-public sealed class WindowDot : Button {
-    readonly Color color;readonly int symbol;bool hover;
-    public WindowDot(Color color,string label,int symbol){this.color=color;this.symbol=symbol;AccessibleName=label;AccessibleRole=AccessibleRole.PushButton;TabStop=true;FlatStyle=FlatStyle.Flat;FlatAppearance.BorderSize=0;BackColor=Theme.Background;SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);}
+public sealed class WindowCaptionButton : Button {
+    readonly int symbol;bool hover;
+    public WindowCaptionButton(string label,int symbol){this.symbol=symbol;AccessibleName=label;AccessibleRole=AccessibleRole.PushButton;TabStop=true;TabIndex=1000+symbol;FlatStyle=FlatStyle.Flat;FlatAppearance.BorderSize=0;BackColor=Theme.TitleSurface;SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);}
     protected override void OnMouseEnter(System.EventArgs e){base.OnMouseEnter(e);hover=true;Invalidate();}
     protected override void OnMouseLeave(System.EventArgs e){base.OnMouseLeave(e);hover=false;Invalidate();}
     protected override void OnGotFocus(System.EventArgs e){base.OnGotFocus(e);Invalidate();}
     protected override void OnLostFocus(System.EventArgs e){base.OnLostFocus(e);Invalidate();}
     protected override void OnPaint(PaintEventArgs e){
-        var g=e.Graphics;g.Clear(Theme.Background);g.SmoothingMode=SmoothingMode.AntiAlias;
-        using(var brush=new SolidBrush(color))g.FillEllipse(brush,6,8,12,12);
-        if(hover||Focused)using(var pen=new Pen(Color.FromArgb(90,0,0,0),1.3f)){
-            if(symbol==0){g.DrawLine(pen,10,12,14,16);g.DrawLine(pen,14,12,10,16);}
-            else if(symbol==1)g.DrawLine(pen,9,14,15,14);
-            else{g.DrawLine(pen,9,16,15,10);g.DrawLine(pen,11,10,15,10);g.DrawLine(pen,15,10,15,14);}
+        var g=e.Graphics;g.Clear(hover?(symbol==0?Color.FromArgb(196,43,28):Color.FromArgb(38,41,49)):Theme.TitleSurface);g.SmoothingMode=SmoothingMode.AntiAlias;
+        var color=hover&&symbol==0?Color.White:hover?Theme.Ink:Theme.Muted;int cx=Width/2,cy=Height/2;
+        using(var pen=new Pen(color,1.15f)){
+            if(symbol==0){g.DrawLine(pen,cx-4,cy-4,cx+4,cy+4);g.DrawLine(pen,cx+4,cy-4,cx-4,cy+4);}
+            else if(symbol==1)g.DrawLine(pen,cx-4,cy+3,cx+4,cy+3);
+            else if(FindForm()!=null&&FindForm().WindowState==FormWindowState.Maximized){g.DrawRectangle(pen,cx-3,cy-4,7,7);g.DrawRectangle(pen,cx-5,cy-2,7,7);}
+            else g.DrawRectangle(pen,cx-4,cy-4,8,8);
         }
-        if(Focused)using(var pen=new Pen(Theme.Ink,1))g.DrawEllipse(pen,3,5,18,18);
+        if(Focused)using(var focus=new SolidBrush(Theme.Accent))g.FillRectangle(focus,8,Height-2,Width-16,2);
+    }
+}
+public static class ModalBackdrop {
+    public static DialogResult Show(Form owner,Form dialog){
+        using(var shade=new Form{Name="RiftReadyModalBackdrop",FormBorderStyle=FormBorderStyle.None,ShowInTaskbar=false,StartPosition=FormStartPosition.Manual,Bounds=owner.Bounds,BackColor=Color.Black,Opacity=.58,AutoScaleMode=AutoScaleMode.None}){
+            shade.Show(owner);try{dialog.StartPosition=FormStartPosition.CenterParent;return dialog.ShowDialog(shade);}finally{shade.Close();if(!owner.IsDisposed)owner.Activate();}
+        }
     }
 }
 public sealed class HistoryScrollBar : Control {
@@ -114,7 +142,7 @@ public static class Theme {
             DwmSetWindowAttribute(form.Handle,34,ref border,4);
         }catch(System.DllNotFoundException){}catch(System.EntryPointNotFoundException){}
     }
-    public static readonly Color Background=Color.FromArgb(15,16,20),Panel=Color.FromArgb(25,27,33),Border=Color.FromArgb(43,46,54),Accent=Color.FromArgb(66,205,198),Ink=Color.FromArgb(238,240,244),Muted=Color.FromArgb(148,154,167);
+    public static readonly Color Background=Color.FromArgb(15,16,20),TitleSurface=Color.FromArgb(19,21,26),Panel=Color.FromArgb(25,27,33),Border=Color.FromArgb(43,46,54),Accent=Color.FromArgb(66,205,198),Ink=Color.FromArgb(238,240,244),Muted=Color.FromArgb(148,154,167);
     public static void Surface(Graphics g, Rectangle box, Color fill, Color accent) {
         if(box.Width<20||box.Height<20)return;
         var old=g.SmoothingMode;g.SmoothingMode=SmoothingMode.AntiAlias;
