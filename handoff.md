@@ -1,6 +1,6 @@
 # Rift Reference handoff
 
-## Local 0.12.20 page navigation and feature retirement (2026-09-08)
+## Published 0.12.20 page navigation and feature retirement (2026-09-08)
 
 Analyzed both supplied Blitz videos at one-second intervals with selected detailed
 frames. See docs/navigation-flow.md for timecoded findings, implemented mappings,
@@ -30,10 +30,16 @@ dependencies/certificates or touch League/Vanguard. Normal installation overlay.
 was backed up to overlay.before-retirement-20260908.json and Enabled/GameBar set false
 for its next startup. The main installed app was not force-closed or replaced.
 
-Local source version 0.12.20 supersedes the unpublished 0.12.19 build below. Public
-remains 0.12.18, website unchanged; nothing was pushed, signed for release, published,
-or installed. Rebuild and sign a matching manifest before any future publication;
-the existing dist/latest.json is NOT valid for the new local installer.
+Published 0.12.20 at https://github.com/existntl/rift-reference/releases/tag/v0.12.20,
+marked Latest, with matching RiftReference-Setup.exe and signed latest.json. Public
+source tag is 8e9c20de3e01de88018119f278634ad84d2d471c; local source commit 2248f34
+matches apart from line endings and ReleaseSecurity.cs's UTF-8 BOM. Direct public
+asset signature/hash/size/tamper checks passed. The unversioned latest-download URL
+initially cached 0.12.18, then updated to 0.12.20. Latest-feed signature/hash/size/tamper
+checks and the compiled 0.12.15 updater's discovery/download/integrity checks passed;
+the probe did not install anything. Evidence: build/release-0.12.20 and build/public-0.12.20.
+dist/latest.json now matches the released installer. Private signing key remained
+external and unchanged. Website content and normal installation were not changed.
 
 Validation passed: 769 app checks, 26 home-data / 14 rank-history checks, 132 dashboard
 checks, 35 new navigation/retirement checks, all-monitor chrome, full Preferences/UI/

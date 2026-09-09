@@ -1,6 +1,6 @@
 # Rift Ready working instructions
 
-- Local 0.12.20 follows both September 8 video captures with main-window pages for
+- Published 0.12.20 follows both September 8 video captures with main-window pages for
   Champions/reference, LP history, match details, Matchups, Review and Updates.
   Only Preferences is modal in active navigation. Preserve Back/Forward, filters,
   overview scroll and unsaved review drafts; destructive review transitions use an
@@ -15,7 +15,11 @@
   user request; Microsoft Xbox Game Bar remains intact. Do not reinstall the prototype.
   Normal installed overlay Enabled/GameBar were set false with a preserved backup.
   Current Preferences has THREE pages; test Save/Cancel native hit targets on all three.
-  Local 0.12.20 is not published or installed. Public remains 0.12.18.
+  0.12.20 is published with source tag 8e9c20de3e01de88018119f278634ad84d2d471c.
+  Public assets and the latest-feed signature/integrity checks passed. The 0.12.15
+  updater discovered, downloaded and verified 0.12.20 without installing it. Installer
+  SHA-256: 9E96DB669C71B90A93B1241972AEA9D3440199AC8DE7D55F433CCF0C3272172F.
+  The normal installation and website content have not been replaced.
 
 - Local 0.12.19 removes all user-facing demo session choices and the --demo launch mode.
   Do not restore fake match/draft/results data or a session selector. Normal startup
