@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      RELEASE_BASE: https://b2170ca2b90649.lhr.life
+      RELEASE_BUNDLE: https://b708c758180675.lhr.life/RiftReady-0.12.16-release.zip
+      EXPECTED_BUNDLE_SHA256: e9ae0813916df99a9bb3fe3410824e53301d36dcf36aa7ca4291df70fb2e0041
       EXPECTED_SHA256: c3a772bf33a89e291ea1becec0b9979a6a3404375140e1d9e4e3ffe2eb8fffb0
       EXPECTED_SIZE: "23662080"
       TARGET_COMMIT: ded9a499667abed20c6af62db483a30432fb5c3d
@@ -23,8 +24,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --location --retry 6 --retry-all-errors --connect-timeout 30 --max-time 900 "$RELEASE_BASE/RiftReference-Setup.exe" --output RiftReference-Setup.exe
-          curl --fail --location --retry 6 --retry-all-errors --connect-timeout 30 --max-time 120 "$RELEASE_BASE/latest.json" --output latest.json
+          curl --fail --location --retry 6 --retry-all-errors --connect-timeout 30 --max-time 900 "$RELEASE_BUNDLE" --output release.zip
+          printf '%s  %s\n' "$EXPECTED_BUNDLE_SHA256" release.zip | sha256sum --check -
+          unzip -q release.zip
           printf '%s  %s\n' "$EXPECTED_SHA256" RiftReference-Setup.exe | sha256sum --check -
           test "$(stat -c %s RiftReference-Setup.exe)" = "$EXPECTED_SIZE"
           python - <<'PY'
